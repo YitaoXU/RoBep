@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  bce-prediction:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - BCE_HOST=0.0.0.0
+      - BCE_PORT=8000
+      - BCE_DEBUG=false
+      - BCE_LOG_LEVEL=info
+      - BCE_DEVICE_ID=0
+      - BCE_MAX_TASKS=5
+    volumes:
+      # Mount data directory for persistent storage
+      - ./data:/app/data
+      - ./models:/app/models
+      # Mount temporary directory
+      - /tmp:/tmp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+    
+  # Optional: Redis for production task queue (commented out by default)
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - redis_data:/data
+  
+  # Optional: Nginx reverse proxy (commented out by default)
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - bce-prediction
+  #   restart: unless-stopped
+
+# Optional volumes for persistent data
+# volumes:
+#   redis_data: 

@@ -1,0 +1,29 @@
+# Ignore everything by default
+*
+
+# Allow key source files and directories
+!.gitignore
+!README.md
+!main.py
+!src/
+!src/**
+!notebooks/example.ipynb
+!models/ReCEP/20250626_110438
+!data/epitopes/data_splits.json
+!data/epitopes/epitopes_13.csv
+!data/epitopes/epitopes.csv
+!data/species.json
+
+# Still ignore generated or development artifacts even in allowed folders
+# src/bce/website/
+
+__pycache__/
+*.py[cod]
+.DS_Store
+.idea/
+.vscode/
+.env*
+data/
+output/
+external/
+jobs/
