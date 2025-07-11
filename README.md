@@ -17,7 +17,7 @@ pip install -e .
 
 ### Data Preparation
 ```python
-from bce.utils.structure.antigen import AntigenChain
+from bce.antigen.antigen import AntigenChain
 
 pdb_id = "8urf"
 chain_id = "A"
