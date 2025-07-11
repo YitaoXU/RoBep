@@ -4,6 +4,7 @@
 # Allow key source files and directories
 !.gitignore
 !README.md
+!setup.py
 !main.py
 !src/
 !src/**
