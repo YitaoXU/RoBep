@@ -1,4 +1,4 @@
-## ReGEP
+## ReCEP
 
 ```bash
 conda create -n ReCEP python=3.10 -y
@@ -25,4 +25,8 @@ chain_id = "A"
 antigen = AntigenChain.from_pdb(id=pdb_id, chain_id = chain_id)
 
 embeddings, backbone_atoms, rsa = antigen_chain.data_preparation()
+```
+
+```bash
+python run_server.py --host 0.0.0.0 --port 8001
 ```

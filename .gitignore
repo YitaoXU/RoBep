@@ -1,30 +1,29 @@
-# Ignore everything by default
+# 忽略所有
 *
 
-# Allow key source files and directories
+# 允许必要文件
 !.gitignore
 !README.md
 !setup.py
 !main.py
+
+# 允许 src 及其子目录
 !src/
 !src/**
+
+# 允许 notebooks
+!notebooks/
 !notebooks/example.ipynb
+
+# 允许 models 路径
+!models/
+!models/ReCEP/
 !models/ReCEP/20250626_110438
+
+# 允许 data 路径
+!data/
+!data/species.json
+!data/epitopes/
 !data/epitopes/data_splits.json
 !data/epitopes/epitopes_13.csv
 !data/epitopes/epitopes.csv
-!data/species.json
-
-# Still ignore generated or development artifacts even in allowed folders
-# src/bce/website/
-
-__pycache__/
-*.py[cod]
-.DS_Store
-.idea/
-.vscode/
-.env*
-data/
-output/
-external/
-jobs/

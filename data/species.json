@@ -1,0 +1,3562 @@
+{
+  "4uuj": {
+    "chain": "C",
+    "organism": "STREPTOMYCES LIVIDANS",
+    "classification": "other"
+  },
+  "7amp": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8f5n": {
+    "chain": "A",
+    "organism": "Streptococcus pyogenes",
+    "classification": "bacterial"
+  },
+  "5bo1": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1ncc": {
+    "chain": "N",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "8x0t": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8g4t": {
+    "chain": "I",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "6o39": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3wfd": {
+    "chain": "C",
+    "organism": "Pseudomonas aeruginosa",
+    "classification": "bacterial"
+  },
+  "8w85": {
+    "chain": "H",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6rps": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9ivk": {
+    "chain": "A",
+    "organism": "artificial sequences",
+    "classification": "other"
+  },
+  "7kql": {
+    "chain": "T",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7kyo": {
+    "chain": "B",
+    "organism": "Streptococcus pneumoniae serotype 2 (strain D39 / NCTC 7466)",
+    "classification": "bacterial"
+  },
+  "3o2d": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1uwx": {
+    "chain": "B",
+    "organism": "STREPTOCOCCUS SP.",
+    "classification": "bacterial"
+  },
+  "2oz4": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6xkq": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "8d9z": {
+    "chain": "D",
+    "organism": "Naja nivea",
+    "classification": "other"
+  },
+  "8v52": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4xnm": {
+    "chain": "C",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "6p67": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6qig": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9dez": {
+    "chain": "C",
+    "organism": "Porcine deltacoronavirus",
+    "classification": "viral"
+  },
+  "8cdd": {
+    "chain": "B",
+    "organism": "Plasmodium falciparum 3D7",
+    "classification": "other"
+  },
+  "4qnp": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "4lss": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4zs7": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9b2w": {
+    "chain": "D",
+    "organism": "Human respirovirus 3",
+    "classification": "viral"
+  },
+  "6vgr": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4nnp": {
+    "chain": "B",
+    "organism": "Staphylococcus aureus subsp. aureus",
+    "classification": "bacterial"
+  },
+  "5lsp": {
+    "chain": "P",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7ec5": {
+    "chain": "B",
+    "organism": "Human enterovirus D68",
+    "classification": "viral"
+  },
+  "8ffe": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1mhp": {
+    "chain": "B",
+    "organism": "Rattus norvegicus",
+    "classification": "other"
+  },
+  "4uu9": {
+    "chain": "D",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "7tuf": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7sue": {
+    "chain": "D",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "7ul3": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8dk6": {
+    "chain": "E",
+    "organism": "Hepatitis C virus isolate HC-J6",
+    "classification": "viral"
+  },
+  "8y0q": {
+    "chain": "2",
+    "organism": "Foot-and-mouth disease virus O",
+    "classification": "viral"
+  },
+  "7upw": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus",
+    "classification": "viral"
+  },
+  "4qti": {
+    "chain": "U",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4o58": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "4krp": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4yxl": {
+    "chain": "A",
+    "organism": "Mesocricetus auratus",
+    "classification": "other"
+  },
+  "7lr3": {
+    "chain": "C",
+    "organism": "Plasmodium berghei",
+    "classification": "other"
+  },
+  "4f2m": {
+    "chain": "E",
+    "organism": "TGEV virulent Purdue",
+    "classification": "other"
+  },
+  "5jxe": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8tzw": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6elu": {
+    "chain": "A",
+    "organism": "Trypanosoma brucei rhodesiense",
+    "classification": "other"
+  },
+  "6nyq": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "9jbq": {
+    "chain": "C",
+    "organism": "Pseudomonas aeruginosa",
+    "classification": "bacterial"
+  },
+  "7wn8": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7quh": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7o9s": {
+    "chain": "A",
+    "organism": "Hantaan orthohantavirus",
+    "classification": "viral"
+  },
+  "8pg0": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1g9n": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "5bk2": {
+    "chain": "A",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "7uvf": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6mei": {
+    "chain": "C",
+    "organism": "Hepacivirus C",
+    "classification": "viral"
+  },
+  "5w3l": {
+    "chain": "B",
+    "organism": "Human rhinovirus 14",
+    "classification": "viral"
+  },
+  "8tco": {
+    "chain": "C",
+    "organism": "Human betaherpesvirus 5",
+    "classification": "viral"
+  },
+  "3u9p": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "6wio": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8vzn": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "5bv7": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7jkt": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7x28": {
+    "chain": "F",
+    "organism": "Middle East respiratory syndrome-related coronavirus",
+    "classification": "viral"
+  },
+  "6xxv": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3ld8": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4lst": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4d3c": {
+    "chain": "A",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "8a44": {
+    "chain": "A",
+    "organism": "Plasmodium vivax",
+    "classification": "other"
+  },
+  "4hwb": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3v6o": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6ogx": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2xra": {
+    "chain": "A",
+    "organism": "SYNTHETIC CONSTRUCT",
+    "classification": "other"
+  },
+  "6q20": {
+    "chain": "A",
+    "organism": "Influenza A virus (strain A/Japan/305/1957 H2N2)",
+    "classification": "viral"
+  },
+  "4jqi": {
+    "chain": "A",
+    "organism": "Rattus norvegicus",
+    "classification": "other"
+  },
+  "5ush": {
+    "chain": "X",
+    "organism": "Vaccinia virus",
+    "classification": "viral"
+  },
+  "3hae": {
+    "chain": "K",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2hmi": {
+    "chain": "B",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "3vg9": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6h2y": {
+    "chain": "D",
+    "organism": "Neisseria meningitidis",
+    "classification": "other"
+  },
+  "8u03": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6bkc": {
+    "chain": "E",
+    "organism": "Recombinant Hepatitis C virus HK6a/JFH-1",
+    "classification": "viral"
+  },
+  "6z3q": {
+    "chain": "C",
+    "organism": "Enterovirus A71",
+    "classification": "viral"
+  },
+  "8dn6": {
+    "chain": "A",
+    "organism": "Arabidopsis thaliana",
+    "classification": "other"
+  },
+  "4qci": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3d85": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3hi6": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8c7h": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7mrz": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7zqt": {
+    "chain": "E",
+    "organism": "Helicobacter pylori",
+    "classification": "other"
+  },
+  "7ued": {
+    "chain": "M",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6wgl": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1nsn": {
+    "chain": "S",
+    "organism": "Staphylococcus aureus",
+    "classification": "bacterial"
+  },
+  "8y31": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6pe8": {
+    "chain": "U",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1xiw": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7wg3": {
+    "chain": "K",
+    "organism": "Bos taurus",
+    "classification": "other"
+  },
+  "8dn7": {
+    "chain": "C",
+    "organism": "Pisum sativum",
+    "classification": "other"
+  },
+  "2hfg": {
+    "chain": "R",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5xez": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8v91": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2j4w": {
+    "chain": "D",
+    "organism": "PLASMODIUM VIVAX",
+    "classification": "other"
+  },
+  "8e8x": {
+    "chain": "1",
+    "organism": "Human poliovirus 3 strain Sabin",
+    "classification": "viral"
+  },
+  "1kb5": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "6gv4": {
+    "chain": "B",
+    "organism": "Human parechovirus 3",
+    "classification": "viral"
+  },
+  "8sxp": {
+    "chain": "C",
+    "organism": "Ophiophagus hannah",
+    "classification": "other"
+  },
+  "6ztr": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6cw3": {
+    "chain": "F",
+    "organism": "Saccharomyces cerevisiae S288c",
+    "classification": "fungal"
+  },
+  "8tq9": {
+    "chain": "B",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "6wfw": {
+    "chain": "G",
+    "organism": "Streptococcus sp. group G",
+    "classification": "bacterial"
+  },
+  "8ee0": {
+    "chain": "A",
+    "organism": "Saccharopolyspora erythraea",
+    "classification": "other"
+  },
+  "3lev": {
+    "chain": "A",
+    "organism": "Thermus aquaticus",
+    "classification": "other"
+  },
+  "6y9b": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7v23": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "8bk2": {
+    "chain": "B",
+    "organism": "Neisseria meningitidis serogroup B",
+    "classification": "other"
+  },
+  "5h35": {
+    "chain": "C",
+    "organism": "Sulfolobus solfataricus",
+    "classification": "other"
+  },
+  "5ldn": {
+    "chain": "A",
+    "organism": "Human adenovirus C serotype 5",
+    "classification": "viral"
+  },
+  "1ors": {
+    "chain": "C",
+    "organism": "Aeropyrum pernix",
+    "classification": "other"
+  },
+  "6fgb": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7tyv": {
+    "chain": "B",
+    "organism": "Lassa virus",
+    "classification": "viral"
+  },
+  "3qwo": {
+    "chain": "C",
+    "organism": "Staphylococcus aureus",
+    "classification": "bacterial"
+  },
+  "7n8q": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4ye4": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus",
+    "classification": "viral"
+  },
+  "3uc0": {
+    "chain": "B",
+    "organism": "Dengue virus 4",
+    "classification": "viral"
+  },
+  "6mlk": {
+    "chain": "A",
+    "organism": "Saccharopolyspora erythraea",
+    "classification": "other"
+  },
+  "6hga": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1fns": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7n0u": {
+    "chain": "C",
+    "organism": "Betula pendula",
+    "classification": "other"
+  },
+  "8db4": {
+    "chain": "E",
+    "organism": "Arachis hypogaea",
+    "classification": "other"
+  },
+  "6id4": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6svl": {
+    "chain": "N",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4wfg": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7shu": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8k3c": {
+    "chain": "B",
+    "organism": "Henipavirus nipahense",
+    "classification": "viral"
+  },
+  "5e94": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8byu": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4cad": {
+    "chain": "I",
+    "organism": "METHANOCOCCUS MARIPALUDIS",
+    "classification": "other"
+  },
+  "4o9h": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5utz": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5eu7": {
+    "chain": "B",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "8e8r": {
+    "chain": "2",
+    "organism": "Human poliovirus 3 strain Sabin",
+    "classification": "viral"
+  },
+  "8uky": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9dh2": {
+    "chain": "T",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7x8q": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8yxi": {
+    "chain": "A",
+    "organism": "Severe fever with thrombocytopenia syndrome virus",
+    "classification": "viral"
+  },
+  "5mo9": {
+    "chain": "X",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3skj": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3grw": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7xw6": {
+    "chain": "R",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6wzk": {
+    "chain": "E",
+    "organism": "Macaca fascicularis",
+    "classification": "other"
+  },
+  "8u2c": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6ks0": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7yms": {
+    "chain": "A",
+    "organism": "Coxsackievirus A16",
+    "classification": "viral"
+  },
+  "8j8r": {
+    "chain": "B",
+    "organism": "Bos taurus",
+    "classification": "other"
+  },
+  "6ba5": {
+    "chain": "N",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7daa": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1dee": {
+    "chain": "H",
+    "organism": "Staphylococcus aureus",
+    "classification": "bacterial"
+  },
+  "7ox3": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6was": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8tq8": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "4yxk": {
+    "chain": "A",
+    "organism": "Cervus elaphus nelsoni",
+    "classification": "other"
+  },
+  "6u36": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2qqn": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3cvh": {
+    "chain": "M",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "4jpk": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "1v7m": {
+    "chain": "V",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2ybr": {
+    "chain": "I",
+    "organism": "CENTRUROIDES NOXIUS HOFFMANN",
+    "classification": "other"
+  },
+  "4ht1": {
+    "chain": "T",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4bz2": {
+    "chain": "A",
+    "organism": "DENGUE VIRUS 4",
+    "classification": "viral"
+  },
+  "8hhy": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "5epm": {
+    "chain": "C",
+    "organism": "Ceratogyrus marshalli",
+    "classification": "other"
+  },
+  "7lxx": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "2zch": {
+    "chain": "P",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6nms": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6vep": {
+    "chain": "Q",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8tv3": {
+    "chain": "A",
+    "organism": "Borreliella burgdorferi B31",
+    "classification": "other"
+  },
+  "6m3b": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7zoz": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4rwy": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "3u4e": {
+    "chain": "J",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4liq": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7rew": {
+    "chain": "I",
+    "organism": "Macaca fascicularis",
+    "classification": "other"
+  },
+  "8tlm": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8vsj": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6ks1": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4leo": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7s13": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "6pi7": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1kyo": {
+    "chain": "P",
+    "organism": "Saccharomyces cerevisiae",
+    "classification": "fungal"
+  },
+  "8fdo": {
+    "chain": "C",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "6u6u": {
+    "chain": "R",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8wre": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7s7i": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7lf8": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6phb": {
+    "chain": "I",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "8fgx": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3gbm": {
+    "chain": "A",
+    "organism": "Influenza A virus (A/Viet Nam/1203/2004(H5N1))",
+    "classification": "viral"
+  },
+  "2j5l": {
+    "chain": "A",
+    "organism": "PLASMODIUM FALCIPARUM",
+    "classification": "other"
+  },
+  "7ce2": {
+    "chain": "A",
+    "organism": "Clostridium tetani",
+    "classification": "other"
+  },
+  "6bf4": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "2xqy": {
+    "chain": "E",
+    "organism": "SUID HERPESVIRUS",
+    "classification": "viral"
+  },
+  "7q0i": {
+    "chain": "D",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "6mug": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4yue": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "4qww": {
+    "chain": "B",
+    "organism": "Bungarus fasciatus",
+    "classification": "other"
+  },
+  "6bfq": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8too": {
+    "chain": "I",
+    "organism": "Epstein-Barr virus",
+    "classification": "viral"
+  },
+  "7dm2": {
+    "chain": "A",
+    "organism": "Mycobacterium tuberculosis H37Rv",
+    "classification": "bacterial"
+  },
+  "8iuy": {
+    "chain": "A",
+    "organism": "H7N9 subtype",
+    "classification": "other"
+  },
+  "6wtu": {
+    "chain": "A",
+    "organism": "Plasmodium vivax (strain Salvador I)",
+    "classification": "other"
+  },
+  "8u1c": {
+    "chain": "A",
+    "organism": "Influenza B virus (B/Iowa/06/2017)",
+    "classification": "viral"
+  },
+  "7a0x": {
+    "chain": "B",
+    "organism": "Salmonella typhimurium (strain LT2 / SGSC1412 / ATCC 700720)",
+    "classification": "bacterial"
+  },
+  "7txt": {
+    "chain": "S",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3liz": {
+    "chain": "A",
+    "organism": "Blattella germanica",
+    "classification": "other"
+  },
+  "6ppg": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6nnf": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4ma7": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "8djg": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7kd6": {
+    "chain": "W",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4m1g": {
+    "chain": "B",
+    "organism": "Vaccinia virus",
+    "classification": "viral"
+  },
+  "8sic": {
+    "chain": "G",
+    "organism": "Human herpesvirus 4",
+    "classification": "viral"
+  },
+  "5tud": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6apb": {
+    "chain": "C",
+    "organism": "Human respiratory syncytial virus",
+    "classification": "viral"
+  },
+  "4a6y": {
+    "chain": "A",
+    "organism": "MUS MUSCULUS",
+    "classification": "other"
+  },
+  "1oaz": {
+    "chain": "A",
+    "organism": "ESCHERICHIA COLI",
+    "classification": "bacterial"
+  },
+  "5vic": {
+    "chain": "E",
+    "organism": "Dengue virus type 1 (strain Nauru/West Pac/1974)",
+    "classification": "viral"
+  },
+  "6k65": {
+    "chain": "A",
+    "organism": "Staphylococcus aureus (strain NCTC 8325)",
+    "classification": "bacterial"
+  },
+  "8r1d": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1lk3": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6meh": {
+    "chain": "C",
+    "organism": "Hepacivirus C",
+    "classification": "viral"
+  },
+  "7e7x": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "6wzl": {
+    "chain": "E",
+    "organism": "Macaca fascicularis",
+    "classification": "other"
+  },
+  "6j14": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4hc1": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1yy9": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8v2e": {
+    "chain": "C",
+    "organism": "synthetic construct",
+    "classification": "other"
+  },
+  "6wh9": {
+    "chain": "D",
+    "organism": "Saccharopolyspora erythraea",
+    "classification": "other"
+  },
+  "5hbv": {
+    "chain": "B",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "5wt9": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5fcu": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "6dkj": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6a3w": {
+    "chain": "L",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4xp9": {
+    "chain": "C",
+    "organism": "Drosophila melanogaster",
+    "classification": "other"
+  },
+  "4ogy": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7k7h": {
+    "chain": "A",
+    "organism": "Salmonella enterica subsp. enterica serovar Typhi str. CT18",
+    "classification": "bacterial"
+  },
+  "7rp2": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3q3g": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6mto": {
+    "chain": "T",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "5w4l": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7bsc": {
+    "chain": "A",
+    "organism": "Dengue virus 2",
+    "classification": "viral"
+  },
+  "5vpl": {
+    "chain": "A",
+    "organism": "Dermatophagoides farinae",
+    "classification": "other"
+  },
+  "4zso": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5e8d": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6umg": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2yss": {
+    "chain": "C",
+    "organism": "Gallus gallus",
+    "classification": "other"
+  },
+  "6xsw": {
+    "chain": "X",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6kz0": {
+    "chain": "J",
+    "organism": "Human rhinovirus 14",
+    "classification": "viral"
+  },
+  "6wzj": {
+    "chain": "E",
+    "organism": "Macaca fascicularis",
+    "classification": "other"
+  },
+  "4fqj": {
+    "chain": "A",
+    "organism": "Influenza B virus",
+    "classification": "viral"
+  },
+  "6uym": {
+    "chain": "E",
+    "organism": "Hepatitis C virus (isolate H)",
+    "classification": "viral"
+  },
+  "2xqb": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8oxv": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5b3j": {
+    "chain": "C",
+    "organism": "Rattus norvegicus",
+    "classification": "other"
+  },
+  "7ox1": {
+    "chain": "X",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9dwe": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "3lhp": {
+    "chain": "S",
+    "organism": "Artificial gene",
+    "classification": "other"
+  },
+  "8cz5": {
+    "chain": "A",
+    "organism": "Lagovirus",
+    "classification": "viral"
+  },
+  "7mjk": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "8txp": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "6al5": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8sgi": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3l95": {
+    "chain": "X",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3tje": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3hmx": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7l0l": {
+    "chain": "E",
+    "organism": "Influenza A virus (A/Canada/720/2005(H2N2))",
+    "classification": "viral"
+  },
+  "8aci": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1nfd": {
+    "chain": "D",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "3vi4": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3wih": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7so5": {
+    "chain": "A",
+    "organism": "Clostridioides difficile R20291",
+    "classification": "other"
+  },
+  "3r1g": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1bgx": {
+    "chain": "T",
+    "organism": "Thermus aquaticus",
+    "classification": "other"
+  },
+  "9c44": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "6ewb": {
+    "chain": "C",
+    "organism": "Norovirus Hu/GII.4/Sydney/NSW0514/2012/AU",
+    "classification": "viral"
+  },
+  "5nh3": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4yqx": {
+    "chain": "M",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "9dx6": {
+    "chain": "A",
+    "organism": "Plasmodium vivax",
+    "classification": "other"
+  },
+  "5kn5": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3ru8": {
+    "chain": "X",
+    "organism": "Human immunodeficiency virus",
+    "classification": "viral"
+  },
+  "7lxw": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "3gbn": {
+    "chain": "A",
+    "organism": "Influenza A virus (A/Brevig Mission/1/1918(H1N1))",
+    "classification": "viral"
+  },
+  "7rt9": {
+    "chain": "Y",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6yio": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4ywg": {
+    "chain": "Q",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "3s35": {
+    "chain": "X",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6uyd": {
+    "chain": "F",
+    "organism": "Hepatitis C virus (isolate H)",
+    "classification": "viral"
+  },
+  "5u8r": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3kr3": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6a77": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7zxk": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6ion": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6wit": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7joo": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4tsa": {
+    "chain": "A",
+    "organism": "Gallus gallus",
+    "classification": "other"
+  },
+  "1ob1": {
+    "chain": "F",
+    "organism": "PLASMODIUM FALCIPARUM",
+    "classification": "other"
+  },
+  "6wzm": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1fj1": {
+    "chain": "E",
+    "organism": "Borrelia burgdorferi",
+    "classification": "other"
+  },
+  "7ttx": {
+    "chain": "A",
+    "organism": "Bat coronavirus RaTG13",
+    "classification": "viral"
+  },
+  "6wmw": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4ot1": {
+    "chain": "A",
+    "organism": "Human Cytomegalovirus",
+    "classification": "viral"
+  },
+  "7qu2": {
+    "chain": "C",
+    "organism": "Argentinian mammarenavirus",
+    "classification": "viral"
+  },
+  "7sgm": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7phu": {
+    "chain": "A",
+    "organism": "Plasmodium falciparum (isolate 3D7)",
+    "classification": "other"
+  },
+  "6sni": {
+    "chain": "X",
+    "organism": "Saccharomyces cerevisiae",
+    "classification": "fungal"
+  },
+  "6aod": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8e8y": {
+    "chain": "1",
+    "organism": "Human poliovirus 2 strain Sabin",
+    "classification": "viral"
+  },
+  "1e6j": {
+    "chain": "P",
+    "organism": "HIV-1 M\\:B_HXB2R",
+    "classification": "other"
+  },
+  "8gat": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5u3m": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7ki6": {
+    "chain": "A",
+    "organism": "Hendra henipavirus",
+    "classification": "viral"
+  },
+  "2uzi": {
+    "chain": "R",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "4wv1": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8caf": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7ly0": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "5dhv": {
+    "chain": "M",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "5yoy": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4g6f": {
+    "chain": "F",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7xco": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "8vyn": {
+    "chain": "C",
+    "organism": "Human betaherpesvirus 5",
+    "classification": "viral"
+  },
+  "8jkf": {
+    "chain": "A",
+    "organism": "Zika virus",
+    "classification": "viral"
+  },
+  "6iek": {
+    "chain": "D",
+    "organism": "Rift valley fever virus",
+    "classification": "viral"
+  },
+  "6wbv": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6hx4": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7rxl": {
+    "chain": "F",
+    "organism": "Plasmodium falciparum (isolate 3D7)",
+    "classification": "other"
+  },
+  "5fb8": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5l0q": {
+    "chain": "A",
+    "organism": "Bos taurus",
+    "classification": "other"
+  },
+  "7a3o": {
+    "chain": "A",
+    "organism": "Dengue virus 1",
+    "classification": "viral"
+  },
+  "6vn1": {
+    "chain": "C",
+    "organism": "Human alphaherpesvirus 3",
+    "classification": "viral"
+  },
+  "8ol9": {
+    "chain": "H",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3mj9": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "6lz9": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5d93": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "3i50": {
+    "chain": "E",
+    "organism": "West Nile virus",
+    "classification": "viral"
+  },
+  "6blh": {
+    "chain": "G",
+    "organism": "Human respiratory syncytial virus A (strain rsb6256)",
+    "classification": "viral"
+  },
+  "8jel": {
+    "chain": "J",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5te4": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7m3n": {
+    "chain": "A",
+    "organism": "Canine parvovirus type 2",
+    "classification": "viral"
+  },
+  "6o3b": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5lcv": {
+    "chain": "A",
+    "organism": "Zika virus",
+    "classification": "viral"
+  },
+  "8ath": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5nmv": {
+    "chain": "K",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8hrx": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7uvi": {
+    "chain": "C",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "9fjk": {
+    "chain": "B",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "6lxj": {
+    "chain": "D",
+    "organism": "Influenza A virus (A/Anhui/1-BALF_RG44/2013(H7N9))",
+    "classification": "viral"
+  },
+  "7ttm": {
+    "chain": "A",
+    "organism": "Bat SARS-like coronavirus RsSHC014",
+    "classification": "viral"
+  },
+  "2aep": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "1sy6": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8udz": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1xf5": {
+    "chain": "L",
+    "organism": "Finegoldia magna",
+    "classification": "other"
+  },
+  "1egj": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6xcj": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "6ml8": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "5jq6": {
+    "chain": "A",
+    "organism": "Staphylococcus aureus",
+    "classification": "bacterial"
+  },
+  "4i2x": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6wo4": {
+    "chain": "E",
+    "organism": "Recombinant Hepatitis C virus HK6a/JFH-1",
+    "classification": "viral"
+  },
+  "4np4": {
+    "chain": "A",
+    "organism": "Clostridium difficile",
+    "classification": "other"
+  },
+  "4ps4": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3idx": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "6iuv": {
+    "chain": "A",
+    "organism": "Influenza A virus (A/Hong Kong/482/97(H5N1))",
+    "classification": "viral"
+  },
+  "8h07": {
+    "chain": "B",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "3gi9": {
+    "chain": "C",
+    "organism": "Methanocaldococcus jannaschii",
+    "classification": "other"
+  },
+  "6bgt": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8t9z": {
+    "chain": "A",
+    "organism": "Human metapneumovirus",
+    "classification": "viral"
+  },
+  "2vxs": {
+    "chain": "D",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "2vxt": {
+    "chain": "I",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "5u3d": {
+    "chain": "E",
+    "organism": "Finegoldia magna",
+    "classification": "other"
+  },
+  "6phc": {
+    "chain": "I",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "1fbi": {
+    "chain": "Y",
+    "organism": "Numida meleagris",
+    "classification": "other"
+  },
+  "6adb": {
+    "chain": "A",
+    "organism": "Escherichia coli (strain K12)",
+    "classification": "bacterial"
+  },
+  "4plj": {
+    "chain": "A",
+    "organism": "Hepatitis E virus",
+    "classification": "viral"
+  },
+  "1rjl": {
+    "chain": "C",
+    "organism": "Borrelia burgdorferi",
+    "classification": "other"
+  },
+  "5vyf": {
+    "chain": "F",
+    "organism": "Felis catus",
+    "classification": "other"
+  },
+  "4jzj": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5xj4": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8ruu": {
+    "chain": "Y",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6v4p": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4rdq": {
+    "chain": "C",
+    "organism": "Gallus gallus",
+    "classification": "other"
+  },
+  "4jlr": {
+    "chain": "C",
+    "organism": "Unknown",
+    "classification": "other"
+  },
+  "8tqa": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "8dcn": {
+    "chain": "F",
+    "organism": "Clostridioides difficile",
+    "classification": "other"
+  },
+  "6v4n": {
+    "chain": "W",
+    "organism": "Influenza B virus",
+    "classification": "viral"
+  },
+  "6vzi": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "5if0": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5k9k": {
+    "chain": "F",
+    "organism": "Influenza A virus (strain A/Hong Kong/1/1968 H3N2)",
+    "classification": "viral"
+  },
+  "5veb": {
+    "chain": "Y",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1tqb": {
+    "chain": "A",
+    "organism": "Ovis aries",
+    "classification": "other"
+  },
+  "3nh7": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4lvo": {
+    "chain": "A",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "8r8d": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4rgo": {
+    "chain": "S",
+    "organism": "Staphylococcus aureus",
+    "classification": "bacterial"
+  },
+  "7r58": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4ala": {
+    "chain": "C",
+    "organism": "DENGUE VIRUS 3",
+    "classification": "viral"
+  },
+  "4f37": {
+    "chain": "A",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "7yru": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4aei": {
+    "chain": "C",
+    "organism": "ANDROCTONUS AUSTRALIS HECTOR",
+    "classification": "other"
+  },
+  "6u2f": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5w5x": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6q0l": {
+    "chain": "A",
+    "organism": "Influenza A virus (A/Beijing/262/1995(H1N1))",
+    "classification": "viral"
+  },
+  "5tq0": {
+    "chain": "A",
+    "organism": "Xenopus laevis",
+    "classification": "other"
+  },
+  "3jwd": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "6oor": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "8g8d": {
+    "chain": "P",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7uot": {
+    "chain": "C",
+    "organism": "Lassa virus",
+    "classification": "viral"
+  },
+  "7lsg": {
+    "chain": "C",
+    "organism": "Tick-borne encephalitis virus",
+    "classification": "viral"
+  },
+  "8sak": {
+    "chain": "B",
+    "organism": "unclassified Merbecovirus",
+    "classification": "viral"
+  },
+  "6uvo": {
+    "chain": "D",
+    "organism": "Human respiratory syncytial virus A (strain A2)",
+    "classification": "viral"
+  },
+  "7uij": {
+    "chain": "D",
+    "organism": "Borreliella burgdorferi B31",
+    "classification": "other"
+  },
+  "7lse": {
+    "chain": "E",
+    "organism": "Tick-borne encephalitis virus Far Eastern subtype",
+    "classification": "viral"
+  },
+  "6cw2": {
+    "chain": "C",
+    "organism": "Saccharomyces cerevisiae",
+    "classification": "fungal"
+  },
+  "4j6r": {
+    "chain": "G",
+    "organism": "HUMAN IMMUNODEFICIENCY VIRUS 1",
+    "classification": "viral"
+  },
+  "7n3c": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "3wkm": {
+    "chain": "B",
+    "organism": "Aquifex aeolicus",
+    "classification": "other"
+  },
+  "6s5a": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5ikc": {
+    "chain": "N",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6s3d": {
+    "chain": "M",
+    "organism": "synthetic construct",
+    "classification": "other"
+  },
+  "7ahu": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8c7m": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7xnf": {
+    "chain": "A",
+    "organism": "Pangolin coronavirus",
+    "classification": "viral"
+  },
+  "8y0r": {
+    "chain": "2",
+    "organism": "Foot-and-mouth disease virus A",
+    "classification": "viral"
+  },
+  "8y6i": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3t2n": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4zff": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4m62": {
+    "chain": "T",
+    "organism": "synthetic construct",
+    "classification": "other"
+  },
+  "4ag4": {
+    "chain": "A",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "5ukr": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "8d1t": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4nzr": {
+    "chain": "M",
+    "organism": "Mycoplasma genitalium",
+    "classification": "other"
+  },
+  "6xlq": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8da1": {
+    "chain": "I",
+    "organism": "Bungarus multicinctus",
+    "classification": "other"
+  },
+  "7u5b": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3q1s": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6by3": {
+    "chain": "C",
+    "organism": "Streptomyces coelicolor",
+    "classification": "other"
+  },
+  "6lyn": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5occ": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8jxs": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4lmq": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5w5z": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7k9j": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "5k59": {
+    "chain": "B",
+    "organism": "Staphylococcus aureus (strain USA300)",
+    "classification": "bacterial"
+  },
+  "8kdm": {
+    "chain": "B",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "7lr4": {
+    "chain": "C",
+    "organism": "Plasmodium berghei",
+    "classification": "other"
+  },
+  "7lf7": {
+    "chain": "M",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8w86": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7wvg": {
+    "chain": "B",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "6wix": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7xrz": {
+    "chain": "Y",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "1jrh": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3ks0": {
+    "chain": "A",
+    "organism": "Saccharomyces cerevisiae",
+    "classification": "fungal"
+  },
+  "7x29": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "5x2n": {
+    "chain": "C",
+    "organism": "Oryzias latipes",
+    "classification": "other"
+  },
+  "7lkf": {
+    "chain": "A",
+    "organism": "Gallus gallus",
+    "classification": "other"
+  },
+  "6mi2": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5dur": {
+    "chain": "A",
+    "organism": "Influenza A virus (A/Anhui/1/2005(H5N1))",
+    "classification": "viral"
+  },
+  "7kyl": {
+    "chain": "Z",
+    "organism": "Powassan virus",
+    "classification": "viral"
+  },
+  "7tuy": {
+    "chain": "R",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4qhu": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7e72": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4g7v": {
+    "chain": "S",
+    "organism": "Ciona intestinalis",
+    "classification": "other"
+  },
+  "8f38": {
+    "chain": "C",
+    "organism": "synthetic construct",
+    "classification": "other"
+  },
+  "8hpk": {
+    "chain": "A",
+    "organism": "Oxalobacter formigenes",
+    "classification": "other"
+  },
+  "6rlo": {
+    "chain": "J",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4dw2": {
+    "chain": "U",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6uj9": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8g3q": {
+    "chain": "G",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "4kxz": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8v5q": {
+    "chain": "G",
+    "organism": "Human alphaherpesvirus 3",
+    "classification": "viral"
+  },
+  "6z7z": {
+    "chain": "F",
+    "organism": "Sus scrofa",
+    "classification": "other"
+  },
+  "8vgn": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1ztx": {
+    "chain": "E",
+    "organism": "West Nile virus",
+    "classification": "viral"
+  },
+  "6jbt": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2r56": {
+    "chain": "A",
+    "organism": "Bos taurus",
+    "classification": "other"
+  },
+  "1iqd": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2q8a": {
+    "chain": "A",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "6pis": {
+    "chain": "B",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "5cbe": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4xwo": {
+    "chain": "A",
+    "organism": "Saccharomyces cerevisiae (ATCC 204508 / S288c)",
+    "classification": "fungal"
+  },
+  "7upb": {
+    "chain": "D",
+    "organism": "Nipah henipavirus",
+    "classification": "viral"
+  },
+  "6uyf": {
+    "chain": "E",
+    "organism": "Recombinant Hepatitis C virus HK6a/JFH-1",
+    "classification": "viral"
+  },
+  "8tbq": {
+    "chain": "P",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7ox4": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "6j5d": {
+    "chain": "A",
+    "organism": "Louping ill virus",
+    "classification": "viral"
+  },
+  "4dtg": {
+    "chain": "K",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6cmi": {
+    "chain": "B",
+    "organism": "Hendra virus",
+    "classification": "viral"
+  },
+  "3efd": {
+    "chain": "K",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "4k3j": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8rp8": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7a3q": {
+    "chain": "A",
+    "organism": "Dengue virus 4",
+    "classification": "viral"
+  },
+  "1uac": {
+    "chain": "Y",
+    "organism": "Meleagris gallopavo",
+    "classification": "other"
+  },
+  "7usl": {
+    "chain": "C",
+    "organism": "Bordetella pertussis",
+    "classification": "other"
+  },
+  "6kyz": {
+    "chain": "A",
+    "organism": "Human rhinovirus 14",
+    "classification": "viral"
+  },
+  "3ehb": {
+    "chain": "B",
+    "organism": "Paracoccus denitrificans",
+    "classification": "other"
+  },
+  "4u6v": {
+    "chain": "B",
+    "organism": "Staphylococcus aureus subsp. aureus TCH60",
+    "classification": "bacterial"
+  },
+  "5i9q": {
+    "chain": "A",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "1wej": {
+    "chain": "F",
+    "organism": "Equus caballus",
+    "classification": "other"
+  },
+  "8xi6": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "5te7": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7nx3": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7q6c": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4xmp": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4dkf": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7jtg": {
+    "chain": "E",
+    "organism": "Recombinant Hepatitis C virus HK6a/JFH-1",
+    "classification": "viral"
+  },
+  "5d8j": {
+    "chain": "A",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "7xy8": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5ob5": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6iap": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6vvu": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8vvm": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6ktr": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6iw2": {
+    "chain": "D",
+    "organism": "Yellow fever virus (strain 17D vaccine)",
+    "classification": "viral"
+  },
+  "6otc": {
+    "chain": "A",
+    "organism": "Lake Victoria marburgvirus (strain Popp-67)",
+    "classification": "viral"
+  },
+  "5otj": {
+    "chain": "D",
+    "organism": "Phleum pratense",
+    "classification": "other"
+  },
+  "6mej": {
+    "chain": "C",
+    "organism": "Hepacivirus C",
+    "classification": "viral"
+  },
+  "3l5w": {
+    "chain": "J",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4okv": {
+    "chain": "F",
+    "organism": "Anopheles stephensi",
+    "classification": "other"
+  },
+  "6p9h": {
+    "chain": "A",
+    "organism": "Staphylococcus aureus",
+    "classification": "bacterial"
+  },
+  "6hig": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8zd5": {
+    "chain": "D",
+    "organism": "Canis lupus familiaris",
+    "classification": "other"
+  },
+  "8ulj": {
+    "chain": "B",
+    "organism": "Respiratory syncytial virus A2",
+    "classification": "viral"
+  },
+  "5th9": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3pnw": {
+    "chain": "R",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5vjo": {
+    "chain": "F",
+    "organism": "Anas platyrhynchos",
+    "classification": "other"
+  },
+  "8j80": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5l6y": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6cxy": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1jhl": {
+    "chain": "A",
+    "organism": "Phasianus colchicus",
+    "classification": "other"
+  },
+  "1nl0": {
+    "chain": "G",
+    "organism": "Unknown",
+    "classification": "other"
+  },
+  "3l5x": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8vvk": {
+    "chain": "B",
+    "organism": "Crimean-Congo hemorrhagic fever virus",
+    "classification": "viral"
+  },
+  "7tpd": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6j15": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7zli": {
+    "chain": "A",
+    "organism": "Caenorhabditis elegans",
+    "classification": "other"
+  },
+  "2h9g": {
+    "chain": "R",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3lh2": {
+    "chain": "V",
+    "organism": "ARTIFICIAL GENE",
+    "classification": "other"
+  },
+  "8dao": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4i3r": {
+    "chain": "G",
+    "organism": "Human Immunodeficiency Virus",
+    "classification": "viral"
+  },
+  "7vgr": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "3thm": {
+    "chain": "F",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8vgm": {
+    "chain": "A",
+    "organism": "Aliarcobacter butzleri RM4018",
+    "classification": "other"
+  },
+  "8dfh": {
+    "chain": "A",
+    "organism": "Plasmodium falciparum 3D7",
+    "classification": "other"
+  },
+  "7wtf": {
+    "chain": "D",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "8y6h": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5mhr": {
+    "chain": "D",
+    "organism": "Reovirus sp.",
+    "classification": "viral"
+  },
+  "8h3n": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "7ujd": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8d9y": {
+    "chain": "K",
+    "organism": "Oxyuranus scutellatus scutellatus",
+    "classification": "other"
+  },
+  "1uj3": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3nfp": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6o9i": {
+    "chain": "C",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "4k94": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7bbj": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7mlh": {
+    "chain": "F",
+    "organism": "Dermatophagoides pteronyssinus",
+    "classification": "other"
+  },
+  "7o52": {
+    "chain": "U",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6umx": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7rah": {
+    "chain": "E",
+    "organism": "Bordetella pertussis",
+    "classification": "other"
+  },
+  "5e8e": {
+    "chain": "H",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4edw": {
+    "chain": "V",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7t0l": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8y6a": {
+    "chain": "B",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "4irz": {
+    "chain": "A",
+    "organism": "Oryctolagus cuniculus",
+    "classification": "other"
+  },
+  "4lu5": {
+    "chain": "A",
+    "organism": "Vaccinia virus",
+    "classification": "viral"
+  },
+  "6sv2": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8tui": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8dyx": {
+    "chain": "I",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "8w83": {
+    "chain": "L",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4rrp": {
+    "chain": "R",
+    "organism": "Saccharomyces cerevisiae",
+    "classification": "fungal"
+  },
+  "5gzn": {
+    "chain": "E",
+    "organism": "Zika virus",
+    "classification": "viral"
+  },
+  "5tl5": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4ypg": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5kw9": {
+    "chain": "A",
+    "organism": "Norwalk virus",
+    "classification": "viral"
+  },
+  "2q8b": {
+    "chain": "A",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "8a1e": {
+    "chain": "A",
+    "organism": "Rabies virus strain Pasteur vaccin",
+    "classification": "viral"
+  },
+  "4d9q": {
+    "chain": "A",
+    "organism": "Macaca mulatta",
+    "classification": "other"
+  },
+  "6wo5": {
+    "chain": "F",
+    "organism": "Hepatitis C virus (isolate H)",
+    "classification": "viral"
+  },
+  "2nyy": {
+    "chain": "A",
+    "organism": "Clostridium botulinum",
+    "classification": "other"
+  },
+  "7lfa": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6cyf": {
+    "chain": "Q",
+    "organism": "Pseudomonas aeruginosa",
+    "classification": "bacterial"
+  },
+  "4zfg": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8ts0": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6n6b": {
+    "chain": "A",
+    "organism": "Influenza A virus (A/Minnesota/11/2010(H3N2))",
+    "classification": "viral"
+  },
+  "6lxi": {
+    "chain": "B",
+    "organism": "Influenza A virus (strain A/Brevig Mission/1/1918 H1N1)",
+    "classification": "viral"
+  },
+  "7phw": {
+    "chain": "D",
+    "organism": "Plasmodium falciparum (isolate 3D7)",
+    "classification": "other"
+  },
+  "5vcn": {
+    "chain": "A",
+    "organism": "Dermatophagoides pteronyssinus",
+    "classification": "other"
+  },
+  "5n7w": {
+    "chain": "X",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4uta": {
+    "chain": "B",
+    "organism": "DENGUE VIRUS 2",
+    "classification": "viral"
+  },
+  "3zkn": {
+    "chain": "B",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "3w9e": {
+    "chain": "C",
+    "organism": "Human herpesvirus 2",
+    "classification": "viral"
+  },
+  "8vdl": {
+    "chain": "C",
+    "organism": "Plasmodium falciparum HB3",
+    "classification": "other"
+  },
+  "3u2s": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "7z2m": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5vkd": {
+    "chain": "A",
+    "organism": "Bundibugyo ebolavirus",
+    "classification": "viral"
+  },
+  "6xqw": {
+    "chain": "E",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "6ck9": {
+    "chain": "G",
+    "organism": "Human immunodeficiency virus 1",
+    "classification": "viral"
+  },
+  "4xvu": {
+    "chain": "H",
+    "organism": "Saccharomyces cerevisiae (ATCC 204508 / S288c)",
+    "classification": "fungal"
+  },
+  "4oii": {
+    "chain": "B",
+    "organism": "West Nile virus",
+    "classification": "viral"
+  },
+  "8gkl": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6i8s": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7unb": {
+    "chain": "R",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "8dg9": {
+    "chain": "C",
+    "organism": "Respiratory syncytial virus A2",
+    "classification": "viral"
+  },
+  "7zjl": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "7x8p": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5wk3": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6vtw": {
+    "chain": "A",
+    "organism": "Human respiratory syncytial virus A2",
+    "classification": "viral"
+  },
+  "8tp7": {
+    "chain": "C",
+    "organism": "Influenza A virus (A/Singapore/1/1957(H2N2))",
+    "classification": "viral"
+  },
+  "6u9s": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8slb": {
+    "chain": "A",
+    "organism": "Thermotoga maritima MSB8",
+    "classification": "other"
+  },
+  "2adf": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2vxq": {
+    "chain": "A",
+    "organism": "PHLEUM PRATENSE",
+    "classification": "other"
+  },
+  "4jr9": {
+    "chain": "A",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "7kpj": {
+    "chain": "E",
+    "organism": "Ruminococcus gnavus",
+    "classification": "other"
+  },
+  "8jnk": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7qu1": {
+    "chain": "C",
+    "organism": "Machupo mammarenavirus",
+    "classification": "viral"
+  },
+  "8urf": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6u8c": {
+    "chain": "B",
+    "organism": "Streptococcus sp. 'group G'",
+    "classification": "bacterial"
+  },
+  "6tyb": {
+    "chain": "G",
+    "organism": "Simian immunodeficiency virus",
+    "classification": "viral"
+  },
+  "7q6e": {
+    "chain": "A",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "5o1r": {
+    "chain": "A",
+    "organism": "Neisseria meningitidis",
+    "classification": "other"
+  },
+  "7ket": {
+    "chain": "C",
+    "organism": "Neisseria meningitidis",
+    "classification": "other"
+  },
+  "8t03": {
+    "chain": "B",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "8da0": {
+    "chain": "E",
+    "organism": "Dendroaspis polylepis polylepis",
+    "classification": "other"
+  },
+  "7kq7": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2jel": {
+    "chain": "P",
+    "organism": "Escherichia coli",
+    "classification": "bacterial"
+  },
+  "8tfl": {
+    "chain": "B",
+    "organism": "Ricinus communis",
+    "classification": "other"
+  },
+  "5w2b": {
+    "chain": "A",
+    "organism": "Reston ebolavirus",
+    "classification": "viral"
+  },
+  "6s8j": {
+    "chain": "E",
+    "organism": "Ebola virus",
+    "classification": "viral"
+  },
+  "3b9k": {
+    "chain": "F",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "4khx": {
+    "chain": "A",
+    "organism": "Human Immunodeficiency Virus 1",
+    "classification": "viral"
+  },
+  "8tfn": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8d7e": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9gwt": {
+    "chain": "P",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6n81": {
+    "chain": "A",
+    "organism": "Norovirus Hu/GII.4/Farmington Hills/2004/USA",
+    "classification": "viral"
+  },
+  "4mwf": {
+    "chain": "D",
+    "organism": "Hepatitis C virus (isolate H)",
+    "classification": "viral"
+  },
+  "7chz": {
+    "chain": "I",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3mxw": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2ypv": {
+    "chain": "A",
+    "organism": "NEISSERIA MENINGITIDIS MC58",
+    "classification": "other"
+  },
+  "8ahn": {
+    "chain": "A",
+    "organism": "Sin Nombre orthohantavirus",
+    "classification": "viral"
+  },
+  "5b71": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7c61": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7uvs": {
+    "chain": "C",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "8f60": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "1yjd": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6m58": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6osv": {
+    "chain": "K",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8jlw": {
+    "chain": "A",
+    "organism": "Crimean-Congo hemorrhagic fever orthonairovirus",
+    "classification": "viral"
+  },
+  "1cl7": {
+    "chain": "I",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "3rkd": {
+    "chain": "A",
+    "organism": "Hepatitis E virus",
+    "classification": "viral"
+  },
+  "5wi9": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8y3u": {
+    "chain": "K",
+    "organism": "Ebola virus",
+    "classification": "viral"
+  },
+  "6mvl": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7l7r": {
+    "chain": "G",
+    "organism": "Crimean-Congo hemorrhagic fever virus (strain Nigeria/IbAr10200/1970)",
+    "classification": "viral"
+  },
+  "8jlx": {
+    "chain": "A",
+    "organism": "Crimean-Congo hemorrhagic fever orthonairovirus",
+    "classification": "viral"
+  },
+  "8b7h": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2qqk": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5d72": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8tv1": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5ggv": {
+    "chain": "Y",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5y9j": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6c9u": {
+    "chain": "A",
+    "organism": "Saccharopolyspora erythraea",
+    "classification": "other"
+  },
+  "8ut3": {
+    "chain": "C",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "5wux": {
+    "chain": "E",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6uyn": {
+    "chain": "A",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  },
+  "4ij3": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8a99": {
+    "chain": "C",
+    "organism": "Severe acute respiratory syndrome coronavirus 2",
+    "classification": "viral"
+  },
+  "6ddm": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "4ffv": {
+    "chain": "B",
+    "organism": "Rattus norvegicus",
+    "classification": "other"
+  },
+  "2bdn": {
+    "chain": "A",
+    "organism": "Unknown",
+    "classification": "other"
+  },
+  "6h3t": {
+    "chain": "B",
+    "organism": "Bovine Schmallenberg virus",
+    "classification": "viral"
+  },
+  "6x3x": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7yk4": {
+    "chain": "B",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6qb6": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2wuc": {
+    "chain": "A",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "6gku": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5eii": {
+    "chain": "I",
+    "organism": "Saccharomyces cerevisiae",
+    "classification": "fungal"
+  },
+  "6k7o": {
+    "chain": "P",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8e8s": {
+    "chain": "2",
+    "organism": "Poliovirus 2",
+    "classification": "viral"
+  },
+  "2j88": {
+    "chain": "A",
+    "organism": "APIS MELLIFERA",
+    "classification": "other"
+  },
+  "4cni": {
+    "chain": "D",
+    "organism": "HOMO SAPIENS",
+    "classification": "human"
+  },
+  "7cj2": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "3u30": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8qya": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "2arj": {
+    "chain": "R",
+    "organism": "Mus musculus",
+    "classification": "other"
+  },
+  "7df1": {
+    "chain": "D",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7dc8": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7sem": {
+    "chain": "F",
+    "organism": "Human metapneumovirus",
+    "classification": "viral"
+  },
+  "5f3b": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8w84": {
+    "chain": "C",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8f5i": {
+    "chain": "A",
+    "organism": "Rhodopseudomonas palustris",
+    "classification": "bacterial"
+  },
+  "5xxy": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6e63": {
+    "chain": "A",
+    "organism": "Plasmodium falciparum",
+    "classification": "other"
+  },
+  "3nps": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "8yx9": {
+    "chain": "J",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "7vux": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "5hys": {
+    "chain": "G",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "9ima": {
+    "chain": "A",
+    "organism": "Homo sapiens",
+    "classification": "human"
+  },
+  "6dfj": {
+    "chain": "E",
+    "organism": "Dengue virus 1",
+    "classification": "viral"
+  },
+  "6flb": {
+    "chain": "G",
+    "organism": "Dengue virus 2",
+    "classification": "viral"
+  },
+  "4f15": {
+    "chain": "J",
+    "organism": "Influenza A virus",
+    "classification": "viral"
+  }
+}
