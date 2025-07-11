@@ -47,14 +47,10 @@ prediction_results = antigen_chain.predict(
 
 ```bash
 # website
-pip install fastapi==0.104.1
-pip install uvicorn[standard]==0.24.0
-pip install python-multipart==0.0.6
-pip install jinja2==3.1.2
-pip install aiofiles==23.2.1
+pip install -r src/bce/website/requirements.txt
 
 cd src/bce/website
 conda activate ReCEP
 
-python run_server.py --host 0.0.0.0 --port 8001
+python run_server.py --host 0.0.0.0 --port 8000
 ```

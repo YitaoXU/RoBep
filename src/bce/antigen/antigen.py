@@ -1362,7 +1362,7 @@ class AntigenChain(ProteinChain):
                           list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1376,7 +1376,7 @@ class AntigenChain(ProteinChain):
             view.setStyle({'chain': self.chain_id}, {**base_style, list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1430,7 +1430,7 @@ class AntigenChain(ProteinChain):
             
             if non_epitope_residues:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id, 'resi': list(non_epitope_residues)})
             
@@ -1475,7 +1475,7 @@ class AntigenChain(ProteinChain):
             view.setStyle({'chain': self.chain_id}, {**base_style, list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1500,7 +1500,7 @@ class AntigenChain(ProteinChain):
             
             if non_region_residues:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id, 'resi': list(non_region_residues)})
             
@@ -1571,13 +1571,13 @@ class AntigenChain(ProteinChain):
                 
                 if non_colored_residues:
                     view.addSurface(py3Dmol.VDW, {
-                        'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                        'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                         'color': base_color
                     }, {'chain': self.chain_id, 'resi': list(non_colored_residues)})
             else:
                 # If no colored residues, show entire surface in base color
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             
@@ -1651,7 +1651,7 @@ class AntigenChain(ProteinChain):
                           list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1682,7 +1682,7 @@ class AntigenChain(ProteinChain):
             # No residues to color, show base style with surface
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.6,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
