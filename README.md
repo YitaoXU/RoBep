@@ -22,13 +22,28 @@ pip install -e .
 ```python
 from bce.antigen.antigen import AntigenChain
 
-pdb_id = "8urf"
+pdb_id = "5i9q"
 chain_id = "A"
 
-antigen = AntigenChain.from_pdb(id=pdb_id, chain_id = chain_id)
+antigen_chain = AntigenChain.from_pdb(id=pdb_id, chain_id = chain_id)
 
 embeddings, backbone_atoms, rsa = antigen_chain.data_preparation()
 ```
+
+### Epitope Prediction
+You can see our [tutorials](notebooks/example.ipynb) to learn how to use ReCEP.
+
+```bash
+prediction_results = antigen_chain.predict(
+    device_id=0,
+    radius=19.0,
+    k=7,
+    encoder="esmc",
+    verbose=True,
+    use_gpu=False
+)
+```
+
 
 ```bash
 # website
