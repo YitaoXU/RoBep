@@ -1,27 +1,22 @@
-# 忽略所有
 *
 
-# 允许必要文件
 !.gitignore
 !README.md
 !setup.py
 !main.py
 !requirements.txt
 
-# 允许 src 及其子目录
 !src/
 !src/**
 
-# 允许 notebooks
 !notebooks/
 !notebooks/example.ipynb
 
-# 允许 models 路径
 !models/
 !models/ReCEP/
 !models/ReCEP/20250626_110438
+!models/ReCEP/20250626_110438/*
 
-# 允许 data 路径
 !data/
 !data/species.json
 !data/epitopes/

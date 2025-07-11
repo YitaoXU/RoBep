@@ -1,0 +1,70 @@
+{
+  "model_config": {
+    "in_dim": 2560,
+    "rsa": true,
+    "dihedral": true,
+    "node_dims": [
+      512,
+      256,
+      256
+    ],
+    "edge_dim": 32,
+    "dropout": 0.4,
+    "activation": "gelu",
+    "residual": true,
+    "attention": true,
+    "normalize": true,
+    "coords_agg": "mean",
+    "ffn": true,
+    "batch_norm": true,
+    "concat": true,
+    "addition": false,
+    "pooling": "attention",
+    "fusion_type": "concat",
+    "node_gate": false,
+    "node_norm": true,
+    "node_layers": 2,
+    "out_dropout": 0.2,
+    "use_egnn": true,
+    "encoder": "esmc"
+  },
+  "training_config": {
+    "num_epoch": 120,
+    "batch_size": 64,
+    "lr": 5e-05,
+    "weight_decay": 1e-05,
+    "patience": 15,
+    "threshold": 0.5,
+    "mixed_precision": false,
+    "device_id": 0
+  },
+  "data_config": {
+    "radii": [
+      16,
+      18,
+      20
+    ],
+    "zero_ratio": 0.3,
+    "undersample": 0.5,
+    "seed": 42
+  },
+  "loss_config": {
+    "region_loss_type": "mse",
+    "reg_weight": 10.0,
+    "cls_type": "bce",
+    "gamma_high_cls": 2.0,
+    "regression_type": "smooth_l1",
+    "node_loss_type": "focal",
+    "alpha": 2.0,
+    "gamma": 2.0,
+    "pos_weight": 8.0,
+    "node_loss_weight": 0.5,
+    "region_weight": 1.0,
+    "consistency_weight": 0.3,
+    "consistency_type": "mse",
+    "label_smoothing": 0.1,
+    "gradnorm": true,
+    "gradnorm_alpha": 2.0,
+    "gradnorm_update_freq": 10
+  }
+}
