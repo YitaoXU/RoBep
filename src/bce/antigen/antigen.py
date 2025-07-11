@@ -99,7 +99,12 @@ class AntigenChain(ProteinChain):
             try:
                 species = get_chain_organism(self.id, self.chain_id)
                 species_dict[self.id] = {'classification': species}
-                with open(f"{BASE_DIR}/data/species.json", "w") as f:
+                
+                # Create directory if it doesn't exist
+                species_file_path = Path(f"{BASE_DIR}/data/species.json")
+                species_file_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(species_file_path, "w") as f:
                     json.dump(species_dict, f, indent=2)
             except Exception as e:
                 print(f"[ERROR] Failed to get species for {self.id}_{self.chain_id}: {str(e)}")
@@ -123,6 +128,9 @@ class AntigenChain(ProteinChain):
             idx_N = RC.atom_order["N"]
 
             backbone_atoms = self.atom37_positions[:, [idx_N, idx_CA, idx_C], :]  # shape: [L, 3, 3]
+            
+            # Create directory if it doesn't exist
+            file.parent.mkdir(parents=True, exist_ok=True)
             np.save(file, backbone_atoms)
             return backbone_atoms
         
@@ -172,7 +180,7 @@ class AntigenChain(ProteinChain):
         
         return ss_onehot
 
-    def rsa(self) -> np.ndarray:
+    def get_rsa(self) -> np.ndarray:
         """
         Calculate relative solvent accessibility (RSA) for all residues.
         RSA is the ratio of SASA to maximum ASA for each residue.
@@ -194,6 +202,9 @@ class AntigenChain(ProteinChain):
             max_asa = MAX_ASA.get(three_letter)
             if max_asa is not None and max_asa != 0:
                 rsa_values[i] = sasa / max_asa
+        
+        # Create directory if it doesn't exist
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
         np.save(cache_file, rsa_values)
             
         return rsa_values
@@ -213,7 +224,7 @@ class AntigenChain(ProteinChain):
             tuple: A tuple of two lists, where the first list contains residue numbers (from the PDB) that are surface-exposed,
                    and the second list contains the indices of the surface residues in the sequence.
         """
-        rsa_values = self.rsa()
+        rsa_values = self.get_rsa()
         surface_residue_numbers = []
         surface_residue_indices = []
         
@@ -661,7 +672,7 @@ class AntigenChain(ProteinChain):
         """
         embeddings = self.get_embeddings(encoder=encoder)
         backbone_atoms = self.get_backbone_atoms()
-        rsa = self.rsa()
+        rsa = self.get_rsa()
         if radius is None:
             # Used for creating data
             for i in range(16,21,2):
@@ -1362,7 +1373,7 @@ class AntigenChain(ProteinChain):
                           list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1376,7 +1387,7 @@ class AntigenChain(ProteinChain):
             view.setStyle({'chain': self.chain_id}, {**base_style, list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1430,7 +1441,7 @@ class AntigenChain(ProteinChain):
             
             if non_epitope_residues:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id, 'resi': list(non_epitope_residues)})
             
@@ -1475,7 +1486,7 @@ class AntigenChain(ProteinChain):
             view.setStyle({'chain': self.chain_id}, {**base_style, list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1500,7 +1511,7 @@ class AntigenChain(ProteinChain):
             
             if non_region_residues:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id, 'resi': list(non_region_residues)})
             
@@ -1571,13 +1582,13 @@ class AntigenChain(ProteinChain):
                 
                 if non_colored_residues:
                     view.addSurface(py3Dmol.VDW, {
-                        'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                        'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                         'color': base_color
                     }, {'chain': self.chain_id, 'resi': list(non_colored_residues)})
             else:
                 # If no colored residues, show entire surface in base color
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             
@@ -1651,7 +1662,7 @@ class AntigenChain(ProteinChain):
                           list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1682,7 +1693,7 @@ class AntigenChain(ProteinChain):
             # No residues to color, show base style with surface
             if show_surface:
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Softer opacity for fallback
+                    'opacity': surface_opacity * 0.9,  # Softer opacity for fallback
                     'color': base_color
                 }, {'chain': self.chain_id})
             return
@@ -1774,7 +1785,7 @@ class AntigenChain(ProteinChain):
                 
                 # Add surface for this residue with softer opacity for gentler visualization
                 view.addSurface(py3Dmol.VDW, {
-                    'opacity': surface_opacity * 0.8,  # Slightly reduced opacity for softer colors
+                    'opacity': surface_opacity * 0.9,  # Slightly reduced opacity for softer colors
                     'color': color
                 }, {'chain': self.chain_id, 'resi': residue_num})
         
@@ -1874,7 +1885,7 @@ class AntigenChain(ProteinChain):
         if show_surface:
             # Base surface with good visibility
             view.addSurface(py3Dmol.VDW, {
-                'opacity': surface_opacity * 0.8,  # Keep base surface visible
+                'opacity': surface_opacity * 0.9,  # Keep base surface visible
                 'color': base_color
             })
             
@@ -2023,7 +2034,7 @@ class AntigenChain(ProteinChain):
         if show_surface:
             # Base surface with good visibility for overall structure
             view.addSurface(py3Dmol.VDW, {
-                'opacity': surface_opacity * 0.8,  # Keep base surface visible
+                'opacity': surface_opacity * 0.9,  # Keep base surface visible
                 'color': base_color
             })
             
