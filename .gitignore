@@ -15,7 +15,7 @@
 !models/
 !models/ReCEP/
 !models/ReCEP/20250626_110438
-!models/ReCEP/20250626_110438/*
+!models/ReCEP/20250626_110438/best_mcc_model.bin
 
 !data/
 !data/species.json
