@@ -1,10 +1,13 @@
 ## ReCEP
 
+### Environment
 ```bash
+git clone https://github.com/YitaoXU/ReCEP.git
+cd ReCEP
+
 conda create -n ReCEP python=3.10 -y
 conda activate ReCEP
 
-# pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1
 conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 
 pip install torch-scatter torch-cluster -f https://data.pyg.org/whl/torch-2.5.1+cu121.html
