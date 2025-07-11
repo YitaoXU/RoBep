@@ -6,6 +6,7 @@
 !README.md
 !setup.py
 !main.py
+!requirements.txt
 
 # 允许 src 及其子目录
 !src/
