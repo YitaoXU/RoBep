@@ -20,8 +20,8 @@ SERVER_HOST = os.getenv("BCE_HOST", "0.0.0.0")
 SERVER_PORT = int(os.getenv("BCE_PORT", "8000"))
 DEBUG_MODE = os.getenv("BCE_DEBUG", "false").lower() == "true"
 
-# Prediction settings - Updated for ESM-C as default
-DEFAULT_DEVICE_ID = int(os.getenv("BCE_DEVICE_ID", "0"))
+# Prediction settings - Updated for ESM-C as default, CPU mode by default
+DEFAULT_DEVICE_ID = int(os.getenv("BCE_DEVICE_ID", "-1"))
 DEFAULT_RADIUS = float(os.getenv("BCE_RADIUS", "19.0"))
 DEFAULT_K = int(os.getenv("BCE_K", "7"))
 DEFAULT_ENCODER = os.getenv("BCE_ENCODER", "esmc")  # Default to ESM-C

@@ -120,7 +120,7 @@ function handleFormSubmission(e) {
     formData.append('radius', $('#radius').val() || '19.0');
     formData.append('k', $('#k').val() || '7');
     formData.append('encoder', $('#encoder').val() || 'esmc');
-    formData.append('device_id', $('#device_id').val() || '0');
+    formData.append('device_id', $('#device_id').val() || '-1');
     
     if ($('#threshold').val()) {
         formData.append('threshold', $('#threshold').val());

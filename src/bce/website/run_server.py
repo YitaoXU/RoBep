@@ -10,7 +10,7 @@ import time
 import torch
 from pathlib import Path
 
-def preload_model(device_id=0, model_path=None, verbose=True):
+def preload_model(device_id=-1, model_path=None, verbose=True):
     """
     预加载ReCEP模型以减少首次请求延迟
     """
@@ -79,7 +79,7 @@ def main():
                        help="Log level (default: info)")
     parser.add_argument("--preload", action="store_true", default=True, help="Preload model on startup (default: True)")
     parser.add_argument("--no-preload", action="store_true", help="Skip model preloading")
-    parser.add_argument("--device-id", type=int, default=0, help="GPU device ID for model preloading (default: 0)")
+    parser.add_argument("--device-id", type=int, default=-1, help="Device ID for model preloading (default: -1 for CPU)")
     parser.add_argument("--model-path", type=str, default=None, help="Custom model path for preloading")
     
     args = parser.parse_args()

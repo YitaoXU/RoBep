@@ -44,7 +44,7 @@ async def predict_epitopes(
     k: int = Form(7),
     threshold: Optional[float] = Form(None),
     encoder: str = Form("esmc"),
-    device_id: int = Form(0)
+    device_id: int = Form(-1)
 ):
     """Start epitope prediction task"""
     
