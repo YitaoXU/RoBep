@@ -10,7 +10,7 @@ from .dihedral import DihedralFeatures
 from .EGNN import EGNNLayer
 from .pooling import AttentionPooling, AddPooling
 from .activation import get_activation
-from .baseline import EP
+# from .baseline import EP
 
 class ReCEP(nn.Module):
     """
@@ -437,7 +437,6 @@ class ReCEP(nn.Module):
         
 model_registry = {
     "ReCEP": ReCEP,
-    "EP": EP,
 }
 
 def get_model(configs):

@@ -40,11 +40,11 @@ seaborn==0.13.2
 tqdm==4.67.1
 prettytable==3.16.0
 
-# Gradio和Web框架
+# Gradio和Web框架 (版本兼容性优化)
 gradio==4.44.0
 fastapi==0.104.1
 uvicorn==0.24.0
-python-multipart==0.0.6
+python-multipart>=0.0.9  # 更新版本以匹配gradio要求
 jinja2==3.1.2
 aiofiles==23.2.1
 
@@ -60,5 +60,7 @@ networkx>=2.8
 notebook==7.3.2
 ipykernel==6.29.5
 
-# 注意：使用--find-links指定PyTorch Geometric wheel索引
-# 这样可以避免从源代码编译的问题
+# 注意：
+# 1. 使用--find-links指定PyTorch Geometric wheel索引避免编译问题
+# 2. python-multipart版本已更新为>=0.0.9以匹配gradio 4.44.0要求
+# 3. 其他依赖包版本经过兼容性测试
