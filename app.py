@@ -287,7 +287,7 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
     return html_content
 
 def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int, 
-                    encoder: str, device_config: str, threshold: Optional[float],
+                    encoder: str, device_config: str, use_threshold: bool, threshold: float,
                     auto_cleanup: bool, progress: gr.Progress) -> Tuple[str, str, str, str, str, str]:
     """
     Main prediction function that handles the epitope prediction workflow
@@ -354,12 +354,15 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         progress(0.4, desc="Running epitope prediction...")
         
         try:
+            # Use threshold only if checkbox is checked
+            final_threshold = threshold if use_threshold else None
+            
             predict_results = antigen_chain.predict(
                 model_path=DEFAULT_MODEL_PATH,
                 device_id=device_id,
                 radius=radius,
                 k=k,
-                threshold=threshold,
+                threshold=final_threshold,
                 verbose=True,
                 encoder=encoder,
                 use_gpu=use_gpu,
@@ -466,7 +469,8 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 "k": k,
                 "encoder": encoder,
                 "device_config": device_config,
-                "threshold": threshold,
+                "use_threshold": use_threshold,
+                "threshold": final_threshold,
                 "auto_cleanup": auto_cleanup
             }
         }
@@ -657,13 +661,20 @@ def create_interface():
                         value="CPU Only"
                     )
                     
+                    use_threshold = gr.Checkbox(
+                        label="Use Custom Threshold",
+                        value=False,
+                        info="Enable to use a custom threshold value"
+                    )
+                    
                     threshold = gr.Number(
-                        label="Threshold (optional)",
+                        label="Threshold Value",
                         minimum=0.0,
                         maximum=1.0,
                         step=0.01,
-                        value=None,
-                        precision=2
+                        value=0.366,
+                        precision=2,
+                        visible=False
                     )
                     
                     auto_cleanup = gr.Checkbox(
@@ -716,10 +727,19 @@ def create_interface():
             else:
                 return gr.update(visible=False), gr.update(visible=True)
         
+        def toggle_threshold(use_threshold):
+            return gr.update(visible=use_threshold)
+        
         input_method.change(
             toggle_input_method,
             inputs=[input_method],
             outputs=[pdb_id, pdb_file]
+        )
+        
+        use_threshold.change(
+            toggle_threshold,
+            inputs=[use_threshold],
+            outputs=[threshold]
         )
         
         # Prediction function
@@ -727,7 +747,7 @@ def create_interface():
             predict_epitopes,
             inputs=[
                 pdb_id, pdb_file, chain_id, radius, k, encoder, 
-                device_config, threshold, auto_cleanup
+                device_config, use_threshold, threshold, auto_cleanup
             ],
             outputs=[
                 results_text, epitope_list, binding_regions, 
@@ -757,7 +777,7 @@ if __name__ == "__main__":
         interface.launch(
             server_name="0.0.0.0",
             server_port=7860,
-            share=not is_spaces,  # Don't create public links on Spaces
+            share=True,  # Required for Hugging Face Spaces
             show_error=True,
             max_threads=4 if is_spaces else 8
         )

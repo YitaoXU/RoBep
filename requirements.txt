@@ -41,7 +41,7 @@ tqdm==4.67.1
 prettytable==3.16.0
 
 # Gradio和Web框架 (版本兼容性优化)
-gradio==4.44.0
+gradio==4.44.1
 fastapi==0.104.1
 uvicorn==0.24.0
 python-multipart>=0.0.9  # 更新版本以匹配gradio要求
