@@ -5,6 +5,7 @@
 !setup.py
 !main.py
 !requirements.txt
+!install.sh
 
 !src/
 !src/**
