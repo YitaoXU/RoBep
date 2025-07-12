@@ -295,7 +295,7 @@ class EP(nn.Module):
                 device = torch.device(device)
             elif isinstance(device, int):
                 if device >= 0 and torch.cuda.is_available():
-                    device = torch.device(f'cuda:{device}')
+                device = torch.device(f'cuda:{device}')
                 else:
                     device = torch.device('cpu')
             elif not isinstance(device, torch.device):

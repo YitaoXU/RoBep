@@ -949,7 +949,8 @@ class AntigenChain(ProteinChain):
         }
         
     def predict(self, model_path: str = None, device_id: int = 1, radius: float = 19.0, k: int = 7, 
-                threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True):
+                threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True, 
+                auto_cleanup: bool = False):
         """
         Predict epitopes using ReCEP model with spherical regions (for unknown true epitopes).
         
@@ -961,6 +962,8 @@ class AntigenChain(ProteinChain):
             threshold (float): Threshold for node-level epitope prediction
             verbose (bool): Whether to print progress information
             encoder (str): Encoder type for embeddings
+            use_gpu (bool): Whether to use GPU for computation
+            auto_cleanup (bool): Whether to automatically delete generated data files after prediction
             
         Returns:
             dict: Dictionary containing:
@@ -1162,7 +1165,8 @@ class AntigenChain(ProteinChain):
             print(f"  Top-k centers: {top_k_centers}")
             print(f"  Total residues in top-k regions: {len(top_k_region_residues)}")
         
-        return {
+        # Prepare return results
+        results = {
             'predicted_epitopes': predicted_epitope_resnums,
             'predictions': all_residue_predictions,
             'top_k_centers': top_k_centers,
@@ -1179,6 +1183,63 @@ class AntigenChain(ProteinChain):
             'antigen_rate': graph_mean,
             'epitope_rate': node_mean
         }
+        
+        # Auto-cleanup generated data files if requested
+        if auto_cleanup:
+            self._cleanup_generated_data(encoder=encoder, verbose=verbose)
+        
+        return results
+    
+    def _cleanup_generated_data(self, encoder: str = "esmc", verbose: bool = True):
+        """
+        Clean up generated data files for this antigen chain.
+        
+        Args:
+            encoder (str): Encoder type used for embeddings
+            verbose (bool): Whether to print cleanup information
+        """
+        import os
+        
+        # List of files to delete
+        files_to_delete = [
+            # Embeddings file
+            Path(BASE_DIR) / "data" / "embeddings" / encoder / f"{self.id}_{self.chain_id}.h5",
+            # Backbone atoms file
+            Path(BASE_DIR) / "data" / "coords" / f"{self.id}_{self.chain_id}.npy",
+            # RSA file
+            Path(BASE_DIR) / "data" / "rsa" / f"{self.id}_{self.chain_id}.npy",
+            # Surface coverage file
+            Path(BASE_DIR) / "data" / "antigen_sphere" / f"{self.id}_{self.chain_id}.h5"
+        ]
+        
+        deleted_files = []
+        failed_deletions = []
+        total_size = 0
+        
+        for file_path in files_to_delete:
+            if file_path.exists():
+                try:
+                    # Get file size before deletion
+                    file_size = file_path.stat().st_size
+                    os.remove(file_path)
+                    deleted_files.append(file_path)
+                    total_size += file_size
+                    if verbose:
+                        print(f"[INFO] Deleted: {file_path}")
+                except Exception as e:
+                    failed_deletions.append((file_path, str(e)))
+                    if verbose:
+                        print(f"[WARNING] Failed to delete {file_path}: {str(e)}")
+            else:
+                if verbose:
+                    print(f"[INFO] File not found (already deleted or not generated): {file_path}")
+        
+        if verbose:
+            print(f"[INFO] Cleanup completed for {self.id}_{self.chain_id}")
+            print(f"  - Files deleted: {len(deleted_files)}")
+            print(f"  - Failed deletions: {len(failed_deletions)}")
+            if total_size > 0:
+                print(f"  - Total space freed: {total_size / (1024**2):.2f} MB")
     
     def visualize(self, 
                   mode: str = 'normal',

@@ -6,6 +6,9 @@
 !main.py
 !requirements.txt
 !install.sh
+!config.yaml
+!launch.py
+!app.py
 
 !src/
 !src/**

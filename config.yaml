@@ -1,0 +1,16 @@
+title: B-cell Epitope Prediction Server
+emoji: 🧬
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+short_description: "AI-powered B-cell epitope prediction using the ReCEP model"
+tags:
+  - bioinformatics
+  - protein-structure
+  - epitope-prediction
+  - machine-learning
+  - computational-biology 

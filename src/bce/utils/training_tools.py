@@ -21,12 +21,12 @@ def parse_range(range_str):
 def setup_device(device_id=1):
     """Setup and verify CUDA device."""
     if device_id >= 0 and torch.cuda.is_available():
-        device = torch.device(f"cuda:{device_id}")
-        if not hasattr(setup_device, '_printed'):
-            print(f"[INFO] Using device: {device}")
-            print(f"[INFO] CUDA device: {torch.cuda.get_device_name(0)}")
-            setup_device._printed = True
-        return device_id
+    device = torch.device(f"cuda:{device_id}")
+    if not hasattr(setup_device, '_printed'):
+        print(f"[INFO] Using device: {device}")
+        print(f"[INFO] CUDA device: {torch.cuda.get_device_name(0)}")
+        setup_device._printed = True
+    return device_id
     else:
         if not hasattr(setup_device, '_printed'):
             print(f"[INFO] Using device: cpu")
