@@ -5,7 +5,7 @@ setup(
     version="1.0.0",
     description="B-cell Epitope Prediction Server using ReCEP model",
     author="BCE Team",
-    author_email="contact@bce-prediction.com",
+    author_email="yitaoxu@cuhk.com",
     url="https://github.com/YitaoXU/ReCEP",
     packages=find_packages(),
     install_requires=[

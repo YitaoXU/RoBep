@@ -23,11 +23,11 @@ from sklearn.metrics import (
     accuracy_score
 )
 
-from bce.loss import CLoss
-from bce.utils.constants import DISK_DIR, BASE_DIR
+from ..loss import CLoss
+from .constants import DISK_DIR, BASE_DIR
 from ..data.data import create_data_loader
 from ..model.ReGEP import ReGEP
-from bce.model.scheduler import get_scheduler
+from ..model.scheduler import get_scheduler
 
 torch.set_num_threads(12)
 

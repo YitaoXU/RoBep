@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple, Optional
 
 import torch
 
-from bce.utils.constants import *
+from .constants import *
 
 # load combined epitopes csv
 def load_epitopes_csv(csv_name: str = "epitopes.csv") -> pd.DataFrame:

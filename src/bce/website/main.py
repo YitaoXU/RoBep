@@ -17,7 +17,7 @@ from datetime import datetime
 import config
 import sys
 sys.path.append(str(config.BASE_DIR))  # Add project root to path
-from bce.antigen.antigen import AntigenChain
+from ..antigen.antigen import AntigenChain
 
 app = FastAPI(title="BCE Prediction Server", description="B-cell Epitope Prediction Web Server")
 

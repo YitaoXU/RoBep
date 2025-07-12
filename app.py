@@ -14,21 +14,63 @@ import base64
 import zipfile
 from datetime import datetime
 
-# Set up paths
+# Set up paths and imports for different deployment environments
+import sys
 BASE_DIR = Path(__file__).parent
-if (BASE_DIR / "src").exists():
-    import sys
-    sys.path.append(str(BASE_DIR))
-    from src.bce.antigen.antigen import AntigenChain
-    from src.bce.utils.constants import BASE_DIR as PROJECT_BASE_DIR
-else:
-    # Try to import from current directory structure
+
+# Smart import handling for different environments
+def setup_imports():
+    """智能导入设置，适配不同的部署环境"""
+    global AntigenChain, PROJECT_BASE_DIR
+    
+    # 方案1: 尝试从src目录导入（本地开发）
+    if (BASE_DIR / "src").exists():
+        sys.path.insert(0, str(BASE_DIR))
+        try:
+            from src.bce.antigen.antigen import AntigenChain
+            from src.bce.utils.constants import BASE_DIR as PROJECT_BASE_DIR
+            print("✅ Successfully imported from src/ directory")
+            return True
+        except ImportError as e:
+            print(f"❌ Failed to import from src/: {e}")
+    
+    # 方案2: 尝试添加src到路径并直接导入（Hugging Face Spaces）
+    src_path = BASE_DIR / "src"
+    if src_path.exists():
+        sys.path.insert(0, str(src_path))
+        try:
+            from bce.antigen.antigen import AntigenChain
+            from bce.utils.constants import BASE_DIR as PROJECT_BASE_DIR
+            print("✅ Successfully imported from src/ added to path")
+            return True
+        except ImportError as e:
+            print(f"❌ Failed to import with src/ in path: {e}")
+    
+    # 方案3: 尝试直接导入（如果已安装包）
     try:
         from bce.antigen.antigen import AntigenChain
         from bce.utils.constants import BASE_DIR as PROJECT_BASE_DIR
-    except ImportError:
-        print("Warning: Could not import BCE modules. Please ensure the correct path structure.")
-        PROJECT_BASE_DIR = BASE_DIR
+        print("✅ Successfully imported from installed package")
+        return True
+    except ImportError as e:
+        print(f"❌ Failed to import from installed package: {e}")
+    
+    # 如果所有方案都失败，使用默认设置
+    print("⚠️ All import methods failed, using fallback settings")
+    PROJECT_BASE_DIR = BASE_DIR
+    return False
+
+# 执行导入设置
+import_success = setup_imports()
+
+if not import_success:
+    print("❌ Critical: Could not import BCE modules. Please check the file structure.")
+    print("Expected structure:")
+    print("- src/bce/antigen/antigen.py")
+    print("- src/bce/utils/constants.py")
+    print("- src/bce/model/ReCEP.py")
+    print("- src/bce/data/utils.py")
+    sys.exit(1)
 
 # Configuration
 DEFAULT_MODEL_PATH = os.getenv("BCE_MODEL_PATH", str(PROJECT_BASE_DIR / "models" / "ReCEP" / "20250626_110438" / "best_mcc_model.bin"))
@@ -260,7 +302,11 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 auto_cleanup=auto_cleanup
             )
         except Exception as e:
-            return f"Error during prediction: {str(e)}", "", "", "", "", ""
+            error_msg = f"Error during prediction: {str(e)}"
+            print(f"Prediction error: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            return error_msg, "", "", "", "", ""
         
         progress(0.8, desc="Processing results...")
         
