@@ -22,5 +22,5 @@ tqdm==4.67.1
 prettytable==3.16.0
 
 # If you want to run the notebooks
-# notebook==7.3.2
-# ipykernel==6.29.5
+notebook==7.3.2
+ipykernel==6.29.5
