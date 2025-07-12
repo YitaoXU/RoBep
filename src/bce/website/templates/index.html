@@ -88,6 +88,12 @@
                             <label for="threshold">Threshold (optional):</label>
                             <input type="number" id="threshold" name="threshold" step="0.01" min="0.0" max="1.0" placeholder="Auto">
                         </div>
+
+                        <div class="form-group">
+                            <label for="auto_cleanup">Auto-cleanup Generated Data:</label>
+                            <input type="checkbox" id="auto_cleanup" name="auto_cleanup" checked>
+                            <small class="form-text">Automatically delete generated files after prediction to save disk space (required)</small>
+                        </div>
                     </div>
 
                     <button type="submit" id="predictBtn">Predict Epitopes</button>

@@ -103,6 +103,14 @@ header p {
     margin-right: 8px;
 }
 
+.form-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.875em;
+    color: #6c757d;
+    font-style: italic;
+}
+
 /* Button Styles */
 button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

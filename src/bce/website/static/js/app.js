@@ -121,6 +121,7 @@ function handleFormSubmission(e) {
     formData.append('k', $('#k').val() || '7');
     formData.append('encoder', $('#encoder').val() || 'esmc');
     formData.append('device_id', $('#device_id').val() || '-1');
+    formData.append('auto_cleanup', $('#auto_cleanup').is(':checked') ? 'true' : 'false');
     
     if ($('#threshold').val()) {
         formData.append('threshold', $('#threshold').val());

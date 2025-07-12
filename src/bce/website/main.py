@@ -44,7 +44,8 @@ async def predict_epitopes(
     k: int = Form(7),
     threshold: Optional[float] = Form(None),
     encoder: str = Form("esmc"),
-    device_id: int = Form(-1)
+    device_id: int = Form(-1),
+    auto_cleanup: str = Form("false")
 ):
     """Start epitope prediction task"""
     
@@ -72,7 +73,8 @@ async def predict_epitopes(
         k,
         threshold,
         encoder,
-        device_id
+        device_id,
+        auto_cleanup
     )
     
     return {"task_id": task_id, "status": "started"}
@@ -87,7 +89,8 @@ async def run_prediction(
     k: int,
     threshold: Optional[float],
     encoder: str,
-    device_id: int
+    device_id: int,
+    auto_cleanup: str
 ):
     """Run the actual prediction in background"""
     try:
@@ -175,7 +178,8 @@ async def run_prediction(
             threshold=threshold,
             verbose=True,  # Enable verbose for debugging
             encoder=encoder,
-            use_gpu=use_gpu
+            use_gpu=use_gpu,
+            auto_cleanup=auto_cleanup.lower() == "true"  # Convert string to boolean
         )
         
         prediction_results[task_id]["message"] = "Processing prediction results..."
