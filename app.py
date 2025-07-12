@@ -14,6 +14,70 @@ import base64
 import zipfile
 from datetime import datetime
 
+# 动态安装PyTorch Geometric依赖包
+def install_torch_geometric_deps():
+    """在运行时安装PyTorch Geometric依赖包，避免Hugging Face Spaces构建时的编译问题"""
+    import subprocess
+    import sys
+    
+    # 检查是否已经安装torch-scatter
+    try:
+        import torch_scatter
+        print("✅ torch-scatter already installed")
+        return True
+    except ImportError:
+        print("🔄 Installing torch-scatter and related packages...")
+        
+        # 获取PyTorch版本和CUDA信息
+        torch_version = torch.__version__
+        torch_version_str = '+'.join(torch_version.split('+')[:1])  # 移除CUDA信息
+        
+        # 使用PyTorch Geometric官方推荐的安装方式
+        try:
+            # 对于CPU版本，使用官方CPU wheel
+            pip_cmd = [
+                sys.executable, "-m", "pip", "install", 
+                "torch-scatter", "torch-sparse", "torch-cluster", "torch-spline-conv",
+                "-f", f"https://data.pyg.org/whl/torch-{torch_version_str}+cpu.html",
+                "--no-cache-dir"
+            ]
+            
+            print(f"Running: {' '.join(pip_cmd)}")
+            result = subprocess.run(pip_cmd, capture_output=True, text=True, timeout=300)
+            
+            if result.returncode == 0:
+                print("✅ Successfully installed torch-scatter and related packages")
+                return True
+            else:
+                print(f"❌ Failed to install packages: {result.stderr}")
+                # 尝试简化安装方式
+                try:
+                    simple_cmd = [sys.executable, "-m", "pip", "install", "torch-scatter", "--no-cache-dir"]
+                    result = subprocess.run(simple_cmd, capture_output=True, text=True, timeout=300)
+                    if result.returncode == 0:
+                        print("✅ Successfully installed torch-scatter with simple method")
+                        return True
+                    else:
+                        print(f"❌ Simple install also failed: {result.stderr}")
+                        return False
+                except Exception as e:
+                    print(f"❌ Exception during simple install: {e}")
+                    return False
+                    
+        except subprocess.TimeoutExpired:
+            print("❌ Installation timeout - packages may not be available")
+            return False
+        except Exception as e:
+            print(f"❌ Exception during installation: {e}")
+            return False
+
+# 尝试安装PyTorch Geometric依赖包
+deps_installed = install_torch_geometric_deps()
+
+if not deps_installed:
+    print("⚠️ Warning: PyTorch Geometric dependencies not installed. Some features may not work.")
+    print("The application will try to continue with limited functionality.")
+
 # Set up paths and imports for different deployment environments
 import sys
 BASE_DIR = Path(__file__).parent

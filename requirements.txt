@@ -10,12 +10,14 @@ torch==2.5.0
 torchvision==0.20.0
 torchaudio==2.5.0
 
-# PyTorch Geometric 相关包 (CPU版本)
+# PyTorch Geometric 相关包 (使用预编译wheel包)
 torch-geometric==2.6.1
+# 使用PyTorch Geometric官方预编译wheel包 (CPU版本)
+--find-links https://data.pyg.org/whl/torch-2.5.0+cpu.html
 torch-scatter
+torch-sparse
 torch-cluster
 torch-spline-conv
-torch-sparse
 
 # 其他PyTorch扩展包
 torchtext==0.18.0
@@ -58,5 +60,5 @@ networkx>=2.8
 notebook==7.3.2
 ipykernel==6.29.5
 
-# 注意：已移除 -e . 以适配Hugging Face Spaces部署
-# 在Hugging Face Spaces中，包会通过源代码直接导入
+# 注意：使用--find-links指定PyTorch Geometric wheel索引
+# 这样可以避免从源代码编译的问题
