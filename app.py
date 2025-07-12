@@ -732,7 +732,8 @@ def create_interface():
             outputs=[
                 results_text, epitope_list, binding_regions, 
                 json_download, csv_download, html_download
-            ]
+            ],
+            show_progress=True  # 启用进度显示
         )
         
         # Footer
@@ -758,7 +759,6 @@ if __name__ == "__main__":
             server_port=7860,
             share=not is_spaces,  # Don't create public links on Spaces
             show_error=True,
-            show_tips=True,
             enable_queue=True,
             max_threads=4 if is_spaces else 8
         )
