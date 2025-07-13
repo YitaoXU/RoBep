@@ -154,11 +154,10 @@ def validate_chain_id(chain_id: str) -> bool:
 
 def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list, 
                                  predictions: dict, protein_id: str, top_k_regions: list = None) -> str:
-    """Create HTML with 3Dmol.js visualization compatible with Gradio"""
+    """Create HTML with 3Dmol.js visualization compatible with Gradio - simplified version without spheres"""
     
     # Prepare data for JavaScript
     epitope_residues = predicted_epitopes
-    top_k_regions = top_k_regions or []
     
     # Create a unique ID for this visualization to avoid conflicts
     import uuid
@@ -174,7 +173,6 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                     <select id="vizMode_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="padding: 4px;">
                         <option value="prediction">Predicted Epitopes</option>
                         <option value="probability">Probability Gradient</option>
-                        <option value="regions">Top-k Regions</option>
                     </select>
                 </div>
                 <div>
@@ -183,14 +181,7 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                         <option value="cartoon">Cartoon</option>
                         <option value="surface">Surface</option>
                         <option value="stick">Stick</option>
-                        <option value="sphere">Sphere</option>
                     </select>
-                </div>
-                <div>
-                    <label style="font-weight: bold; margin-right: 5px;">
-                        <input type="checkbox" id="showSpheres_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="margin-right: 3px;">
-                        Show Spheres
-                    </label>
                 </div>
                 <div>
                     <button onclick="resetView_{viewer_id}()" style="padding: 4px 8px; margin-right: 5px;">Reset View</button>
@@ -205,66 +196,76 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
         </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/3dmol@2.0.4/build/3Dmol-min.js"></script>
     <script>
-        // Wait for 3Dmol to be available
-        function wait3Dmol_{viewer_id}() {{
+        // Global variables for this viewer instance
+        window.viewer_{viewer_id} = null;
+        window.pdbData_{viewer_id} = `{pdb_data}`;
+        window.predictedEpitopes_{viewer_id} = {json.dumps(epitope_residues)};
+        window.predictions_{viewer_id} = {json.dumps(predictions)};
+        
+        // Wait for 3Dmol to be available with timeout
+        function wait3Dmol_{viewer_id}(attempts = 0) {{
             if (typeof $3Dmol !== 'undefined') {{
-                console.log('3Dmol.js loaded successfully');
+                console.log('3Dmol.js loaded successfully for {viewer_id}');
                 document.getElementById('status_{viewer_id}').textContent = 'Initializing 3D viewer...';
-                initializeViewer_{viewer_id}();
+                setTimeout(() => initializeViewer_{viewer_id}(), 100);
+            }} else if (attempts < 50) {{ // 5 second timeout
+                console.log(`Waiting for 3Dmol.js... attempt ${{attempts + 1}}`);
+                setTimeout(() => wait3Dmol_{viewer_id}(attempts + 1), 100);
             }} else {{
-                console.log('Waiting for 3Dmol.js...');
-                setTimeout(wait3Dmol_{viewer_id}, 100);
+                console.error('Failed to load 3Dmol.js after 5 seconds');
+                document.getElementById('status_{viewer_id}').textContent = 'Failed to load 3Dmol.js. Please refresh the page.';
+                document.getElementById('status_{viewer_id}').style.color = 'red';
             }}
         }}
-        
-        let viewer_{viewer_id};
-        let pdbData_{viewer_id} = `{pdb_data}`;
-        let predictedEpitopes_{viewer_id} = {json.dumps(epitope_residues)};
-        let predictions_{viewer_id} = {json.dumps(predictions)};
-        let topKRegions_{viewer_id} = {json.dumps(top_k_regions)};
         
         function initializeViewer_{viewer_id}() {{
             try {{
                 const element = document.getElementById('{viewer_id}');
                 if (!element) {{
-                    console.error('Viewer element not found');
+                    console.error('Viewer element not found: {viewer_id}');
                     return;
                 }}
                 
                 document.getElementById('status_{viewer_id}').textContent = 'Creating viewer...';
                 
-                viewer_{viewer_id} = $3Dmol.createViewer(element, {{
+                window.viewer_{viewer_id} = $3Dmol.createViewer(element, {{
                     defaultcolors: $3Dmol.rasmolElementColors
                 }});
                 
                 document.getElementById('status_{viewer_id}').textContent = 'Loading structure...';
                 
-                viewer_{viewer_id}.addModel(pdbData_{viewer_id}, 'pdb');
+                window.viewer_{viewer_id}.addModel(window.pdbData_{viewer_id}, 'pdb');
                 
-                document.getElementById('status_{viewer_id}').style.display = 'none';
+                // Hide status message
+                const statusEl = document.getElementById('status_{viewer_id}');
+                if (statusEl) statusEl.style.display = 'none';
                 
                 updateVisualization_{viewer_id}();
                 
-                console.log('3D viewer initialized successfully');
+                console.log('3D viewer initialized successfully for {viewer_id}');
             }} catch (error) {{
                 console.error('Error initializing 3D viewer:', error);
-                document.getElementById('status_{viewer_id}').textContent = 'Error loading 3D viewer: ' + error.message;
+                const statusEl = document.getElementById('status_{viewer_id}');
+                if (statusEl) {{
+                    statusEl.textContent = 'Error loading 3D viewer: ' + error.message;
+                    statusEl.style.color = 'red';
+                }}
             }}
         }}
         
         function updateVisualization_{viewer_id}() {{
-            if (!viewer_{viewer_id}) return;
+            if (!window.viewer_{viewer_id}) return;
             
             try {{
                 const mode = document.getElementById('vizMode_{viewer_id}').value;
                 const style = document.getElementById('vizStyle_{viewer_id}').value;
-                const showSpheres = document.getElementById('showSpheres_{viewer_id}').checked;
                 
                 // Clear everything
-                viewer_{viewer_id}.removeAllShapes();
-                viewer_{viewer_id}.removeAllSurfaces();
-                viewer_{viewer_id}.setStyle({{}}, {{}});
+                window.viewer_{viewer_id}.removeAllShapes();
+                window.viewer_{viewer_id}.removeAllSurfaces();
+                window.viewer_{viewer_id}.setStyle({{}}, {{}});
                 
                 // Base style
                 const baseStyle = {{}};
@@ -273,91 +274,79 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                 }} else {{
                     baseStyle[style] = {{ color: '#e6e6f7' }};
                 }}
-                viewer_{viewer_id}.setStyle({{}}, baseStyle);
+                window.viewer_{viewer_id}.setStyle({{}}, baseStyle);
                 
                 if (mode === 'prediction') {{
                     // Highlight predicted epitopes
-                    if (predictedEpitopes_{viewer_id}.length > 0 && style !== 'surface') {{
+                    if (window.predictedEpitopes_{viewer_id}.length > 0 && style !== 'surface') {{
                         const epitopeStyle = {{}};
                         epitopeStyle[style] = {{ color: '#9C6ADE' }};
-                        viewer_{viewer_id}.setStyle({{ resi: predictedEpitopes_{viewer_id} }}, epitopeStyle);
+                        window.viewer_{viewer_id}.setStyle({{ resi: window.predictedEpitopes_{viewer_id} }}, epitopeStyle);
                     }}
                     
                     // Add surface for epitopes if surface mode
                     if (style === 'surface') {{
-                        viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                        window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
                             opacity: 0.8,
                             color: '#e6e6f7'
                         }});
                         
-                        if (predictedEpitopes_{viewer_id}.length > 0) {{
-                            viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                        if (window.predictedEpitopes_{viewer_id}.length > 0) {{
+                            window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
                                 opacity: 1.0,
                                 color: '#9C6ADE'
-                            }}, {{ resi: predictedEpitopes_{viewer_id} }});
+                            }}, {{ resi: window.predictedEpitopes_{viewer_id} }});
+                        }}
+                    }}
+                }} else if (mode === 'probability') {{
+                    // Color by probability scores
+                    if (window.predictions_{viewer_id} && Object.keys(window.predictions_{viewer_id}).length > 0) {{
+                        Object.entries(window.predictions_{viewer_id}).forEach(([resnum, score]) => {{
+                            const color = getColorFromScore(score);
+                            const probStyle = {{}};
+                            if (style === 'surface') {{
+                                // For surface, we'll use a different approach
+                                probStyle['cartoon'] = {{ hidden: true }};
+                            }} else {{
+                                probStyle[style] = {{ color: color }};
+                            }}
+                            window.viewer_{viewer_id}.setStyle({{ resi: parseInt(resnum) }}, probStyle);
+                        }});
+                        
+                        if (style === 'surface') {{
+                            window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                                opacity: 0.8,
+                                colorscheme: 'RdYlBu',
+                                map: $3Dmol.createPropertyMap(window.predictions_{viewer_id})
+                            }});
                         }}
                     }}
                 }}
                 
-                // Add spheres if requested
-                if (showSpheres && topKRegions_{viewer_id}.length > 0) {{
-                    const colors = ['#FF6B6B', '#96CEB4', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#87CEEB'];
-                    
-                    topKRegions_{viewer_id}.forEach((region, index) => {{
-                        if (region.center_residue && region.radius) {{
-                            try {{
-                                const model = viewer_{viewer_id}.getModel(0);
-                                const centerResidues = model.selectedAtoms({{ 
-                                    resi: region.center_residue,
-                                    atom: 'CA'
-                                }});
-                                
-                                if (centerResidues.length > 0) {{
-                                    const centerAtom = centerResidues[0];
-                                    const centerCoords = {{ x: centerAtom.x, y: centerAtom.y, z: centerAtom.z }};
-                                    const sphereColor = colors[index % colors.length];
-                                    
-                                    // Add wireframe sphere
-                                    viewer_{viewer_id}.addSphere({{
-                                        center: centerCoords,
-                                        radius: region.radius || 19.0,
-                                        color: sphereColor,
-                                        wireframe: true,
-                                        linewidth: 2.0
-                                    }});
-                                    
-                                    // Add center point
-                                    viewer_{viewer_id}.addSphere({{
-                                        center: centerCoords,
-                                        radius: 0.7,
-                                        color: '#FFD700',
-                                        wireframe: false
-                                    }});
-                                }}
-                            }} catch (error) {{
-                                console.error('Error adding sphere:', error);
-                            }}
-                        }}
-                    }});
-                }}
-                
-                viewer_{viewer_id}.zoomTo();
-                viewer_{viewer_id}.render();
+                window.viewer_{viewer_id}.zoomTo();
+                window.viewer_{viewer_id}.render();
             }} catch (error) {{
                 console.error('Error updating visualization:', error);
             }}
         }}
         
+        function getColorFromScore(score) {{
+            // Convert score to color (red for low, yellow for medium, green for high)
+            if (score < 0.3) return '#ff4444';
+            if (score < 0.6) return '#ffaa44';
+            return '#44ff44';
+        }}
+        
         function resetView_{viewer_id}() {{
-            if (viewer_{viewer_id}) {{
-                viewer_{viewer_id}.zoomTo();
-                viewer_{viewer_id}.render();
+            if (window.viewer_{viewer_id}) {{
+                window.viewer_{viewer_id}.zoomTo();
+                window.viewer_{viewer_id}.render();
             }}
         }}
         
         function saveImage_{viewer_id}() {{
-            if (viewer_{viewer_id}) {{
-                viewer_{viewer_id}.pngURI(function(uri) {{
+            if (window.viewer_{viewer_id}) {{
+                window.viewer_{viewer_id}.pngURI(function(uri) {{
                     const link = document.createElement('a');
                     link.href = uri;
                     link.download = '{protein_id}_structure.png';
@@ -679,9 +668,6 @@ def create_interface():
         .form-row > * {
             flex: 1;
         }
-        """, 
-        head="""
-        <script src="https://cdn.jsdelivr.net/npm/3dmol@2.0.4/build/3Dmol-min.js"></script>
         """) as interface:
         
         # Header
@@ -712,7 +698,7 @@ def create_interface():
                     encoder = gr.Dropdown(label="Encoder", choices=["esmc", "esm2"], value="esmc")
                     device_config = gr.Dropdown(label="Device Configuration", choices=["CPU Only", "GPU 0", "GPU 1", "GPU 2", "GPU 3"], value="CPU Only")
                     use_threshold = gr.Checkbox(label="Use Custom Threshold", value=False)
-                    threshold = gr.Number(label="Threshold Value", minimum=0.0, maximum=1.0, step=0.01, value=0.366, precision=2, visible=False)
+                    threshold = gr.Number(label="Threshold Value", minimum=0.0, maximum=1.0, step=0.01, value=0.366, visible=False)
                     auto_cleanup = gr.Checkbox(label="Auto-cleanup Generated Data", value=True)
 
                 predict_btn = gr.Button("🧮 Predict Epitopes", variant="primary", size="lg")
@@ -760,7 +746,7 @@ def create_interface():
                 results_text, epitope_list, binding_regions, 
                 visualization_html, json_download, csv_download, html_download
             ],
-            show_progress="full"
+            show_progress=True
         )
 
         gr.HTML("""
@@ -784,7 +770,7 @@ if __name__ == "__main__":
         interface.launch(
             server_name="0.0.0.0",
             server_port=7860,
-            share=True,  # Required for Hugging Face Spaces
+            share=False if is_spaces else True,  # Don't use share=True on Spaces
             show_error=True,
             max_threads=4 if is_spaces else 8
         )
