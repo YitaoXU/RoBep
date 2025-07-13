@@ -153,165 +153,254 @@ def validate_chain_id(chain_id: str) -> bool:
     return chain_id.isalnum()
 
 def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list, 
-                                 predictions: dict, protein_id: str) -> str:
-    """Create HTML with 3Dmol.js visualization"""
+                                 predictions: dict, protein_id: str, top_k_regions: list = None) -> str:
+    """Create HTML with 3Dmol.js visualization compatible with Gradio"""
     
-    # Create color mapping for residues
-    epitope_residues = set(predicted_epitopes)
+    # Prepare data for JavaScript
+    epitope_residues = predicted_epitopes
+    top_k_regions = top_k_regions or []
+    
+    # Create a unique ID for this visualization to avoid conflicts
+    import uuid
+    viewer_id = f"viewer_{uuid.uuid4().hex[:8]}"
     
     html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 20px; }}
-            #viewer {{ width: 100%; height: 500px; position: relative; }}
-            .controls {{ margin: 10px 0; }}
-            .control-group {{ margin: 10px 0; }}
-            label {{ display: inline-block; width: 150px; font-weight: bold; }}
-            select, button {{ margin: 5px; padding: 5px; }}
-        </style>
-    </head>
-    <body>
-        <h2>3D Structure Visualization - {protein_id}</h2>
-        <div class="controls">
-            <div class="control-group">
-                <label>Display Mode:</label>
-                <select id="vizMode" onchange="updateVisualization()">
-                    <option value="prediction">Predicted Epitopes</option>
-                    <option value="probability">Probability Gradient</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label>Representation:</label>
-                <select id="vizStyle" onchange="updateVisualization()">
-                    <option value="cartoon">Cartoon</option>
-                    <option value="surface">Surface</option>
-                    <option value="stick">Stick</option>
-                    <option value="sphere">Sphere</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <button onclick="resetView()">Reset View</button>
-                <button onclick="saveImage()">Save Image</button>
+    <div style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+        <div style="padding: 10px; background: #f8f9fa; border-bottom: 1px solid #ddd;">
+            <h3 style="margin: 0 0 10px 0; color: #333;">3D Structure Visualization - {protein_id}</h3>
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <label style="font-weight: bold; margin-right: 5px;">Display Mode:</label>
+                    <select id="vizMode_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="padding: 4px;">
+                        <option value="prediction">Predicted Epitopes</option>
+                        <option value="probability">Probability Gradient</option>
+                        <option value="regions">Top-k Regions</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-right: 5px;">Style:</label>
+                    <select id="vizStyle_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="padding: 4px;">
+                        <option value="cartoon">Cartoon</option>
+                        <option value="surface">Surface</option>
+                        <option value="stick">Stick</option>
+                        <option value="sphere">Sphere</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-right: 5px;">
+                        <input type="checkbox" id="showSpheres_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="margin-right: 3px;">
+                        Show Spheres
+                    </label>
+                </div>
+                <div>
+                    <button onclick="resetView_{viewer_id}()" style="padding: 4px 8px; margin-right: 5px;">Reset View</button>
+                    <button onclick="saveImage_{viewer_id}()" style="padding: 4px 8px;">Save Image</button>
+                </div>
             </div>
         </div>
-        <div id="viewer"></div>
+        <div id="{viewer_id}" style="width: 100%; height: 520px; position: relative; background: #f0f0f0;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <p id="status_{viewer_id}" style="color: #666;">Loading 3Dmol.js...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Wait for 3Dmol to be available
+        function wait3Dmol_{viewer_id}() {{
+            if (typeof $3Dmol !== 'undefined') {{
+                console.log('3Dmol.js loaded successfully');
+                document.getElementById('status_{viewer_id}').textContent = 'Initializing 3D viewer...';
+                initializeViewer_{viewer_id}();
+            }} else {{
+                console.log('Waiting for 3Dmol.js...');
+                setTimeout(wait3Dmol_{viewer_id}, 100);
+            }}
+        }}
         
-        <script>
-            let viewer;
-            let pdbData = `{pdb_data}`;
-            let predictedEpitopes = {json.dumps(predicted_epitopes)};
-            let predictions = {json.dumps(predictions)};
-            
-            function initializeViewer() {{
-                viewer = $3Dmol.createViewer('viewer', {{
+        let viewer_{viewer_id};
+        let pdbData_{viewer_id} = `{pdb_data}`;
+        let predictedEpitopes_{viewer_id} = {json.dumps(epitope_residues)};
+        let predictions_{viewer_id} = {json.dumps(predictions)};
+        let topKRegions_{viewer_id} = {json.dumps(top_k_regions)};
+        
+        function initializeViewer_{viewer_id}() {{
+            try {{
+                const element = document.getElementById('{viewer_id}');
+                if (!element) {{
+                    console.error('Viewer element not found');
+                    return;
+                }}
+                
+                document.getElementById('status_{viewer_id}').textContent = 'Creating viewer...';
+                
+                viewer_{viewer_id} = $3Dmol.createViewer(element, {{
                     defaultcolors: $3Dmol.rasmolElementColors
                 }});
                 
-                viewer.addModel(pdbData, 'pdb');
-                updateVisualization();
-            }}
-            
-            function updateVisualization() {{
-                viewer.removeAllModels();
-                viewer.addModel(pdbData, 'pdb');
+                document.getElementById('status_{viewer_id}').textContent = 'Loading structure...';
                 
-                const mode = document.getElementById('vizMode').value;
-                const style = document.getElementById('vizStyle').value;
+                viewer_{viewer_id}.addModel(pdbData_{viewer_id}, 'pdb');
+                
+                document.getElementById('status_{viewer_id}').style.display = 'none';
+                
+                updateVisualization_{viewer_id}();
+                
+                console.log('3D viewer initialized successfully');
+            }} catch (error) {{
+                console.error('Error initializing 3D viewer:', error);
+                document.getElementById('status_{viewer_id}').textContent = 'Error loading 3D viewer: ' + error.message;
+            }}
+        }}
+        
+        function updateVisualization_{viewer_id}() {{
+            if (!viewer_{viewer_id}) return;
+            
+            try {{
+                const mode = document.getElementById('vizMode_{viewer_id}').value;
+                const style = document.getElementById('vizStyle_{viewer_id}').value;
+                const showSpheres = document.getElementById('showSpheres_{viewer_id}').checked;
+                
+                // Clear everything
+                viewer_{viewer_id}.removeAllShapes();
+                viewer_{viewer_id}.removeAllSurfaces();
+                viewer_{viewer_id}.setStyle({{}}, {{}});
                 
                 // Base style
-                const baseStyle = getBaseStyle(style);
-                viewer.setStyle({{}}, baseStyle);
+                const baseStyle = {{}};
+                if (style === 'surface') {{
+                    baseStyle['cartoon'] = {{ hidden: true }};
+                }} else {{
+                    baseStyle[style] = {{ color: '#e6e6f7' }};
+                }}
+                viewer_{viewer_id}.setStyle({{}}, baseStyle);
                 
                 if (mode === 'prediction') {{
                     // Highlight predicted epitopes
-                    const epitopeStyle = Object.assign({{}}, baseStyle);
-                    epitopeStyle[Object.keys(baseStyle)[0]].color = '#9C6ADE';
+                    if (predictedEpitopes_{viewer_id}.length > 0 && style !== 'surface') {{
+                        const epitopeStyle = {{}};
+                        epitopeStyle[style] = {{ color: '#9C6ADE' }};
+                        viewer_{viewer_id}.setStyle({{ resi: predictedEpitopes_{viewer_id} }}, epitopeStyle);
+                    }}
                     
-                    predictedEpitopes.forEach(resnum => {{
-                        viewer.setStyle({{resi: resnum}}, epitopeStyle);
-                    }});
-                }} else if (mode === 'probability') {{
-                    // Color by probability
-                    for (const [resnum, prob] of Object.entries(predictions)) {{
-                        const color = getProbabilityColor(prob);
-                        const probStyle = Object.assign({{}}, baseStyle);
-                        probStyle[Object.keys(baseStyle)[0]].color = color;
-                        viewer.setStyle({{resi: parseInt(resnum)}}, probStyle);
+                    // Add surface for epitopes if surface mode
+                    if (style === 'surface') {{
+                        viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                            opacity: 0.8,
+                            color: '#e6e6f7'
+                        }});
+                        
+                        if (predictedEpitopes_{viewer_id}.length > 0) {{
+                            viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                                opacity: 1.0,
+                                color: '#9C6ADE'
+                            }}, {{ resi: predictedEpitopes_{viewer_id} }});
+                        }}
                     }}
                 }}
                 
-                viewer.zoomTo();
-                viewer.render();
+                // Add spheres if requested
+                if (showSpheres && topKRegions_{viewer_id}.length > 0) {{
+                    const colors = ['#FF6B6B', '#96CEB4', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#87CEEB'];
+                    
+                    topKRegions_{viewer_id}.forEach((region, index) => {{
+                        if (region.center_residue && region.radius) {{
+                            try {{
+                                const model = viewer_{viewer_id}.getModel(0);
+                                const centerResidues = model.selectedAtoms({{ 
+                                    resi: region.center_residue,
+                                    atom: 'CA'
+                                }});
+                                
+                                if (centerResidues.length > 0) {{
+                                    const centerAtom = centerResidues[0];
+                                    const centerCoords = {{ x: centerAtom.x, y: centerAtom.y, z: centerAtom.z }};
+                                    const sphereColor = colors[index % colors.length];
+                                    
+                                    // Add wireframe sphere
+                                    viewer_{viewer_id}.addSphere({{
+                                        center: centerCoords,
+                                        radius: region.radius || 19.0,
+                                        color: sphereColor,
+                                        wireframe: true,
+                                        linewidth: 2.0
+                                    }});
+                                    
+                                    // Add center point
+                                    viewer_{viewer_id}.addSphere({{
+                                        center: centerCoords,
+                                        radius: 0.7,
+                                        color: '#FFD700',
+                                        wireframe: false
+                                    }});
+                                }}
+                            }} catch (error) {{
+                                console.error('Error adding sphere:', error);
+                            }}
+                        }}
+                    }});
+                }}
+                
+                viewer_{viewer_id}.zoomTo();
+                viewer_{viewer_id}.render();
+            }} catch (error) {{
+                console.error('Error updating visualization:', error);
             }}
-            
-            function getBaseStyle(style) {{
-                const styles = {{
-                    'cartoon': {{cartoon: {{color: '#e6e6f7'}}}},
-                    'surface': {{surface: {{color: '#e6e6f7', opacity: 0.7}}}},
-                    'stick': {{stick: {{color: '#e6e6f7'}}}},
-                    'sphere': {{sphere: {{color: '#e6e6f7'}}}}
-                }};
-                return styles[style] || styles['cartoon'];
+        }}
+        
+        function resetView_{viewer_id}() {{
+            if (viewer_{viewer_id}) {{
+                viewer_{viewer_id}.zoomTo();
+                viewer_{viewer_id}.render();
             }}
-            
-            function getProbabilityColor(prob) {{
-                // Color gradient from blue (low) to red (high)
-                const r = Math.floor(prob * 255);
-                const b = Math.floor((1 - prob) * 255);
-                return `rgb(${{r}}, 0, ${{b}})`;
+        }}
+        
+        function saveImage_{viewer_id}() {{
+            if (viewer_{viewer_id}) {{
+                viewer_{viewer_id}.pngURI(function(uri) {{
+                    const link = document.createElement('a');
+                    link.href = uri;
+                    link.download = '{protein_id}_structure.png';
+                    link.click();
+                }});
             }}
-            
-            function resetView() {{
-                viewer.zoomTo();
-                viewer.render();
-            }}
-            
-            function saveImage() {{
-                const canvas = viewer.pngURI();
-                const link = document.createElement('a');
-                link.download = '{protein_id}_structure.png';
-                link.href = canvas;
-                link.click();
-            }}
-            
-            // Initialize when page loads
-            document.addEventListener('DOMContentLoaded', initializeViewer);
-        </script>
-    </body>
-    </html>
+        }}
+        
+        // Start initialization
+        wait3Dmol_{viewer_id}();
+    </script>
     """
     
     return html_content
 
 def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int, 
                     encoder: str, device_config: str, use_threshold: bool, threshold: float,
-                    auto_cleanup: bool, progress: gr.Progress) -> Tuple[str, str, str, str, str, str]:
+                    auto_cleanup: bool, progress: gr.Progress = None) -> Tuple[str, str, str, str, str, str, str]:
     """
     Main prediction function that handles the epitope prediction workflow
     """
     try:
         # Input validation
         if not pdb_file and not pdb_id:
-            return "Error: Please provide either a PDB ID or upload a PDB file", "", "", "", "", ""
+            return "Error: Please provide either a PDB ID or upload a PDB file", "", "", "", "", "", ""
         
         if pdb_id and not validate_pdb_id(pdb_id):
-            return "Error: PDB ID must be exactly 4 characters (letters and numbers)", "", "", "", "", ""
+            return "Error: PDB ID must be exactly 4 characters (letters and numbers)", "", "", "", "", "", ""
         
         if not validate_chain_id(chain_id):
-            return "Error: Chain ID must be exactly 1 character", "", "", "", "", ""
+            return "Error: Chain ID must be exactly 1 character", "", "", "", "", "", ""
         
         # Update progress
-        progress(0.1, desc="Initializing prediction...")
+        if progress:
+            progress(0.1, desc="Initializing prediction...")
         
         # Process device configuration
         device_id = -1 if device_config == "CPU Only" else int(device_config.split(" ")[1])
         use_gpu = device_id >= 0
         
         # Load protein structure
-        progress(0.2, desc="Loading protein structure...")
+        if progress:
+            progress(0.2, desc="Loading protein structure...")
         
         antigen_chain = None
         temp_file_path = None
@@ -319,7 +408,8 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         try:
             if pdb_file:
                 # Handle uploaded file
-                progress(0.25, desc="Processing uploaded PDB file...")
+                if progress:
+                        progress(0.25, desc="Processing uploaded PDB file...")
                 
                 # Save uploaded file to temporary location
                 temp_file_path = tempfile.mktemp(suffix=".pdb")
@@ -337,7 +427,8 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 )
             else:
                 # Load from PDB ID
-                progress(0.25, desc=f"Downloading PDB structure {pdb_id}...")
+                if progress:
+                    progress(0.25, desc=f"Downloading PDB structure {pdb_id}...")
                 
                 antigen_chain = AntigenChain.from_pdb(
                     chain_id=chain_id,
@@ -345,13 +436,14 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 )
                 
         except Exception as e:
-            return f"Error loading protein structure: {str(e)}", "", "", "", "", ""
+            return f"Error loading protein structure: {str(e)}", "", "", "", "", "", ""
         
         if antigen_chain is None:
-            return "Error: Failed to load protein structure", "", "", "", "", ""
+            return "Error: Failed to load protein structure", "", "", "", "", "", ""
         
         # Run prediction
-        progress(0.4, desc="Running epitope prediction...")
+        if progress:
+            progress(0.4, desc="Running epitope prediction...")
         
         try:
             # Use threshold only if checkbox is checked
@@ -373,13 +465,14 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
             print(f"Prediction error: {error_msg}")
             import traceback
             traceback.print_exc()
-            return error_msg, "", "", "", "", ""
+            return error_msg, "", "", "", "", "", ""
         
-        progress(0.8, desc="Processing results...")
+        if progress:
+            progress(0.8, desc="Processing results...")
         
         # Process results
         if not predict_results:
-            return "Error: No prediction results generated", "", "", "", "", ""
+            return "Error: No prediction results generated", "", "", "", "", "", ""
         
         # Extract prediction data
         predicted_epitopes = predict_results.get("predicted_epitopes", [])
@@ -388,18 +481,11 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         top_k_region_residues = predict_results.get("top_k_region_residues", [])
         top_k_regions = predict_results.get("top_k_regions", [])
         
-        # Calculate statistics
+        # Calculate summary statistics
         protein_length = len(antigen_chain.sequence)
         epitope_count = len(predicted_epitopes)
         region_count = len(top_k_regions)
         coverage_rate = (len(top_k_region_residues) / protein_length) * 100 if protein_length > 0 else 0
-        
-        # Calculate mean region prediction value
-        region_values = [region.get('graph_pred', 0) for region in top_k_regions]
-        mean_region = np.mean(region_values) if region_values else 0
-        
-        # Calculate epitope rate (antigenicity)
-        epitope_rate = (epitope_count / protein_length) * 100 if protein_length > 0 else 0
         
         # Create summary text
         summary_text = f"""
@@ -415,8 +501,6 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
 - **Predicted Epitopes**: {epitope_count}
 - **Top-k Regions**: {region_count}
 - **Coverage Rate**: {coverage_rate:.1f}%
-- **Mean Region Value**: {mean_region:.3f}
-- **Epitope Rate**: {epitope_rate:.1f}%
 
 ### Top-k Region Centers
 {', '.join(map(str, top_k_centers))}
@@ -437,7 +521,8 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         binding_text += "\n".join([f"Residue {res}" for res in top_k_region_residues])
         
         # Create downloadable files
-        progress(0.9, desc="Preparing download files...")
+        if progress:
+            progress(0.9, desc="Preparing download files...")
         
         # JSON file
         json_data = {
@@ -460,9 +545,8 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                     }
                     for region in top_k_regions
                 ],
-                "epitope_rate": epitope_rate,
                 "coverage_rate": coverage_rate,
-                "mean_region_value": mean_region
+                "mean_region_value": 0 # No longer calculated
             },
             "parameters": {
                 "radius": radius,
@@ -497,13 +581,15 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         csv_df.to_csv(csv_file_path, index=False)
         
         # Create 3D visualization
-        progress(0.95, desc="Creating 3D visualization...")
+        if progress:
+            progress(0.95, desc="Creating 3D visualization...")
         
         # Generate PDB string for visualization
+        html_content = "<p>3D visualization not available</p>"
         try:
             pdb_str = generate_pdb_string(antigen_chain)
             html_content = create_pdb_visualization_html(
-                pdb_str, predicted_epitopes, predictions, f"{pdb_id}_{chain_id}"
+                pdb_str, predicted_epitopes, predictions, f"{pdb_id}_{chain_id}", top_k_regions
             )
             
             # Save HTML file
@@ -513,26 +599,31 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 
         except Exception as e:
             html_file_path = None
+            html_content = f"<p>3D visualization error: {str(e)}</p>"
             print(f"Warning: Could not create 3D visualization: {str(e)}")
         
         # Clean up temporary files
         if temp_file_path and os.path.exists(temp_file_path):
             os.remove(temp_file_path)
         
-        progress(1.0, desc="Prediction completed!")
+        if progress:
+            progress(1.0, desc="Prediction completed!")
         
+        # Return all results
         return (
             summary_text,
             epitope_text,
             binding_text,
+            html_content,
             json_file_path,
             csv_file_path,
             html_file_path
         )
         
     except Exception as e:
+        import traceback
         error_msg = f"Error: {str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-        return error_msg, "", "", "", "", ""
+        return error_msg, "", "", "", "", "", ""
 
 def generate_pdb_string(antigen_chain) -> str:
     """Generate PDB string for 3D visualization"""
@@ -561,13 +652,12 @@ def generate_pdb_string(antigen_chain) -> str:
 
 def create_interface():
     """Create the Gradio interface"""
-    
-    with gr.Blocks(
-        title="B-cell Epitope Prediction Server",
-        theme=gr.themes.Soft(),
-        css="""
-        .gradio-container {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    with gr.Blocks(css="""
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         .header {
             text-align: center;
@@ -581,14 +671,18 @@ def create_interface():
             font-size: 2.5em;
             margin-bottom: 10px;
         }
-        .section {
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 10px;
-            background: #f8f9fa;
+        .form-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
         }
-        """
-    ) as interface:
+        .form-row > * {
+            flex: 1;
+        }
+        """, 
+        head="""
+        <script src="https://cdn.jsdelivr.net/npm/3dmol@2.0.4/build/3Dmol-min.js"></script>
+        """) as interface:
         
         # Header
         gr.HTML("""
@@ -597,152 +691,65 @@ def create_interface():
             <p>Predict epitopes using the ReCEP model</p>
         </div>
         """)
-        
+
         with gr.Row():
             with gr.Column(scale=1):
                 gr.HTML("<div class='section'><h2>📋 Input Protein Structure</h2></div>")
-                
-                # Input method selection
+
                 input_method = gr.Radio(
                     choices=["PDB ID", "Upload PDB File"],
                     value="PDB ID",
                     label="Input Method"
                 )
-                
-                # PDB ID input
-                pdb_id = gr.Textbox(
-                    label="PDB ID",
-                    placeholder="e.g., 5I9Q",
-                    max_lines=1,
-                    visible=True
-                )
-                
-                # File upload
-                pdb_file = gr.File(
-                    label="Upload PDB File",
-                    file_types=[".pdb", ".ent"],
-                    visible=False
-                )
-                
-                # Chain ID
-                chain_id = gr.Textbox(
-                    label="Chain ID",
-                    value="A",
-                    max_lines=1
-                )
-                
-                # Advanced parameters
+
+                pdb_id = gr.Textbox(label="PDB ID", placeholder="e.g., 5I9Q", max_lines=1, visible=True)
+                pdb_file = gr.File(label="Upload PDB File", file_types=[".pdb", ".ent"], visible=False)
+                chain_id = gr.Textbox(label="Chain ID", value="A", max_lines=1)
+
                 with gr.Accordion("🔧 Advanced Parameters", open=False):
-                    radius = gr.Slider(
-                        label="Radius (Å)",
-                        minimum=1.0,
-                        maximum=50.0,
-                        step=0.1,
-                        value=19.0
-                    )
-                    
-                    k = gr.Slider(
-                        label="Top-k Regions",
-                        minimum=1,
-                        maximum=20,
-                        step=1,
-                        value=7
-                    )
-                    
-                    encoder = gr.Dropdown(
-                        label="Encoder",
-                        choices=["esmc", "esm2"],
-                        value="esmc"
-                    )
-                    
-                    device_config = gr.Dropdown(
-                        label="Device Configuration",
-                        choices=["CPU Only", "GPU 0", "GPU 1", "GPU 2", "GPU 3"],
-                        value="CPU Only"
-                    )
-                    
-                    use_threshold = gr.Checkbox(
-                        label="Use Custom Threshold",
-                        value=False,
-                        info="Enable to use a custom threshold value"
-                    )
-                    
-                    threshold = gr.Number(
-                        label="Threshold Value",
-                        minimum=0.0,
-                        maximum=1.0,
-                        step=0.01,
-                        value=0.366,
-                        precision=2,
-                        visible=False
-                    )
-                    
-                    auto_cleanup = gr.Checkbox(
-                        label="Auto-cleanup Generated Data",
-                        value=True,
-                        info="Automatically delete generated files after prediction to save disk space"
-                    )
-                
-                # Predict button
+                    radius = gr.Slider(label="Radius (Å)", minimum=1.0, maximum=50.0, step=0.1, value=19.0)
+                    k = gr.Slider(label="Top-k Regions", minimum=1, maximum=20, step=1, value=7)
+                    encoder = gr.Dropdown(label="Encoder", choices=["esmc", "esm2"], value="esmc")
+                    device_config = gr.Dropdown(label="Device Configuration", choices=["CPU Only", "GPU 0", "GPU 1", "GPU 2", "GPU 3"], value="CPU Only")
+                    use_threshold = gr.Checkbox(label="Use Custom Threshold", value=False)
+                    threshold = gr.Number(label="Threshold Value", minimum=0.0, maximum=1.0, step=0.01, value=0.366, precision=2, visible=False)
+                    auto_cleanup = gr.Checkbox(label="Auto-cleanup Generated Data", value=True)
+
                 predict_btn = gr.Button("🧮 Predict Epitopes", variant="primary", size="lg")
-                
+
             with gr.Column(scale=2):
                 gr.HTML("<div class='section'><h2>📊 Results</h2></div>")
-                
-                # Results display
+
                 results_text = gr.Markdown(label="Prediction Summary")
-                
+
                 with gr.Row():
-                    with gr.Column():
-                        epitope_list = gr.Textbox(
-                            label="Predicted Epitope Residues",
-                            max_lines=10,
-                            interactive=False
-                        )
-                    
-                    with gr.Column():
-                        binding_regions = gr.Textbox(
-                            label="Binding Region Residues",
-                            max_lines=10,
-                            interactive=False
-                        )
-                
-                # Download section
+                    epitope_list = gr.Textbox(label="Predicted Epitope Residues", max_lines=10, interactive=False)
+                    binding_regions = gr.Textbox(label="Binding Region Residues", max_lines=10, interactive=False)
+
                 with gr.Row():
                     json_download = gr.File(label="📥 Download JSON Results")
                     csv_download = gr.File(label="📥 Download CSV Results")
-                
-                # 3D Visualization
+
                 with gr.Accordion("🎨 3D Structure Visualization", open=False):
+                    visualization_html = gr.HTML(
+                        value="<p>3D visualization will appear here after prediction...</p>"
+                    )
                     gr.HTML("""
-                    <p><strong>Note:</strong> The 3D visualization will be available as a downloadable HTML file 
-                    that you can open in your browser for interactive viewing.</p>
+                    <p><strong>Instructions:</strong> Use mouse to rotate, zoom, and explore the 3D structure. 
+                    Predicted epitopes are highlighted in purple.</p>
                     """)
                     html_download = gr.File(label="📥 Download 3D Visualization")
-        
-        # Event handlers
+
         def toggle_input_method(method):
-            if method == "PDB ID":
-                return gr.update(visible=True), gr.update(visible=False)
-            else:
-                return gr.update(visible=False), gr.update(visible=True)
-        
+            return (gr.update(visible=method == "PDB ID"),
+                    gr.update(visible=method == "Upload PDB File"))
+
         def toggle_threshold(use_threshold):
             return gr.update(visible=use_threshold)
-        
-        input_method.change(
-            toggle_input_method,
-            inputs=[input_method],
-            outputs=[pdb_id, pdb_file]
-        )
-        
-        use_threshold.change(
-            toggle_threshold,
-            inputs=[use_threshold],
-            outputs=[threshold]
-        )
-        
-        # Prediction function
+
+        input_method.change(toggle_input_method, inputs=[input_method], outputs=[pdb_id, pdb_file])
+        use_threshold.change(toggle_threshold, inputs=[use_threshold], outputs=[threshold])
+
         predict_btn.click(
             predict_epitopes,
             inputs=[
@@ -751,20 +758,20 @@ def create_interface():
             ],
             outputs=[
                 results_text, epitope_list, binding_regions, 
-                json_download, csv_download, html_download
+                visualization_html, json_download, csv_download, html_download
             ],
-            show_progress="full"  # 启用完整进度显示
+            show_progress="full"
         )
-        
-        # Footer
+
         gr.HTML("""
         <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 10px;">
             <p>© 2024 B-cell Epitope Prediction Server | Powered by ReCEP model</p>
             <p>🚀 Deployed on Hugging Face Spaces</p>
         </div>
         """)
-    
+
     return interface
+
 
 if __name__ == "__main__":
     # Create and launch the interface
