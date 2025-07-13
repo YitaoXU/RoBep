@@ -14,13 +14,13 @@ import base64
 import zipfile
 from datetime import datetime
 
-# 动态安装PyTorch Geometric依赖包
+# Dynamic installation of PyTorch Geometric dependencies
 def install_torch_geometric_deps():
-    """在运行时安装PyTorch Geometric依赖包，避免Hugging Face Spaces构建时的编译问题"""
+    """Install PyTorch Geometric dependencies at runtime to avoid compilation issues during Hugging Face Spaces build"""
     import subprocess
     import sys
     
-    # 检查是否已经安装torch-scatter
+    # Check if torch-scatter is already installed
     try:
         import torch_scatter
         print("✅ torch-scatter already installed")
@@ -28,13 +28,13 @@ def install_torch_geometric_deps():
     except ImportError:
         print("🔄 Installing torch-scatter and related packages...")
         
-        # 获取PyTorch版本和CUDA信息
+        # Get PyTorch version and CUDA info
         torch_version = torch.__version__
-        torch_version_str = '+'.join(torch_version.split('+')[:1])  # 移除CUDA信息
+        torch_version_str = '+'.join(torch_version.split('+')[:1])  # Remove CUDA info
         
-        # 使用PyTorch Geometric官方推荐的安装方式
+        # Use PyTorch Geometric official recommended installation method
         try:
-            # 对于CPU版本，使用官方CPU wheel
+            # For CPU version, use official CPU wheel
             pip_cmd = [
                 sys.executable, "-m", "pip", "install", 
                 "torch-scatter", "torch-sparse", "torch-cluster", "torch-spline-conv",
@@ -50,7 +50,7 @@ def install_torch_geometric_deps():
                 return True
             else:
                 print(f"❌ Failed to install packages: {result.stderr}")
-                # 尝试简化安装方式
+                # Try simplified installation method
                 try:
                     simple_cmd = [sys.executable, "-m", "pip", "install", "torch-scatter", "--no-cache-dir"]
                     result = subprocess.run(simple_cmd, capture_output=True, text=True, timeout=300)
@@ -71,7 +71,7 @@ def install_torch_geometric_deps():
             print(f"❌ Exception during installation: {e}")
             return False
 
-# 尝试安装PyTorch Geometric依赖包
+# Try to install PyTorch Geometric dependencies
 deps_installed = install_torch_geometric_deps()
 
 if not deps_installed:
@@ -84,10 +84,10 @@ BASE_DIR = Path(__file__).parent
 
 # Smart import handling for different environments
 def setup_imports():
-    """智能导入设置，适配不同的部署环境"""
+    """Smart import setup for different deployment environments"""
     global AntigenChain, PROJECT_BASE_DIR
     
-    # 方案1: 尝试从src目录导入（本地开发）
+    # Method 1: Try importing from src directory (local development)
     if (BASE_DIR / "src").exists():
         sys.path.insert(0, str(BASE_DIR))
         try:
@@ -98,7 +98,7 @@ def setup_imports():
         except ImportError as e:
             print(f"❌ Failed to import from src/: {e}")
     
-    # 方案2: 尝试添加src到路径并直接导入（Hugging Face Spaces）
+    # Method 2: Try adding src to path and direct import (Hugging Face Spaces)
     src_path = BASE_DIR / "src"
     if src_path.exists():
         sys.path.insert(0, str(src_path))
@@ -110,7 +110,7 @@ def setup_imports():
         except ImportError as e:
             print(f"❌ Failed to import with src/ in path: {e}")
     
-    # 方案3: 尝试直接导入（如果已安装包）
+    # Method 3: Try direct import (if package is installed)
     try:
         from bce.antigen.antigen import AntigenChain
         from bce.utils.constants import BASE_DIR as PROJECT_BASE_DIR
@@ -119,12 +119,12 @@ def setup_imports():
     except ImportError as e:
         print(f"❌ Failed to import from installed package: {e}")
     
-    # 如果所有方案都失败，使用默认设置
+    # If all methods fail, use default settings
     print("⚠️ All import methods failed, using fallback settings")
     PROJECT_BASE_DIR = BASE_DIR
     return False
 
-# 执行导入设置
+# Execute import setup
 import_success = setup_imports()
 
 if not import_success:
@@ -140,6 +140,10 @@ if not import_success:
 DEFAULT_MODEL_PATH = os.getenv("BCE_MODEL_PATH", str(PROJECT_BASE_DIR / "models" / "ReCEP" / "20250626_110438" / "best_mcc_model.bin"))
 ESM_TOKEN = os.getenv("ESM_TOKEN", "1mzAo8l1uxaU8UfVcGgV7B")
 
+# PDB data directory
+PDB_DATA_DIR = PROJECT_BASE_DIR / "data" / "pdb"
+PDB_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 def validate_pdb_id(pdb_id: str) -> bool:
     """Validate PDB ID format"""
     if not pdb_id or len(pdb_id) != 4:
@@ -154,10 +158,23 @@ def validate_chain_id(chain_id: str) -> bool:
 
 def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list, 
                                  predictions: dict, protein_id: str, top_k_regions: list = None) -> str:
-    """Create HTML with 3Dmol.js visualization compatible with Gradio - simplified version without spheres"""
+    """Create HTML with 3Dmol.js visualization compatible with Gradio - enhanced version with more features"""
     
     # Prepare data for JavaScript
     epitope_residues = predicted_epitopes
+    
+    # Process top_k_regions for visualization
+    processed_regions = []
+    if top_k_regions:
+        for i, region in enumerate(top_k_regions):
+            if isinstance(region, dict):
+                processed_regions.append({
+                    'center_idx': region.get('center_idx', 0),
+                    'center_residue': region.get('center_residue', region.get('center_idx', 0)),
+                    'covered_residues': region.get('covered_residues', region.get('covered_indices', [])),
+                    'radius': 19.0,  # Default radius
+                    'predicted_value': region.get('graph_pred', 0.0)
+                })
     
     # Create a unique ID for this visualization to avoid conflicts
     import uuid
@@ -173,6 +190,7 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                     <select id="vizMode_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="padding: 4px;">
                         <option value="prediction">Predicted Epitopes</option>
                         <option value="probability">Probability Gradient</option>
+                        <option value="regions">Top-k Regions</option>
                     </select>
                 </div>
                 <div>
@@ -181,7 +199,33 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                         <option value="cartoon">Cartoon</option>
                         <option value="surface">Surface</option>
                         <option value="stick">Stick</option>
+                        <option value="sphere">Sphere</option>
                     </select>
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-right: 5px;">
+                        <input type="checkbox" id="showSpheres_{viewer_id}" onchange="updateVisualization_{viewer_id}()" style="margin-right: 3px;"> Show Spheres
+                    </label>
+                </div>
+                <div>
+                    <label style="font-weight: bold; margin-right: 5px;">Sphere Display:</label>
+                    <select id="sphereCount_{viewer_id}" onchange="handleSphereCountChange_{viewer_id}()" style="padding: 4px;">
+                        <option value="1">Top 1</option>
+                        <option value="2">Top 2</option>
+                        <option value="3">Top 3</option>
+                        <option value="4">Top 4</option>
+                        <option value="5" selected>Top 5</option>
+                        <option value="6">Top 6</option>
+                        <option value="7">Top 7</option>
+                        <option value="all">All Spheres</option>
+                        <option value="custom">Custom Selection</option>
+                    </select>
+                </div>
+                <div id="customSphereSelection_{viewer_id}" style="display: none; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 5px; max-height: 120px; overflow-y: auto;">
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Select Spheres to Display:</label>
+                    <div id="sphereCheckboxes_{viewer_id}" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 80px; overflow-y: auto;">
+                        <!-- Checkboxes will be dynamically generated -->
+                    </div>
                 </div>
                 <div>
                     <button onclick="resetView_{viewer_id}()" style="padding: 4px 8px; margin-right: 5px;">Reset View</button>
@@ -189,20 +233,21 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                 </div>
             </div>
         </div>
-        <div id="{viewer_id}" style="width: 100%; height: 520px; position: relative; background: #f0f0f0;">
+        <div id="{viewer_id}" style="width: 100%; height: 520px; min-height: 400px; position: relative; background: #f0f0f0;">
             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
                 <p id="status_{viewer_id}" style="color: #666;">Loading 3Dmol.js...</p>
             </div>
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/3dmol@2.0.4/build/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/3dmol@2.0.4/build/3Dmol-min.js"></script>
     <script>
         // Global variables for this viewer instance
         window.viewer_{viewer_id} = null;
         window.pdbData_{viewer_id} = `{pdb_data}`;
         window.predictedEpitopes_{viewer_id} = {json.dumps(epitope_residues)};
         window.predictions_{viewer_id} = {json.dumps(predictions)};
+        window.topKRegions_{viewer_id} = {json.dumps(processed_regions)};
         
         // Wait for 3Dmol to be available with timeout
         function wait3Dmol_{viewer_id}(attempts = 0) {{
@@ -244,6 +289,11 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                 
                 updateVisualization_{viewer_id}();
                 
+                // Initialize sphere checkboxes if data is available
+                if (window.topKRegions_{viewer_id} && window.topKRegions_{viewer_id}.length > 0) {{
+                    generateSphereCheckboxes_{viewer_id}();
+                }}
+                
                 console.log('3D viewer initialized successfully for {viewer_id}');
             }} catch (error) {{
                 console.error('Error initializing 3D viewer:', error);
@@ -261,6 +311,7 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
             try {{
                 const mode = document.getElementById('vizMode_{viewer_id}').value;
                 const style = document.getElementById('vizStyle_{viewer_id}').value;
+                const showSpheres = document.getElementById('showSpheres_{viewer_id}').checked;
                 
                 // Clear everything
                 window.viewer_{viewer_id}.removeAllShapes();
@@ -301,26 +352,112 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                 }} else if (mode === 'probability') {{
                     // Color by probability scores
                     if (window.predictions_{viewer_id} && Object.keys(window.predictions_{viewer_id}).length > 0) {{
+                        const allProbs = Object.values(window.predictions_{viewer_id}).filter(p => p !== undefined);
+                        const minProb = Math.min(...allProbs);
+                        const maxProb = Math.max(...allProbs);
+                        
                         Object.entries(window.predictions_{viewer_id}).forEach(([resnum, score]) => {{
-                            const color = getColorFromScore(score);
+                            const normalizedProb = maxProb > minProb ? (score - minProb) / (maxProb - minProb) : 0.5;
+                            const color = interpolateColor('#E6F3FF', '#DC143C', normalizedProb);
                             const probStyle = {{}};
-                            if (style === 'surface') {{
-                                // For surface, we'll use a different approach
-                                probStyle['cartoon'] = {{ hidden: true }};
-                            }} else {{
+                            if (style !== 'surface') {{
                                 probStyle[style] = {{ color: color }};
+                                window.viewer_{viewer_id}.setStyle({{ resi: parseInt(resnum) }}, probStyle);
                             }}
-                            window.viewer_{viewer_id}.setStyle({{ resi: parseInt(resnum) }}, probStyle);
                         }});
                         
                         if (style === 'surface') {{
                             window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
                                 opacity: 0.8,
-                                colorscheme: 'RdYlBu',
-                                map: $3Dmol.createPropertyMap(window.predictions_{viewer_id})
+                                color: '#e6e6f7'
+                            }});
+                            
+                            Object.entries(window.predictions_{viewer_id}).forEach(([resnum, score]) => {{
+                                const normalizedProb = maxProb > minProb ? (score - minProb) / (maxProb - minProb) : 0.5;
+                                const color = interpolateColor('#E6F3FF', '#DC143C', normalizedProb);
+                                window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                                    opacity: 1.0,
+                                    color: color
+                                }}, {{ resi: parseInt(resnum) }});
                             }});
                         }}
                     }}
+                }} else if (mode === 'regions') {{
+                    // Color top-k regions
+                    const colors = ['#FF6B6B', '#96CEB4', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#87CEEB'];
+                    
+                    if (window.topKRegions_{viewer_id} && window.topKRegions_{viewer_id}.length > 0) {{
+                        window.topKRegions_{viewer_id}.forEach((region, index) => {{
+                            const color = colors[index % colors.length];
+                            const regionStyle = {{}};
+                            if (style !== 'surface') {{
+                                regionStyle[style] = {{ color: color }};
+                                window.viewer_{viewer_id}.setStyle({{ resi: region.covered_residues }}, regionStyle);
+                            }}
+                        }});
+                        
+                        if (style === 'surface') {{
+                            window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                                opacity: 0.8,
+                                color: '#e6e6f7'
+                            }});
+                            
+                            window.topKRegions_{viewer_id}.forEach((region, index) => {{
+                                const color = colors[index % colors.length];
+                                window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
+                                    opacity: 1.0,
+                                    color: color
+                                }}, {{ resi: region.covered_residues }});
+                            }});
+                        }}
+                    }}
+                }}
+                
+                // Add spheres if requested
+                if (showSpheres && window.topKRegions_{viewer_id} && window.topKRegions_{viewer_id}.length > 0) {{
+                    const colors = ['#FF6B6B', '#96CEB4', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#87CEEB'];
+                    const sphereCount = document.getElementById('sphereCount_{viewer_id}').value;
+                    
+                    // Determine which spheres to show
+                    let spheresToShow = [];
+                    if (sphereCount === 'custom') {{
+                        const selectedIndices = getSelectedSphereIndices_{viewer_id}();
+                        spheresToShow = selectedIndices.map(idx => ({{ region: window.topKRegions_{viewer_id}[idx], index: idx }}));
+                    }} else {{
+                        let numSpheres = sphereCount === 'all' ? window.topKRegions_{viewer_id}.length : parseInt(sphereCount);
+                        numSpheres = Math.min(numSpheres, window.topKRegions_{viewer_id}.length);
+                        spheresToShow = window.topKRegions_{viewer_id}.slice(0, numSpheres).map((region, index) => ({{ region, index }}));
+                    }}
+                    
+                    spheresToShow.forEach(({{ region, index }}) => {{
+                        const color = colors[index % colors.length];
+                        const centerResidues = window.viewer_{viewer_id}.getModel(0).selectedAtoms({{
+                            resi: region.center_residue,
+                            atom: 'CA'
+                        }});
+                        
+                        if (centerResidues.length > 0) {{
+                            const centerAtom = centerResidues[0];
+                            const centerCoords = {{ x: centerAtom.x, y: centerAtom.y, z: centerAtom.z }};
+                            
+                            // Add wireframe sphere
+                            window.viewer_{viewer_id}.addSphere({{
+                                center: centerCoords,
+                                radius: region.radius,
+                                color: color,
+                                wireframe: true,
+                                linewidth: 2.0
+                            }});
+                            
+                            // Add center point
+                            window.viewer_{viewer_id}.addSphere({{
+                                center: centerCoords,
+                                radius: 0.7,
+                                color: '#FFD700',
+                                wireframe: false
+                            }});
+                        }}
+                    }});
                 }}
                 
                 window.viewer_{viewer_id}.zoomTo();
@@ -330,11 +467,29 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
             }}
         }}
         
-        function getColorFromScore(score) {{
-            // Convert score to color (red for low, yellow for medium, green for high)
-            if (score < 0.3) return '#ff4444';
-            if (score < 0.6) return '#ffaa44';
-            return '#44ff44';
+        // Color interpolation helper functions
+        function interpolateColor(color1, color2, factor) {{
+            const c1 = hexToRgb(color1);
+            const c2 = hexToRgb(color2);
+            
+            const r = Math.round(c1.r + factor * (c2.r - c1.r));
+            const g = Math.round(c1.g + factor * (c2.g - c1.g));
+            const b = Math.round(c1.b + factor * (c2.b - c1.b));
+            
+            return rgbToHex(r, g, b);
+        }}
+        
+        function hexToRgb(hex) {{
+            const result = /^#?([a-f\d]{{2}})([a-f\d]{{2}})([a-f\d]{{2}})$/i.exec(hex);
+            return result ? {{
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            }} : null;
+        }}
+        
+        function rgbToHex(r, g, b) {{
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }}
         
         function resetView_{viewer_id}() {{
@@ -353,6 +508,117 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                     link.click();
                 }});
             }}
+        }}
+        
+        // Handle sphere count selection change
+        function handleSphereCountChange_{viewer_id}() {{
+            const sphereCount = document.getElementById('sphereCount_{viewer_id}').value;
+            const customSelectionDiv = document.getElementById('customSphereSelection_{viewer_id}');
+            
+            if (sphereCount === 'custom') {{
+                customSelectionDiv.style.display = 'block';
+                generateSphereCheckboxes_{viewer_id}();
+            }} else {{
+                customSelectionDiv.style.display = 'none';
+            }}
+            
+            updateVisualization_{viewer_id}();
+        }}
+        
+        // Generate sphere checkboxes for custom selection
+        function generateSphereCheckboxes_{viewer_id}() {{
+            if (!window.topKRegions_{viewer_id} || window.topKRegions_{viewer_id}.length === 0) {{
+                return;
+            }}
+            
+            const regions = window.topKRegions_{viewer_id};
+            const container = document.getElementById('sphereCheckboxes_{viewer_id}');
+            container.innerHTML = '';
+            
+            regions.forEach((region, index) => {{
+                const sphereNum = index + 1;
+                const checkboxId = `sphere_{{sphereNum}}_{viewer_id}`;
+                const colors = ['#FF6B6B', '#96CEB4', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#87CEEB'];
+                const sphereColor = colors[index % colors.length];
+                
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    padding: 5px 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    background: white;
+                    cursor: pointer;
+                    user-select: none;
+                `;
+                checkboxContainer.setAttribute('data-sphere', sphereNum);
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = checkboxId;
+                checkbox.checked = sphereNum <= 5; // Default: show first 5
+                checkbox.style.marginRight = '5px';
+                
+                const colorBox = document.createElement('div');
+                colorBox.style.cssText = `
+                    width: 16px;
+                    height: 16px;
+                    background-color: ${{sphereColor}};
+                    border: 1px solid #333;
+                    border-radius: 2px;
+                    margin-right: 5px;
+                `;
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', checkboxId);
+                label.textContent = `Sphere ${{sphereNum}} (R${{region.center_residue}})`;
+                label.style.cursor = 'pointer';
+                label.style.fontSize = '14px';
+                
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(colorBox);
+                checkboxContainer.appendChild(label);
+                container.appendChild(checkboxContainer);
+                
+                // Add click handler
+                checkboxContainer.addEventListener('click', function(e) {{
+                    if (e.target.type !== 'checkbox') {{
+                        checkbox.checked = !checkbox.checked;
+                    }}
+                    
+                    if (checkbox.checked) {{
+                        checkboxContainer.style.backgroundColor = '#f0f8ff';
+                        checkboxContainer.style.borderColor = '#4a90e2';
+                    }} else {{
+                        checkboxContainer.style.backgroundColor = 'white';
+                        checkboxContainer.style.borderColor = '#ddd';
+                    }}
+                    
+                    updateVisualization_{viewer_id}();
+                }});
+                
+                // Initialize visual state
+                if (checkbox.checked) {{
+                    checkboxContainer.style.backgroundColor = '#f0f8ff';
+                    checkboxContainer.style.borderColor = '#4a90e2';
+                }}
+            }});
+        }}
+        
+        // Get selected sphere indices for custom mode
+        function getSelectedSphereIndices_{viewer_id}() {{
+            const selected = [];
+            const checkboxes = document.querySelectorAll('#sphereCheckboxes_{viewer_id} input[type="checkbox"]:checked');
+            checkboxes.forEach(function(checkbox) {{
+                // Get sphere number from the data-sphere attribute of the container
+                const container = checkbox.closest('[data-sphere]');
+                if (container) {{
+                    const sphereNum = parseInt(container.getAttribute('data-sphere'));
+                    selected.push(sphereNum - 1); // Convert to 0-based index
+                }}
+            }});
+            return selected;
         }}
         
         // Start initialization
@@ -400,17 +666,50 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 if progress:
                         progress(0.25, desc="Processing uploaded PDB file...")
                 
-                # Save uploaded file to temporary location
-                temp_file_path = tempfile.mktemp(suffix=".pdb")
-                with open(temp_file_path, "wb") as f:
-                    f.write(pdb_file)
+                # Debug: print type and attributes of pdb_file
+                print(f"🔍 Debug: pdb_file type = {type(pdb_file)}")
+                print(f"🔍 Debug: pdb_file attributes = {dir(pdb_file)}")
                 
                 # Extract PDB ID from filename if not provided
                 if not pdb_id:
-                    pdb_id = Path(pdb_file.name).stem.split('_')[0][:4]
+                    if hasattr(pdb_file, 'name'):
+                        pdb_id = Path(pdb_file.name).stem.split('_')[0][:4]
+                    else:
+                        pdb_id = "UNKN"  # Default fallback
+                
+                # Save uploaded file to data/pdb/ directory with proper naming
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"{pdb_id}_{chain_id}_{timestamp}.pdb"
+                temp_file_path = PDB_DATA_DIR / filename
+                
+                # Properly read and write the uploaded file
+                try:
+                    if hasattr(pdb_file, 'name') and os.path.isfile(pdb_file.name):
+                        # pdb_file is a file object with .name attribute
+                        print(f"📁 Processing file object: {pdb_file.name}")
+                        with open(pdb_file.name, "rb") as src:
+                            with open(temp_file_path, "wb") as dst:
+                                dst.write(src.read())
+                    elif hasattr(pdb_file, 'read'):
+                        # pdb_file is a file-like object
+                        print(f"📄 Processing file-like object")
+                        with open(temp_file_path, "wb") as f:
+                            f.write(pdb_file.read())
+                    else:
+                        # pdb_file is a string (file path)
+                        print(f"📍 Processing file path: {pdb_file}")
+                        with open(str(pdb_file), "rb") as src:
+                            with open(temp_file_path, "wb") as dst:
+                                dst.write(src.read())
+                    
+                    print(f"✅ PDB file saved to: {temp_file_path}")
+                    
+                except Exception as file_error:
+                    print(f"❌ Error processing uploaded file: {file_error}")
+                    return f"Error processing uploaded file: {str(file_error)}", "", "", "", "", ""
                 
                 antigen_chain = AntigenChain.from_pdb(
-                    path=temp_file_path,
+                    path=str(temp_file_path),
                     chain_id=chain_id,
                     id=pdb_id
                 )
@@ -484,7 +783,7 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
 - **PDB ID**: {pdb_id}
 - **Chain**: {chain_id}
 - **Length**: {protein_length} residues
-- **Sequence**: {antigen_chain.sequence}
+- **Sequence**: <div style="word-wrap: break-word; word-break: break-all; white-space: pre-wrap; max-width: 100%; font-family: monospace; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 5px 0; display: inline-block;">{antigen_chain.sequence}</div>
 
 ### Prediction Summary
 - **Predicted Epitopes**: {epitope_count}
@@ -591,39 +890,46 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         if progress:
             progress(0.95, desc="Creating 3D visualization...")
         
-        # Generate PDB string for visualization
-        html_content = "<p>3D visualization not available</p>"
+        # Generate PDB string for visualization HTML file
+        html_file_path = None
         try:
             pdb_str = generate_pdb_string(antigen_chain)
             html_content = create_pdb_visualization_html(
                 pdb_str, predicted_epitopes, predictions, f"{pdb_id}_{chain_id}", top_k_regions
             )
             
-            # Save HTML file
-            html_file_path = tempfile.mktemp(suffix=".html")
-            with open(html_file_path, "w") as f:
+            # Save HTML file to data directory for download
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            html_filename = f"{pdb_id}_{chain_id}_visualization_{timestamp}.html"
+            html_file_path = PDB_DATA_DIR / html_filename
+            
+            with open(html_file_path, "w", encoding='utf-8') as f:
                 f.write(html_content)
+                
+            print(f"✅ 3D visualization HTML saved to: {html_file_path}")
                 
         except Exception as e:
             html_file_path = None
-            html_content = f"<p>3D visualization error: {str(e)}</p>"
             print(f"Warning: Could not create 3D visualization: {str(e)}")
         
-        # Clean up temporary files
-        if temp_file_path and os.path.exists(temp_file_path):
+        # Clean up temporary files if auto_cleanup is enabled
+        if auto_cleanup and temp_file_path and os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+            print(f"🧹 Cleaned up temporary file: {temp_file_path}")
+        elif temp_file_path and os.path.exists(temp_file_path):
+            print(f"📁 PDB file retained at: {temp_file_path}")
         
         if progress:
             progress(1.0, desc="Prediction completed!")
         
-        # Return all results
+        # Return all results including HTML file path for download
         return (
             summary_text,
             epitope_text,
             binding_text,
+            str(html_file_path) if html_file_path else None,  # HTML file moved to 4th position
             json_file_path,
-            csv_file_path,
-            html_file_path
+            csv_file_path
         )
         
     except Exception as e:
@@ -685,6 +991,34 @@ def create_interface():
         .form-row > * {
             flex: 1;
         }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+            border: 1px solid #e0e8f0;
+        }
+        .download-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .download-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
         """) as interface:
         
         # Header
@@ -705,34 +1039,98 @@ def create_interface():
                     label="Input Method"
                 )
 
-                pdb_id = gr.Textbox(label="PDB ID", placeholder="e.g., 5I9Q", max_lines=1, visible=True)
-                pdb_file = gr.File(label="Upload PDB File", file_types=[".pdb", ".ent"], visible=False)
-                chain_id = gr.Textbox(label="Chain ID", value="A", max_lines=1)
+                pdb_id = gr.Textbox(
+                    label="PDB ID", 
+                    placeholder="e.g., 5I9Q", 
+                    max_lines=1, 
+                    visible=True
+                )
+                pdb_file = gr.File(
+                    label="Upload PDB File", 
+                    file_types=[".pdb", ".ent"], 
+                    visible=False
+                )
+                chain_id = gr.Textbox(
+                    label="Chain ID", 
+                    value="A", 
+                    max_lines=1
+                )
 
                 with gr.Accordion("🔧 Advanced Parameters", open=False):
-                    radius = gr.Slider(label="Radius (Å)", minimum=1.0, maximum=50.0, step=0.1, value=19.0)
-                    k = gr.Slider(label="Top-k Regions", minimum=1, maximum=20, step=1, value=7)
-                    encoder = gr.Dropdown(label="Encoder", choices=["esmc", "esm2"], value="esmc")
-                    device_config = gr.Dropdown(label="Device Configuration", choices=["CPU Only", "GPU 0", "GPU 1", "GPU 2", "GPU 3"], value="CPU Only")
-                    use_threshold = gr.Checkbox(label="Use Custom Threshold", value=False)
-                    threshold = gr.Number(label="Threshold Value", value=0.366, visible=False)
-                    auto_cleanup = gr.Checkbox(label="Auto-cleanup Generated Data", value=True)
+                    radius = gr.Slider(
+                        label="Radius (Å)", 
+                        minimum=1.0, 
+                        maximum=50.0, 
+                        step=0.1, 
+                        value=19.0
+                    )
+                    k = gr.Slider(
+                        label="Top-k Regions", 
+                        minimum=1, 
+                        maximum=20, 
+                        step=1, 
+                        value=7
+                    )
+                    encoder = gr.Dropdown(
+                        label="Encoder", 
+                        choices=["esmc", "esm2"], 
+                        value="esmc"
+                    )
+                    device_config = gr.Dropdown(
+                        label="Device Configuration", 
+                        choices=["CPU Only", "GPU 0", "GPU 1", "GPU 2", "GPU 3"], 
+                        value="CPU Only"
+                    )
+                    use_threshold = gr.Checkbox(
+                        label="Use Custom Threshold", 
+                        value=False
+                    )
+                    threshold = gr.Number(
+                        label="Threshold Value", 
+                        value=0.366, 
+                        visible=False
+                    )
+                    auto_cleanup = gr.Checkbox(
+                        label="Auto-cleanup Generated Data", 
+                        value=True
+                    )
 
                 predict_btn = gr.Button("🧮 Predict Epitopes", variant="primary", size="lg")
 
             with gr.Column(scale=2):
-                gr.HTML("<div class='section'><h2>📊 Results</h2></div>")
+                gr.HTML("<div class='section'><h2>📊 Prediction Results</h2></div>")
 
-                results_text = gr.Markdown(label="Prediction Summary")
+                results_text = gr.Markdown(label="Prediction Summary", visible=True)
+
+                # 3D Visualization download (moved to top)
+                gr.HTML("<div style='margin: 15px 0; padding: 10px; background: #f0f8ff; border-left: 4px solid #4a90e2; border-radius: 5px;'><h3 style='margin: 0 0 8px 0; color: #333;'>🧬 3D Visualization</h3><p style='margin: 0; color: #666;'>You can download the HTML to visualize the prediction results and the spheres used.</p></div>")
+                html_download = gr.File(
+                    label="Download Interactive 3D Visualization HTML",
+                    visible=True
+                )
 
                 with gr.Row():
-                    epitope_list = gr.Textbox(label="Predicted Epitope Residues", max_lines=10, interactive=False)
-                    binding_regions = gr.Textbox(label="Binding Region Residues", max_lines=10, interactive=False)
+                    epitope_list = gr.Textbox(
+                        label="Predicted Epitope Residues", 
+                        max_lines=10, 
+                        interactive=False
+                    )
+                    binding_regions = gr.Textbox(
+                        label="Binding Region Residues", 
+                        max_lines=10, 
+                        interactive=False
+                    )
 
+                gr.HTML("<div class='download-section'><h3>📥 Download Data Results</h3></div>")
                 with gr.Row():
-                    json_download = gr.File(label="📥 Download JSON Results")
-                    csv_download = gr.File(label="📥 Download CSV Results")
-                    html_download = gr.File(label="📥 Download 3D Visualization HTML")
+                    json_download = gr.File(
+                        label="JSON Results",
+                        visible=True
+                    )
+                    csv_download = gr.File(
+                        label="CSV Results",
+                        visible=True
+                    )
 
         def toggle_input_method(method):
             return (gr.update(visible=method == "PDB ID"),
@@ -752,7 +1150,7 @@ def create_interface():
             ],
             outputs=[
                 results_text, epitope_list, binding_regions, 
-                json_download, csv_download, html_download
+                html_download, json_download, csv_download
             ],
             show_progress=True
         )
@@ -760,7 +1158,8 @@ def create_interface():
         gr.HTML("""
         <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 10px;">
             <p>© 2024 B-cell Epitope Prediction Server | Powered by ReCEP model</p>
-            <p>🚀 Deployed on Hugging Face Spaces</p>
+            <p>🚀 Advanced AI-powered epitope prediction with interactive 3D visualization</p>
+            <p><strong>Features:</strong> PDB ID/File support • ESM-C encoder • GPU acceleration • 3D visualization • Multiple export formats</p>
         </div>
         """)
 

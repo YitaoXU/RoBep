@@ -37,9 +37,9 @@ Choose one of two input methods:
 #### Advanced Parameters (Optional):
 - **Radius**: Spherical region radius in Ångstroms (default: 19.0)
 - **Top-k Regions**: Number of top regions to analyze (default: 7)
-- **Encoder**: Protein encoder type (ESM-C or ESM-2, default: ESM-C)
-- **Device Configuration**: CPU or GPU processing (default: CPU Only)
-- **Threshold**: Custom prediction threshold (leave empty for auto)
+- **Encoder**: Protein encoder type (ESM-C only now)
+- **Device Configuration**: CPU or GPU processing (CPU Only now)
+- **Threshold**: Custom prediction threshold (leave empty for auto, required)
 
 ### 3. View Results
 
