@@ -1098,16 +1098,16 @@ def create_interface():
                 predict_btn = gr.Button("🧮 Predict Epitopes", variant="primary", size="lg")
 
             with gr.Column(scale=2):
-                gr.HTML("<div class='section'><h2>📊 Prediction Results</h2></div>")
-
-                results_text = gr.Markdown(label="Prediction Summary", visible=True)
-
                 # 3D Visualization download (moved to top)
                 gr.HTML("<div style='margin: 15px 0; padding: 10px; background: #f0f8ff; border-left: 4px solid #4a90e2; border-radius: 5px;'><h3 style='margin: 0 0 8px 0; color: #333;'>🧬 3D Visualization</h3><p style='margin: 0; color: #666;'>You can download the HTML to visualize the prediction results and the spheres used.</p></div>")
                 html_download = gr.File(
                     label="Download Interactive 3D Visualization HTML",
                     visible=True
                 )
+                
+                gr.HTML("<div class='section'><h2>📊 Prediction Results</h2></div>")
+
+                results_text = gr.Markdown(label="Prediction Summary", visible=True)
 
                 with gr.Row():
                     epitope_list = gr.Textbox(
