@@ -364,20 +364,20 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
 
 def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int, 
                     encoder: str, device_config: str, use_threshold: bool, threshold: float,
-                    auto_cleanup: bool, progress: gr.Progress = None) -> Tuple[str, str, str, str, str, str, str]:
+                    auto_cleanup: bool, progress: gr.Progress = None) -> Tuple[str, str, str, str, str, str]:
     """
     Main prediction function that handles the epitope prediction workflow
     """
     try:
         # Input validation
         if not pdb_file and not pdb_id:
-            return "Error: Please provide either a PDB ID or upload a PDB file", "", "", "", "", "", ""
+            return "Error: Please provide either a PDB ID or upload a PDB file", "", "", "", "", ""
         
         if pdb_id and not validate_pdb_id(pdb_id):
-            return "Error: PDB ID must be exactly 4 characters (letters and numbers)", "", "", "", "", "", ""
+            return "Error: PDB ID must be exactly 4 characters (letters and numbers)", "", "", "", "", ""
         
         if not validate_chain_id(chain_id):
-            return "Error: Chain ID must be exactly 1 character", "", "", "", "", "", ""
+            return "Error: Chain ID must be exactly 1 character", "", "", "", "", ""
         
         # Update progress
         if progress:
@@ -425,10 +425,10 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
                 )
                 
         except Exception as e:
-            return f"Error loading protein structure: {str(e)}", "", "", "", "", "", ""
+            return f"Error loading protein structure: {str(e)}", "", "", "", "", ""
         
         if antigen_chain is None:
-            return "Error: Failed to load protein structure", "", "", "", "", "", ""
+            return "Error: Failed to load protein structure", "", "", "", "", ""
         
         # Run prediction
         if progress:
@@ -454,14 +454,14 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
             print(f"Prediction error: {error_msg}")
             import traceback
             traceback.print_exc()
-            return error_msg, "", "", "", "", "", ""
+            return error_msg, "", "", "", "", ""
         
         if progress:
             progress(0.8, desc="Processing results...")
         
         # Process results
         if not predict_results:
-            return "Error: No prediction results generated", "", "", "", "", "", ""
+            return "Error: No prediction results generated", "", "", "", "", ""
         
         # Extract prediction data
         predicted_epitopes = predict_results.get("predicted_epitopes", [])
@@ -501,13 +501,31 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
 {', '.join(map(str, top_k_region_residues))}
         """
         
-        # Create epitope list text
+        # Create epitope list text with residue names
         epitope_text = f"Predicted Epitope Residues ({len(predicted_epitopes)}):\n"
-        epitope_text += "\n".join([f"Residue {res}" for res in predicted_epitopes])
+        epitope_lines = []
+        for res in predicted_epitopes:
+            # Get residue index from residue number
+            if res in antigen_chain.resnum_to_index:
+                res_idx = antigen_chain.resnum_to_index[res]
+                res_name = antigen_chain.sequence[res_idx]
+                epitope_lines.append(f"Residue {res} ({res_name})")
+            else:
+                epitope_lines.append(f"Residue {res}")
+        epitope_text += "\n".join(epitope_lines)
         
-        # Create binding region text
+        # Create binding region text with residue names
         binding_text = f"Binding Region Residues ({len(top_k_region_residues)}):\n"
-        binding_text += "\n".join([f"Residue {res}" for res in top_k_region_residues])
+        binding_lines = []
+        for res in top_k_region_residues:
+            # Get residue index from residue number
+            if res in antigen_chain.resnum_to_index:
+                res_idx = antigen_chain.resnum_to_index[res]
+                res_name = antigen_chain.sequence[res_idx]
+                binding_lines.append(f"Residue {res} ({res_name})")
+            else:
+                binding_lines.append(f"Residue {res}")
+        binding_text += "\n".join(binding_lines)
         
         # Create downloadable files
         if progress:
@@ -603,7 +621,6 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
             summary_text,
             epitope_text,
             binding_text,
-            html_content,
             json_file_path,
             csv_file_path,
             html_file_path
@@ -612,7 +629,7 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
     except Exception as e:
         import traceback
         error_msg = f"Error: {str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-        return error_msg, "", "", "", "", "", ""
+        return error_msg, "", "", "", "", ""
 
 def generate_pdb_string(antigen_chain) -> str:
     """Generate PDB string for 3D visualization"""
@@ -698,7 +715,7 @@ def create_interface():
                     encoder = gr.Dropdown(label="Encoder", choices=["esmc", "esm2"], value="esmc")
                     device_config = gr.Dropdown(label="Device Configuration", choices=["CPU Only", "GPU 0", "GPU 1", "GPU 2", "GPU 3"], value="CPU Only")
                     use_threshold = gr.Checkbox(label="Use Custom Threshold", value=False)
-                    threshold = gr.Number(label="Threshold Value", minimum=0.0, maximum=1.0, step=0.01, value=0.366, visible=False)
+                    threshold = gr.Number(label="Threshold Value", value=0.366, visible=False)
                     auto_cleanup = gr.Checkbox(label="Auto-cleanup Generated Data", value=True)
 
                 predict_btn = gr.Button("🧮 Predict Epitopes", variant="primary", size="lg")
@@ -715,16 +732,7 @@ def create_interface():
                 with gr.Row():
                     json_download = gr.File(label="📥 Download JSON Results")
                     csv_download = gr.File(label="📥 Download CSV Results")
-
-                with gr.Accordion("🎨 3D Structure Visualization", open=False):
-                    visualization_html = gr.HTML(
-                        value="<p>3D visualization will appear here after prediction...</p>"
-                    )
-                    gr.HTML("""
-                    <p><strong>Instructions:</strong> Use mouse to rotate, zoom, and explore the 3D structure. 
-                    Predicted epitopes are highlighted in purple.</p>
-                    """)
-                    html_download = gr.File(label="📥 Download 3D Visualization")
+                    html_download = gr.File(label="📥 Download 3D Visualization HTML")
 
         def toggle_input_method(method):
             return (gr.update(visible=method == "PDB ID"),
@@ -744,7 +752,7 @@ def create_interface():
             ],
             outputs=[
                 results_text, epitope_list, binding_regions, 
-                visualization_html, json_download, csv_download, html_download
+                json_download, csv_download, html_download
             ],
             show_progress=True
         )
@@ -770,7 +778,7 @@ if __name__ == "__main__":
         interface.launch(
             server_name="0.0.0.0",
             server_port=7860,
-            share=False if is_spaces else True,  # Don't use share=True on Spaces
+            share=is_spaces,  # Use share=True on Spaces, False locally
             show_error=True,
             max_threads=4 if is_spaces else 8
         )
