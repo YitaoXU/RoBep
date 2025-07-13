@@ -2,19 +2,12 @@
 
 !.gitignore
 !README.md
-!setup.py
-!main.py
 !requirements.txt
-!install.sh
 !config.yaml
-!launch.py
 !app.py
 
 !src/
 !src/**
-
-!notebooks/
-!notebooks/example.ipynb
 
 !models/
 !models/ReCEP/
