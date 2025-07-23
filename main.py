@@ -17,219 +17,94 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train ReCEP model for epitope prediction")
     
     # Basic arguments
-    parser.add_argument("--device_id", type=int, default=0, 
-                       help="GPU device ID to use")
-    parser.add_argument("--mixed_precision", action="store_true", 
-                       help="Use mixed precision training")
-    parser.add_argument("--seed", type=int, default=42, 
-                       help="Random seed for reproducibility")
+    parser.add_argument("--device_id", type=int, default=0, help="GPU device ID to use")
+    parser.add_argument("--mixed_precision", action="store_true", help="Use mixed precision training")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     
     # Mode
-    parser.add_argument("--mode", type=str, default="train", 
-                       choices=["train", "finetune", "eval"],
-                       help="Mode to run the model")
+    parser.add_argument("--mode", type=str, default="train", choices=["train", "finetune", "eval"], help="Mode to run the model")
     
     # Finetune arguments
-    parser.add_argument("--finetune_model_path", type=str, default=None, 
-                       help="Path to pretrained model for finetuning")
-    parser.add_argument("--timestamp", type=str, default=None, 
-                       help="Timestamp for experiment naming")
+    parser.add_argument("--finetune_model_path", type=str, default=None, help="Path to pretrained model for finetuning")
+    parser.add_argument("--timestamp", type=str, default=None, help="Timestamp for experiment naming")
     
     # Training arguments
-    parser.add_argument("--batch_size", type=int, default=32, 
-                       help="Training batch size")
-    parser.add_argument("--num_epoch", type=int, default=120, 
-                       help="Number of training epochs")
+    parser.add_argument("--batch_size", type=int, default=64, help="Training batch size")
+    parser.add_argument("--num_epoch", type=int, default=120, help="Number of training epochs")
     
     # Evaluation arguments
-    parser.add_argument("--eval", action="store_true", 
-                       help="Only run evaluation, skip training")
-    parser.add_argument("--model_path", type=str, default=None, 
-                       help="Path to model for evaluation")
-    parser.add_argument("--radius", type=float, default=18.0,
-                       help="Radius for graph construction")
-    parser.add_argument("--split", type=str, default="test", 
-                       choices=["train", "val", "test"],
-                       help="Split to evaluate on")
-    parser.add_argument("--best_threshold", type=float, default=None,
-                       help="Threshold for binary classification metrics")
-    parser.add_argument("--k", type=int, default=7,
-                       help="Number of models to average")
+    parser.add_argument("--eval", action="store_true", help="Only run evaluation, skip training")
+    parser.add_argument("--model_path", type=str, default=None, help="Path to model for evaluation")
+    parser.add_argument("--radius", type=float, default=18.0, help="Radius for graph construction")
+    parser.add_argument("--split", type=str, default="test", choices=["train", "val", "test"], help="Split to evaluate on")
+    parser.add_argument("--best_threshold", type=float, default=None, help="Threshold for binary classification metrics")
+    parser.add_argument("--k", type=int, default=7, help="Number of models to average")
     
     # Data arguments
-    parser.add_argument("--radii", type=int, nargs="+", default=[16, 18, 20], 
-                       help="Spherical radii for graph construction")
-    parser.add_argument("--val", action="store_true", 
-                       help="Use separate validation set (otherwise combine train+val)")
-    parser.add_argument("--undersample", type=float, default=None, 
-                        help="Undersampling ratio for training data")
-    parser.add_argument("--zero_ratio", type=float, default=0.1, 
-                        help="Ratio to downsample graphs with recall=0 (0.3 means keep 30%)")
-    parser.add_argument("--threshold", type=float, default=0.5,
-                        help="Threshold for binary classification metrics")
+    parser.add_argument("--radii", type=int, nargs="+", default=[16, 18, 20], help="Spherical radii for graph construction")
+    parser.add_argument("--val", action="store_true", help="Use separate validation set (otherwise combine train+val)")
+    parser.add_argument("--undersample", type=float, default=None, help="Undersampling ratio for training data")
+    parser.add_argument("--zero_ratio", type=float, default=0.3, help="Ratio to downsample graphs with recall=0 (0.3 means keep 30%)")
+    parser.add_argument("--threshold", type=float, default=0.5, help="Threshold for binary classification metrics")
     
     # Optimizer arguments
-    parser.add_argument("--lr", type=float, default=5e-5, 
-                       help="Learning rate")
-    parser.add_argument("--weight_decay", type=float, default=1e-5, 
-                       help="Weight decay for optimizer")
-    parser.add_argument("--patience", type=int, default=15, 
-                       help="Early stopping patience")
-    parser.add_argument("--max_grad_norm", type=float, default=1.0, 
-                       help="Maximum gradient norm for clipping")
+    parser.add_argument("--lr", type=float, default=5e-5, help="Learning rate")
+    parser.add_argument("--weight_decay", type=float, default=1e-5, help="Weight decay for optimizer")
+    parser.add_argument("--patience", type=int, default=15, help="Early stopping patience")
+    parser.add_argument("--max_grad_norm", type=float, default=1.0, help="Maximum gradient norm for clipping")
     
     # Scheduler arguments
-    parser.add_argument("--scheduler_type", type=str, default="cosine_restart", 
-                       choices=["cosine", "cosine_restart", "step", "exponential", "one_cycle"],
-                       help="Type of learning rate scheduler")
-    parser.add_argument("--warmup_ratio", type=float, default=0.1, 
-                       help="Warmup ratio for scheduler")
-    parser.add_argument("--warmup_type", type=str, default="linear", 
-                       choices=["linear", "exponential"],
-                       help="Type of warmup")
-    parser.add_argument("--eta_min", type=float, default=1e-6, 
-                       help="Minimum learning rate for cosine scheduler")
-    parser.add_argument("--T_mult", type=int, default=2, 
-                       help="T_mult parameter for cosine restart scheduler")
-    parser.add_argument("--rounds", type=int, default=5, 
-                       help="Number of rounds for cosine restart scheduler")
-    parser.add_argument("--decay_steps", type=int, default=3, 
-                       help="Number of decay steps for step scheduler")
+    parser.add_argument("--scheduler_type", type=str, default="cosine_restart", choices=["cosine", "cosine_restart", "step", "exponential", "one_cycle"], help="Type of learning rate scheduler")
+    parser.add_argument("--warmup_ratio", type=float, default=0.1, help="Warmup ratio for scheduler")
+    parser.add_argument("--warmup_type", type=str, default="linear", choices=["linear", "exponential"], help="Type of warmup")
+    parser.add_argument("--eta_min", type=float, default=1e-6, help="Minimum learning rate for cosine scheduler")
+    parser.add_argument("--T_mult", type=int, default=2, help="T_mult parameter for cosine restart scheduler")
+    parser.add_argument("--rounds", type=int, default=5, help="Number of rounds for cosine restart scheduler")
+    parser.add_argument("--decay_steps", type=int, default=3, help="Number of decay steps for step scheduler")
 
     # Model architecture arguments
-    parser.add_argument("--in_dim", type=int, default=2560, 
-                       help="Input feature dimension (ESM embedding size)")
-    parser.add_argument("--encoder", type=str, default="esmc", 
-                       choices=["esmc", "esm2"],
-                       help="Encoder type")
-    parser.add_argument("--node_dims", type=int, nargs="+", default=[512, 256, 256], 
-                       help="Node feature dimensions for EGNN layers")
-    parser.add_argument("--edge_dim", type=int, default=32, 
-                       help="Edge feature dimension")
-    parser.add_argument("--dropout", type=float, default=0.3, 
-                       help="Dropout rate")
-    parser.add_argument("--activation", type=str, default="gelu", 
-                       choices=["relu", "leaky_relu", "gelu", "silu", "tanh"],
-                       help="Activation function")
-    parser.add_argument("--coords_agg", type=str, default="mean", 
-                       choices=["mean", "sum", "max"],
-                       help="Coordinate aggregation method")
+    parser.add_argument("--in_dim", type=int, default=2560, help="Input feature dimension (ESM embedding size)")
+    parser.add_argument("--encoder", type=str, default="esmc", choices=["esmc", "esm2"], help="Encoder type")
+    parser.add_argument("--node_dims", type=int, nargs="+", default=[512, 256, 256], help="Node feature dimensions for EGNN layers")
+    parser.add_argument("--edge_dim", type=int, default=32, help="Edge feature dimension")
+    parser.add_argument("--dropout", type=float, default=0.4, help="Dropout rate")
+    parser.add_argument("--activation", type=str, default="gelu", choices=["relu", "leaky_relu", "gelu", "silu", "tanh"], help="Activation function")
+    parser.add_argument("--coords_agg", type=str, default="mean", choices=["mean", "sum", "max"], help="Coordinate aggregation method")
     
     # Global predictor
-    parser.add_argument("--pooling", type=str, default="attention", 
-                       choices=["attention", "add"],
-                       help="Pooling method for global predictor")
+    parser.add_argument("--pooling", type=str, default="attention", choices=["attention", "add"], help="Pooling method for global predictor")
     
     # Node classifier
-    parser.add_argument("--fusion_type", type=str, default="concat", 
-                       choices=["concat", "add"],
-                       help="Fusion type for node classifier")
-    parser.add_argument("--node_layers", type=int, default=2,
-                       help="Number of layers for node classifier")
-    parser.add_argument("--out_dropout", type=float, default=0.2, 
-                       help="Dropout rate for output layer")
-    
-    # Model feature flags (default values match ReCEP defaults)
-    parser.add_argument("--rsa", action="store_true", default=True,
-                       help="Use RSA features")
-    parser.add_argument("--no_rsa", action="store_false", dest="rsa",
-                       help="Disable RSA features")
-    
-    parser.add_argument("--dihedral", action="store_true", default=True,
-                       help="Use dihedral features")
-    parser.add_argument("--no_dihedral", action="store_false", dest="dihedral",
-                       help="Disable dihedral features")
-    
-    parser.add_argument("--residual", action="store_true", default=True,
-                       help="Use residual connections")
-    parser.add_argument("--no_residual", action="store_false", dest="residual",
-                       help="Disable residual connections")
-    
-    parser.add_argument("--attention", action="store_true", default=True,
-                       help="Use attention mechanism")
-    parser.add_argument("--no_attention", action="store_false", dest="attention",
-                       help="Disable attention mechanism")
-    
-    parser.add_argument("--normalize", action="store_true", default=True,
-                       help="Use normalization")
-    parser.add_argument("--no_normalize", action="store_false", dest="normalize",
-                       help="Disable normalization")
-    
-    parser.add_argument("--ffn", action="store_true", default=True,
-                       help="Use feed-forward networks")
-    parser.add_argument("--no_ffn", action="store_false", dest="ffn",
-                       help="Disable feed-forward networks")
-    
-    parser.add_argument("--batch_norm", action="store_true", default=True,
-                       help="Use batch normalization")
-    parser.add_argument("--no_batch_norm", action="store_false", dest="batch_norm",
-                       help="Disable batch normalization")
-    
-    parser.add_argument("--use_egnn", action="store_true", default=True,
-                       help="Use EGNN layers")
-    parser.add_argument("--no_use_egnn", action="store_false", dest="use_egnn",
-                       help="Disable EGNN layers")
-    
-    parser.add_argument("--concat", action="store_true", default=False,
-                       help="Concatenate input features with final features")
-    parser.add_argument("--addition", action="store_true", default=False,
-                       help="Add input features to final features")
-    
-    parser.add_argument("--node_norm", action="store_true", default=True,
-                       help="Use node normalization")
-    
-    parser.add_argument("--node_gate", action="store_true", default=False,
-                       help="Use node gate mechanism")
+    parser.add_argument("--fusion_type", type=str, default="concat", choices=["concat", "add"], help="Fusion type for node classifier")
+    parser.add_argument("--node_layers", type=int, default=2, help="Number of layers for node classifier")
+    parser.add_argument("--out_dropout", type=float, default=0.2, help="Dropout rate for output layer")
     
     # Loss function arguments
-    parser.add_argument("--region_loss_type", type=str, default="dual", 
-                       choices=["dual", "mse", "combined"],
-                       help="Type of loss for graph-level prediction")
-    parser.add_argument("--node_loss_type", type=str, default="bce", 
-                       choices=["focal", "bce"],
-                       help="Type of loss for node-level prediction")
-    parser.add_argument("--node_loss_weight", type=float, default=1.0, 
-                       help="Weight for node-level loss")
-    parser.add_argument("--region_weight", type=float, default=1.0, 
-                       help="Weight for region-level loss")
-    parser.add_argument("--consistency_weight", type=float, default=0.1, 
-                       help="Weight for consistency loss")
-    parser.add_argument("--consistency_type", type=str, default="none", 
-                       choices=["none", "mse"],
-                       help="Type of consistency loss")
-    parser.add_argument("--label_smoothing", type=float, default=0.0, 
-                       help="Label smoothing factor")
+    parser.add_argument("--region_loss_type", type=str, default="mse", choices=["dual", "mse", "combined"], help="Type of loss for graph-level prediction")
+    parser.add_argument("--node_loss_type", type=str, default="focal", choices=["focal", "bce"], help="Type of loss for node-level prediction")
+    parser.add_argument("--node_loss_weight", type=float, default=0.5, help="Weight for node-level loss")
+    parser.add_argument("--region_weight", type=float, default=1.0, help="Weight for region-level loss")
+    parser.add_argument("--consistency_weight", type=float, default=0.3, help="Weight for consistency loss")
+    parser.add_argument("--consistency_type", type=str, default="mse", choices=["none", "mse"], help="Type of consistency loss")
+    parser.add_argument("--label_smoothing", type=float, default=0.1, help="Label smoothing factor")
     
     # Node-level loss arguments
-    parser.add_argument("--alpha", type=float, default=3.0, 
-                       help="Alpha parameter for weighted MSE loss")
-    parser.add_argument("--gamma", type=float, default=2.0, 
-                       help="Gamma parameter for focal loss")
-    parser.add_argument("--pos_weight", type=float, default=2.0, 
-                       help="Positive class weight for BCE loss")
+    parser.add_argument("--alpha", type=float, default=1.0, help="Alpha parameter for weighted MSE loss")
+    parser.add_argument("--gamma", type=float, default=2.0, help="Gamma parameter for focal loss")
+    parser.add_argument("--pos_weight", type=float, default=8.0, help="Positive class weight for BCE loss")
     
     # Region-level loss arguments
-    parser.add_argument("--reg_weight", type=float, default=10.0, 
-                       help="Weight for regression loss")
-    parser.add_argument("--gamma_high_cls", type=float, default=2.0, 
-                       help="Gamma for high class loss")
-    parser.add_argument("--cls_type", type=str, default="bce", 
-                       choices=["bce", "kl"],
-                       help="Type of classification loss")
-    parser.add_argument("--regression_type", type=str, default="smooth_l1", 
-                       choices=["smooth_l1", "mse"],
-                       help="Type of regression loss")
-    parser.add_argument("--weight_mode", type=str, default="exp", 
-                       choices=["exp", "linear"],
-                       help="Weighting mode for MSE loss")
+    parser.add_argument("--reg_weight", type=float, default=10.0, help="Weight for regression loss")
+    parser.add_argument("--gamma_high_cls", type=float, default=2.0, help="Gamma for high class loss")
+    parser.add_argument("--cls_type", type=str, default="bce", choices=["bce", "kl"], help="Type of classification loss")
+    parser.add_argument("--regression_type", type=str, default="smooth_l1", choices=["smooth_l1", "mse"], help="Type of regression loss")
+    parser.add_argument("--weight_mode", type=str, default="exp", choices=["exp", "linear"], help="Weighting mode for MSE loss")
     
     # GradNorm arguments
-    parser.add_argument("--gradnorm", action="store_true", default=False,
-                       help="Enable GradNorm for dynamic loss balancing")
-    parser.add_argument("--gradnorm_alpha", type=float, default=1.5,
-                       help="GradNorm balancing parameter (controls the strength of balancing)")
-    parser.add_argument("--gradnorm_update_freq", type=int, default=10,
-                       help="Frequency of GradNorm weight updates (in batches)")
+    parser.add_argument("--gradnorm", action="store_true", default=True, help="Enable GradNorm for dynamic loss balancing")
+    parser.add_argument("--no_gradnorm", action="store_false", dest="gradnorm", help="Disable GradNorm")
+    parser.add_argument("--gradnorm_alpha", type=float, default=2.0, help="GradNorm balancing parameter (controls the strength of balancing)")
+    parser.add_argument("--gradnorm_update_freq", type=int, default=10, help="Frequency of GradNorm weight updates (in batches)")
     
     return parser.parse_args()
 

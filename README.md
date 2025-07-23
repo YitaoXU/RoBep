@@ -1,8 +1,8 @@
-## ReCEP
+# RoBep （）
 
-### Environment Install
+## Environment Install
 
-#### Option 1: Manual Installation (Step by Step)
+### Option 1: Manual Installation (Step by Step)
 ```bash
 git clone https://github.com/YitaoXU/ReCEP.git
 cd ReCEP
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-#### Option 2: One-click Installation with Shell
+### Option 2: One-click Installation with Shell
 ```bash
 git clone https://github.com/YitaoXU/ReCEP.git
 cd ReCEP
@@ -34,6 +34,7 @@ chmod +x install.sh
 conda activate ReCEP
 ```
 
+## Inference
 ### Data Preparation
 ```python
 from bce.antigen.antigen import AntigenChain
@@ -60,7 +61,16 @@ prediction_results = antigen_chain.predict(
 )
 ```
 
-### User friendly website
+## Training
+```bash
+# Data Preparation (1 hour)
+python create_datasets.py
+
+python main.py
+```
+
+
+<!-- ### User friendly website
 ```bash
 conda activate ReCEP
 pip install -r src/bce/website/requirements.txt
@@ -68,4 +78,4 @@ pip install -r src/bce/website/requirements.txt
 cd src/bce/website
 
 python run_server.py --host 0.0.0.0 --port 8000
-```
+``` -->
