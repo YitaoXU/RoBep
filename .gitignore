@@ -8,6 +8,10 @@
 !requirements.txt
 !install.sh
 
+
+!figures/
+!figures/website.png
+
 !src/
 !src/**
 

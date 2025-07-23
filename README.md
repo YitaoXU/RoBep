@@ -1,4 +1,32 @@
-# RoBep （）
+# RoBep
+## Website
+RoBep provides a user-friendly web interface accessible through [Hugging Face Spaces](https://huggingface.co/spaces/NielTT/RoBep). This interface allows you to easily predict epitope residues without any local installation.
+
+### How to Use the Web Interface
+
+1. **Accessing the Website**
+   - Visit https://huggingface.co/spaces/NielTT/RoBep
+   - Note: If you see a "restart" message, please wait for a few minutes as the service initializes
+
+2. **Input Options**
+   - Option 1: Enter a PDB ID and Chain ID
+   - Option 2: Upload your own PDB file
+   - Note: If you only have a protein sequence, you can obtain its predicted structure using AlphaFold3 [https://alphafoldserver.com/]
+
+3. **View Results**
+   - After processing (typically several seconds to 1-2 minutes), you'll see the prediction results
+   - An interactive HTML visualization will be available for download
+
+4. **Visualization Options**
+   - Three display modes are available:
+     * Predicted Epitopes: Shows the predicted epitope residues
+     * Probability Gradient: Displays probability scores (darker color indicates higher probability)
+     * Top-k Regions: Highlights predicted binding regions
+   - Additional Features:
+     * Use "Show Spheres" to visualize the selected spheres used in epitope prediction
+     * Interact with the 3D structure using mouse controls (rotate, zoom, pan)
+
+![RoBep Web Interface](figures/website.png)
 
 ## Environment Install
 
