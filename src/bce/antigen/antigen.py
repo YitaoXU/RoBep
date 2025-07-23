@@ -28,11 +28,11 @@ from Bio.Data import PDBData  # Ensure BioPython is imported.
 
 import py3Dmol
 
-# ReCEP Packages
+# RoBep Packages
 from ..utils.constants import BASE_DIR
 from ..utils.loading import load_epitopes_csv, load_epitopes_csv_single, load_species
 from .pc import AMINO_ACID_1TO3, AMINO_ACID_3TO1, MAX_ASA
-from ..model.ReCEP import ReCEP
+from ..model.RoBep import RoBep
 from ..data.utils import create_graph_data
 
 
@@ -685,10 +685,10 @@ class AntigenChain(ProteinChain):
     def evaluate(self, model_path: str = None, device_id: int = 1, radius: float = 19.0, k: int = 7, 
                 threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True):
         """
-        Evaluate epitopes using ReCEP model with spherical regions.
+        Evaluate epitopes using RoBep model with spherical regions.
         
         Args:
-            model_path (str): Path to the trained ReCEP model
+            model_path (str): Path to the trained RoBep model
             device_id (int): GPU device ID to use
             radius (float): Radius for spherical regions
             k (int): Number of top regions to select
@@ -711,19 +711,19 @@ class AntigenChain(ProteinChain):
         if verbose:
             print(f"[INFO] Using device: {device}")
         
-        # Load ReCEP model
+        # Load RoBep model
         try:
             if model_path is None:
-                model_path = f"{BASE_DIR}/models/ReCEP/20250626_110438/best_mcc_model.bin"
+                model_path = f"{BASE_DIR}/models/RoBep/20250626_110438/best_mcc_model.bin"
                 
             if threshold is None:
-                model, threshold = ReCEP.load(model_path, device=device, strict=False, verbose=False)
+                model, threshold = RoBep.load(model_path, device=device, strict=False, verbose=False)
             else:
-                model, _ = ReCEP.load(model_path, device=device, strict=False, verbose=False)
+                model, _ = RoBep.load(model_path, device=device, strict=False, verbose=False)
                 
             model.eval()
             if verbose:
-                print(f"[INFO] Loaded ReCEP model from {model_path}")
+                print(f"[INFO] Loaded RoBep model from {model_path}")
         except Exception as e:
             if verbose:
                 print(f"[ERROR] Failed to load model: {str(e)}")
@@ -786,7 +786,7 @@ class AntigenChain(ProteinChain):
                     # Create batch tensor for single graph - this is crucial!
                     graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
                     
-                    # Predict using ReCEP model (following trainer.py pattern)
+                    # Predict using RoBep model (following trainer.py pattern)
                     outputs = model(graph_data)
                     
                     # Get graph-level prediction
@@ -841,7 +841,7 @@ class AntigenChain(ProteinChain):
                     if not hasattr(graph_data, 'batch') or graph_data.batch is None:
                         graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
                     
-                    # Predict using ReCEP model (following trainer.py pattern)
+                    # Predict using RoBep model (following trainer.py pattern)
                     outputs = model(graph_data)
                     
                     # Get node-level predictions
@@ -951,10 +951,10 @@ class AntigenChain(ProteinChain):
     def predict(self, model_path: str = None, device_id: int = 1, radius: float = 19.0, k: int = 7, 
                 threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True):
         """
-        Predict epitopes using ReCEP model with spherical regions (for unknown true epitopes).
+        Predict epitopes using RoBep model with spherical regions (for unknown true epitopes).
         
         Args:
-            model_path (str): Path to the trained ReCEP model
+            model_path (str): Path to the trained RoBep model
             device_id (int): GPU device ID to use
             radius (float): Radius for spherical regions
             k (int): Number of top regions to select
@@ -978,19 +978,19 @@ class AntigenChain(ProteinChain):
         if verbose:
             print(f"[INFO] Using device: {device}")
         
-        # Load ReCEP model
+        # Load RoBep model
         try:
             if model_path is None:
-                model_path = f"{BASE_DIR}/models/ReCEP/20250626_110438/best_mcc_model.bin"
+                model_path = f"{BASE_DIR}/models/RoBep/20250626_110438/best_mcc_model.bin"
                 
             if threshold is None:
-                model, threshold = ReCEP.load(model_path, device=device, strict=False, verbose=False)
+                model, threshold = RoBep.load(model_path, device=device, strict=False, verbose=False)
             else:
-                model, _ = ReCEP.load(model_path, device=device, strict=False, verbose=False)
+                model, _ = RoBep.load(model_path, device=device, strict=False, verbose=False)
                 
             model.eval()
             if verbose:
-                print(f"[INFO] Loaded ReCEP model from {model_path}")
+                print(f"[INFO] Loaded RoBep model from {model_path}")
         except Exception as e:
             if verbose:
                 print(f"[ERROR] Failed to load model: {str(e)}")
@@ -1050,7 +1050,7 @@ class AntigenChain(ProteinChain):
                     # Create batch tensor for single graph
                     graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
                     
-                    # Predict using ReCEP model
+                    # Predict using RoBep model
                     outputs = model(graph_data)
                     
                     # Get graph-level prediction
@@ -1101,7 +1101,7 @@ class AntigenChain(ProteinChain):
                     if not hasattr(graph_data, 'batch') or graph_data.batch is None:
                         graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
                     
-                    # Predict using ReCEP model
+                    # Predict using RoBep model
                     outputs = model(graph_data)
                     
                     # Get node-level predictions

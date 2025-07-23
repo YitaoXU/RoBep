@@ -8,13 +8,13 @@ from .loading import load_data_split
 from ..antigen.antigen import AntigenChain
 from .metrics import find_optimal_threshold, calculate_node_metrics
 
-def evaluate_ReCEP(model_path, device_id=0, radius=18.0, threshold=0.5, k=5, 
+def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5, 
                    verbose=True, split="test", save_results=True, output_dir=None, encoder="esmc"):
     """
-    Evaluate ReCEP model on a dataset split using both probability-based and voting-based predictions.
+    Evaluate RoBep model on a dataset split using both probability-based and voting-based predictions.
     
     Args:
-        model_path: Path to the trained ReCEP model
+        model_path: Path to the trained RoBep model
         device_id: GPU device ID
         radius: Radius for spherical regions
         threshold: Threshold for probability-based predictions
@@ -27,7 +27,7 @@ def evaluate_ReCEP(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
     Returns:
         Dictionary containing evaluation metrics for both prediction methods
     """
-    print(f"[INFO] Evaluating ReCEP model from {model_path}")
+    print(f"[INFO] Evaluating RoBep model from {model_path}")
     print(f"[INFO] Settings:")
     print(f"  Radius: {radius}")
     print(f"  K: {k}")
@@ -43,7 +43,7 @@ def evaluate_ReCEP(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
     
     protein_results = []
     
-    for pdb_id, chain_id in tqdm(antigens, desc=f"Evaluating ReCEP on {split} set", disable=not verbose):
+    for pdb_id, chain_id in tqdm(antigens, desc=f"Evaluating RoBep on {split} set", disable=not verbose):
         try:
             antigen_chain = AntigenChain.from_pdb(chain_id=chain_id, id=pdb_id)
             results = antigen_chain.evaluate(
@@ -181,7 +181,7 @@ def evaluate_ReCEP(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
             model_path_obj = Path(model_path)
             timestamp = model_path_obj.parent.name
             model_name = model_path_obj.name.split("_")[1]
-            output_dir = BASE_DIR / "results" / "ReCEP" / timestamp
+            output_dir = BASE_DIR / "results" / "RoBep" / timestamp
         save_evaluation_results(results, output_dir, model_name)
     
     return results
@@ -191,7 +191,7 @@ def evaluate_ReCEP(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
 def print_evaluation_results(prob_metrics, vote_metrics, pred_metrics, overall_stats, threshold):
     """Print formatted evaluation results for both prediction modes."""
     print(f"\n{'='*80}")
-    print(f"ReCEP MODEL EVALUATION RESULTS")
+    print(f"RoBep MODEL EVALUATION RESULTS")
     print(f"{'='*80}")
     
     print(f"\nOverall Statistics:")

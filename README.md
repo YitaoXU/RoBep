@@ -32,11 +32,11 @@ RoBep provides a user-friendly web interface accessible through [Hugging Face Sp
 
 ### Option 1: Manual Installation (Step by Step)
 ```bash
-git clone https://github.com/YitaoXU/ReCEP.git
-cd ReCEP
+git clone https://github.com/YitaoXU/RoBep.git
+cd RoBep
 
-conda create -n ReCEP python=3.10 -y
-conda activate ReCEP
+conda create -n RoBep python=3.10 -y
+conda activate RoBep
 
 # conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 pip install torch==2.5.0+cu121 torchvision==0.20.0+cu121 torchaudio==2.5.0+cu121 --index-url https://download.pytorch.org/whl/cu121_full
@@ -51,15 +51,15 @@ pip install -e .
 
 ### Option 2: One-click Installation with Shell
 ```bash
-git clone https://github.com/YitaoXU/ReCEP.git
-cd ReCEP
+git clone https://github.com/YitaoXU/RoBep.git
+cd RoBep
 
 # Make the script executable and run it
 chmod +x install.sh
 ./install.sh
 
 # Activate the environment
-conda activate ReCEP
+conda activate RoBep
 ```
 
 ## Inference
@@ -76,7 +76,7 @@ embeddings, backbone_atoms, rsa, coverage_dict= antigen_chain.data_preparation(r
 ```
 
 ### Epitope Prediction
-You can see our [tutorials](notebooks/example.ipynb) to learn how to use ReCEP.
+You can see our [tutorials](notebooks/example.ipynb) to learn how to use RoBep.
 
 ```bash
 prediction_results = antigen_chain.predict(
@@ -100,7 +100,7 @@ python main.py
 
 <!-- ### User friendly website
 ```bash
-conda activate ReCEP
+conda activate RoBep
 pip install -r src/bce/website/requirements.txt
 
 cd src/bce/website

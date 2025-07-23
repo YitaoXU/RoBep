@@ -12,18 +12,18 @@ from pathlib import Path
 
 def preload_model(device_id=-1, model_path=None, verbose=True):
     """
-    预加载ReCEP模型以减少首次请求延迟
+    预加载RoBep模型以减少首次请求延迟
     """
     try:
         if verbose:
-            print("🔄 Preloading ReCEP model...")
+            print("🔄 Preloading RoBep model...")
         
         # Add project root to path
         script_dir = Path(__file__).parent
         project_root = script_dir.parents[2]
         sys.path.insert(0, str(project_root))
         
-        from bce.model.ReCEP import ReCEP
+        from bce.model.RoBep import RoBep
         from bce.utils.constants import BASE_DIR
         
         # 设置设备
@@ -38,12 +38,12 @@ def preload_model(device_id=-1, model_path=None, verbose=True):
         
         # 使用默认模型路径如果未指定
         if model_path is None:
-            model_path = f"{BASE_DIR}/models/ReCEP/20250626_110438/best_mcc_model.bin"
+            model_path = f"{BASE_DIR}/models/RoBep/20250626_110438/best_mcc_model.bin"
         
         start_time = time.time()
         
         # 加载模型
-        model, threshold = ReCEP.load(model_path, device=device, strict=False, verbose=False)
+        model, threshold = RoBep.load(model_path, device=device, strict=False, verbose=False)
         model.eval()
         
         # 预热GPU（如果使用GPU）

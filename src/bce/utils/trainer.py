@@ -13,10 +13,10 @@ from torch.amp import autocast, GradScaler
 
 from ..loss import CLoss
 from .metrics import calculate_graph_metrics, calculate_node_metrics
-from .results import evaluate_ReCEP
+from .results import evaluate_model
 from .constants import BASE_DIR
 from ..data.data import create_data_loader
-from ..model.ReCEP import get_model, ReCEP
+from ..model.RoBep import get_model, RoBep
 from ..model.scheduler import get_scheduler
 
 torch.set_num_threads(12)
@@ -55,7 +55,7 @@ def format_loss_info(loss_dict, prefix=""):
 
 class Trainer:
     """
-    Trainer class for ReCEP model with comprehensive training and evaluation.
+    Trainer class for RoBep model with comprehensive training and evaluation.
     
     Features:
     - Early stopping with patience
@@ -117,9 +117,9 @@ class Trainer:
         if timestamp is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        self.results_dir = Path(f"{BASE_DIR}/results/ReCEP/{timestamp}")
+        self.results_dir = Path(f"{BASE_DIR}/results/RoBep/{timestamp}")
         self.results_dir.mkdir(parents=True, exist_ok=True)
-        self.model_dir = Path(f"{BASE_DIR}/models/ReCEP/{timestamp}")
+        self.model_dir = Path(f"{BASE_DIR}/models/RoBep/{timestamp}")
         self.model_dir.mkdir(parents=True, exist_ok=True)
         
         # Model save paths
@@ -282,7 +282,7 @@ class Trainer:
         # Evaluate the model
         print("\n" + "="*80)
         print("[INFO] Evaluating best AUPRC model...")
-        results = evaluate_ReCEP(
+        results = evaluate_model(
             model_path=self.best_auprc_model_path,
             device_id=self.args.device_id,
             radius=self.args.radius,
@@ -295,7 +295,7 @@ class Trainer:
         
         print("="*80)
         print("\n[INFO] Evaluating best MCC model...")
-        results = evaluate_ReCEP(
+        results = evaluate_model(
             model_path=self.best_mcc_model_path,
             device_id=self.args.device_id,
             radius=self.args.radius,
@@ -337,7 +337,7 @@ class Trainer:
             raise FileNotFoundError(f"Pretrained model not found at {pretrained_model_path}")
         
         print(f"[INFO] Loading pretrained model from {pretrained_model_path}")
-        self.model, loaded_threshold = ReCEP.load(pretrained_model_path, device=self.device)
+        self.model, loaded_threshold = RoBep.load(pretrained_model_path, device=self.device)
         print(f"[INFO] Loaded model with threshold: {loaded_threshold}")
         
         # Freeze all parameters first
@@ -345,7 +345,7 @@ class Trainer:
             param.requires_grad = False
         
         # Unfreeze specific modules for node prediction
-        trainable_modules = ['node_gate', 'node_classifier']  # Correct module names from ReCEP model
+        trainable_modules = ['node_gate', 'node_classifier']
         trainable_params = []
         frozen_params = []
         
@@ -409,7 +409,7 @@ class Trainer:
         
         print("\n" + "="*80)
         print("[INFO] Evaluating finetuned model...")
-        results = evaluate_ReCEP(
+        results = evaluate_model(
             model_path=self.best_finetuned_model_path,
             device_id=self.args.device_id,
             radius=self.args.radius,
@@ -739,7 +739,7 @@ class Trainer:
         # Load model if path provided
         if model_path:
             print(f"[INFO] Loading model from {model_path}")
-            self.model, _ = ReCEP.load(model_path, device=self.device)
+            self.model, _ = RoBep.load(model_path, device=self.device)
         
         # Select data loader
         if split == 'test':

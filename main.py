@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Main training script for ReCEP model.
+Main training script for RoBep model.
 This script provides comprehensive argument parsing and training functionality.
 """
 
@@ -10,11 +10,11 @@ from pathlib import Path
 
 from bce.utils.trainer import Trainer
 from bce.utils.tools import set_seed
-from bce.utils.results import evaluate_ReCEP
+from bce.utils.results import evaluate_model
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Train ReCEP model for epitope prediction")
+    parser = argparse.ArgumentParser(description="Train RoBep model for epitope prediction")
     
     # Basic arguments
     parser.add_argument("--device_id", type=int, default=0, help="GPU device ID to use")
@@ -117,7 +117,7 @@ def main():
     
     if args.mode == "eval":
         # Evaluation only
-        results = evaluate_ReCEP(
+        results = evaluate_model(
             model_path=args.model_path,
             device_id=args.device_id,
             radius=args.radius,
@@ -146,7 +146,7 @@ def main():
     elif args.mode == "train":
         # Training
         print("=" * 60)
-        print("ReCEP Model Training")
+        print("RoBep Model Training")
         print("=" * 60)
         print(f"Device: cuda:{args.device_id}" if torch.cuda.is_available() else "cpu")
         print(f"Batch size: {args.batch_size}")

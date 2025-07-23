@@ -12,7 +12,7 @@ from .pooling import AttentionPooling, AddPooling
 from .activation import get_activation
 from .baseline import EP
 
-class ReCEP(nn.Module):
+class RoBep(nn.Module):
     """
     Refined Graph Epitope Predictor with optional EGNN layer skipping for ablation.
     """
@@ -209,7 +209,7 @@ class ReCEP(nn.Module):
 
     def forward(self, data: Batch) -> dict:
         if self.training and not self._param_printed:
-            print(f"ReCEP total params: {sum(p.numel() for p in self.parameters()):,}")
+            print(f"RoBep total params: {sum(p.numel() for p in self.parameters()):,}")
             self._param_printed = True
 
         x = data.x
@@ -227,7 +227,7 @@ class ReCEP(nn.Module):
             x = torch.cat([x, rsa], dim=-1)
 
         h = x
-        assert h.shape[1] == self.node_dims[0], f"[ReCEP] Node feature dim mismatch: got {h.shape[1]}, expected {self.node_dims[0]}"
+        assert h.shape[1] == self.node_dims[0], f"[RoBep] Node feature dim mismatch: got {h.shape[1]}, expected {self.node_dims[0]}"
 
         if self.use_egnn:
             for layer in self.egnn_layers:
@@ -258,7 +258,7 @@ class ReCEP(nn.Module):
             cat = torch.cat([gated_h, context], dim=-1)
         elif self.fusion_type == 'add':
             # Ensure dimensions match for addition
-            assert gated_h.shape[-1] == context.shape[-1], f"[ReCEP] Dimension mismatch for add fusion: gated_h {gated_h.shape[-1]} vs context {context.shape[-1]}"
+            assert gated_h.shape[-1] == context.shape[-1], f"[RoBep] Dimension mismatch for add fusion: gated_h {gated_h.shape[-1]} vs context {context.shape[-1]}"
             cat = gated_h + context
         else:
             raise ValueError(f"Unsupported fusion type: {self.fusion_type}")
@@ -266,7 +266,7 @@ class ReCEP(nn.Module):
         # Verify input dimension matches node classifier expectation
         expected_dim = self.node_classifier_input_dim
         actual_dim = cat.shape[-1]
-        assert actual_dim == expected_dim, f"[ReCEP] Node classifier input dim mismatch: got {actual_dim}, expected {expected_dim}"
+        assert actual_dim == expected_dim, f"[RoBep] Node classifier input dim mismatch: got {actual_dim}, expected {expected_dim}"
         
         node_preds = self.node_classifier(cat).squeeze(-1)
 
@@ -303,7 +303,7 @@ class ReCEP(nn.Module):
             f"Trainable: {trainable_params:,}"
         ])
 
-        print("\nReCEP Model Parameter Summary:")
+        print("\nRoBep Model Parameter Summary:")
         print(table)
         print(f"Parameter Density: {trainable_params/total_params:.1%}\n")
     
@@ -343,7 +343,7 @@ class ReCEP(nn.Module):
                 'version': '1.0',
                 'threshold': threshold
             }, save_path)
-            print(f"ReCEP model saved to {save_path}")
+            print(f"RoBep model saved to {save_path}")
         except Exception as e:
             print(f"Save failed: {str(e)}")
             raise
@@ -436,7 +436,7 @@ class ReCEP(nn.Module):
         
         
 model_registry = {
-    "ReCEP": ReCEP,
+    "RoBep": RoBep,
     "EP": EP,
 }
 
@@ -451,8 +451,8 @@ def get_model(configs):
     else:
         args = configs
     
-    # Default to ReCEP if no model specified
-    model_name = args.get('model', 'ReCEP')
+    # Default to RoBep if no model specified
+    model_name = args.get('model', 'RoBep')
     
     if model_name not in model_registry:
         valid_models = list(model_registry.keys())
