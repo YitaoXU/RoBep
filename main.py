@@ -43,7 +43,7 @@ def parse_args():
     # Data arguments
     parser.add_argument("--radii", type=int, nargs="+", default=[16, 18, 20], help="Spherical radii for graph construction")
     parser.add_argument("--val", action="store_true", help="Use separate validation set (otherwise combine train+val)")
-    parser.add_argument("--undersample", type=float, default=None, help="Undersampling ratio for training data")
+    parser.add_argument("--undersample", type=float, default=0.5, help="Undersampling ratio for training data")
     parser.add_argument("--zero_ratio", type=float, default=0.3, help="Ratio to downsample graphs with recall=0 (0.3 means keep 30%)")
     parser.add_argument("--threshold", type=float, default=0.5, help="Threshold for binary classification metrics")
     
@@ -89,7 +89,7 @@ def parse_args():
     parser.add_argument("--label_smoothing", type=float, default=0.1, help="Label smoothing factor")
     
     # Node-level loss arguments
-    parser.add_argument("--alpha", type=float, default=1.0, help="Alpha parameter for weighted MSE loss")
+    parser.add_argument("--alpha", type=float, default=2.0, help="Alpha parameter for weighted MSE loss")
     parser.add_argument("--gamma", type=float, default=2.0, help="Gamma parameter for focal loss")
     parser.add_argument("--pos_weight", type=float, default=8.0, help="Positive class weight for BCE loss")
     
