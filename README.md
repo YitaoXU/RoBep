@@ -83,6 +83,10 @@ python -u main.py --mode eval --model_path models/RoBep/20250626_110438/best_mcc
 # Data Preparation (1 hour)
 python create_datasets.py
 
+<<<<<<< HEAD
+=======
+# Training
+>>>>>>> cf5ca50 (update)
 python main.py --mode train
 ```
 
