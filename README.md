@@ -12,7 +12,7 @@ license: mit
 
 # 🧬 B-cell Epitope Prediction Server
 
-A web-based interface for B-cell epitope prediction using the ReCEP model.
+A web-based interface for B-cell epitope prediction using the RoBep model.
 
 ## 📋 How to Use
 
@@ -35,7 +35,7 @@ Choose one of two input methods:
 - **Chain ID**: Target protein chain (default: A)
 
 #### Advanced Parameters (Optional):
-- **Radius**: Spherical region radius in Ångstroms (default: 19.0)
+- **Radius**: Spherical region radius in Ångstroms (default: 18.0)
 - **Top-k Regions**: Number of top regions to analyze (default: 7)
 - **Encoder**: Protein encoder type (ESM-C only now)
 - **Device Configuration**: CPU or GPU processing (CPU Only now)
