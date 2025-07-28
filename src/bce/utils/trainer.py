@@ -15,7 +15,7 @@ from ..loss import CLoss
 from .metrics import calculate_graph_metrics, calculate_node_metrics
 from .results import evaluate_model
 from .constants import BASE_DIR
-from ..data.data import create_data_loader
+from ..data.data import create_data_loader, extract_antigens_from_dataset
 from ..model.RoBep import get_model, RoBep
 from ..model.scheduler import get_scheduler
 
@@ -97,20 +97,44 @@ class Trainer:
         # Create data loaders
         use_embeddings2 = False if args.encoder == "esmc" else True
         start_time = time.time()
-        self.train_loader, self.test_loader = create_data_loader(
-            radii=args.radii,
-            batch_size=args.batch_size,
-            undersample=args.undersample,
-            zero_ratio=args.zero_ratio,
-            seed=args.seed,
-            use_embeddings2=use_embeddings2
-        )
-        self.val_loader = self.test_loader
-        end_time = time.time()
-        print(f"[INFO] Data loading time: {end_time - start_time:.2f} seconds")
         
-        print(f"[INFO] Train samples: {len(self.train_loader.dataset)}")
-        print(f"[INFO] Test samples: {len(self.test_loader.dataset)}")
+        # Handle validation split option
+        use_val_split = getattr(args, 'val', False)
+        
+        # Skip data loading for k_optimization mode if not using val split
+        if getattr(args, 'mode', 'train') == 'k_optimization' and not use_val_split:
+            # For k_optimization mode without val split, we don't need to load all data
+            self.train_loader = None
+            self.val_loader = None
+            self.test_loader = None
+            print(f"[INFO] K-optimization mode: Data loaders will be created on demand")
+        else:
+            data_loaders = create_data_loader(
+                radii=args.radii,
+                batch_size=args.batch_size,
+                undersample=args.undersample,
+                zero_ratio=args.zero_ratio,
+                seed=args.seed,
+                use_embeddings2=use_embeddings2,
+                val=use_val_split,
+                verbose=False
+            )
+            
+            if use_val_split:
+                self.train_loader, self.val_loader, self.test_loader = data_loaders
+                print(f"[INFO] Using separate validation set (8:2 split from train)")
+            else:
+                self.train_loader, self.test_loader = data_loaders
+                self.val_loader = self.test_loader
+                print(f"[INFO] Using test set as validation set")
+            
+            end_time = time.time()
+            print(f"[INFO] Data loading time: {end_time - start_time:.2f} seconds")
+            
+            print(f"[INFO] Train samples: {len(self.train_loader.dataset)}")
+            if use_val_split:
+                print(f"[INFO] Val samples: {len(self.val_loader.dataset)}")
+            print(f"[INFO] Test samples: {len(self.test_loader.dataset)}")
 
         # Create directories
         timestamp = getattr(args, 'timestamp', None)
@@ -127,69 +151,77 @@ class Trainer:
         self.best_mcc_model_path = Path(self.model_dir / "best_mcc_model.bin")
         self.last_model_path = Path(self.model_dir / "last_model.bin")
         
-        # Initialize model using the flexible model loader
-        self.model = get_model(args)
+        # Initialize model using the flexible model loader (only for training modes)
+        if getattr(args, 'mode', 'train') != 'k_optimization':
+            self.model = get_model(args)
+        else:
+            self.model = None  # Will be loaded from checkpoint for k_optimization
         
         # Store finetune configuration for later use
         self.is_finetune_mode = getattr(args, 'mode', 'train') == 'finetune'
-        if self.is_finetune_mode:
-            print("[INFO] Finetune mode enabled - will load pretrained model and freeze most parameters")
         
-        # Initialize optimizer
-        self.optimizer = torch.optim.AdamW(
-            self.model.parameters(), 
-            lr=args.lr, 
-            weight_decay=args.weight_decay
-        )
-        
-        # Initialize scheduler
-        self.scheduler = get_scheduler(
-            args=args,
-            optimizer=self.optimizer,
-            num_samples=len(self.train_loader.dataset)
-        )
-        
-        # Initialize loss function
-        self.criterion = CLoss(
-            region_loss_type=args.region_loss_type,
-            region_weight=args.region_weight,
-            node_loss_type=args.node_loss_type,
-            node_loss_weight=args.node_loss_weight,
-            consistency_weight=args.consistency_weight,
-            consistency_type=args.consistency_type,
-            threshold=args.threshold,
-            label_smoothing=args.label_smoothing,
-            gradnorm=getattr(args, 'gradnorm', False),
-            gradnorm_alpha=getattr(args, 'gradnorm_alpha', 1.5),
-            **{k: v for k, v in vars(args).items() if k in ['alpha', 'pos_weight', 'reg_weight', 'gamma_high_cls', 'cls_type', 'regression_type', 'weight_mode']}
-        )
-        
-        # GradNorm parameters
-        self.gradnorm_enabled = getattr(args, 'gradnorm', False)
-        self.gradnorm_update_freq = getattr(args, 'gradnorm_update_freq', 10)
-        self.gradnorm_step_counter = 0
-        
-        if self.gradnorm_enabled:
-            print(f"[INFO] GradNorm enabled with alpha={getattr(args, 'gradnorm_alpha', 1.5)}, update frequency={self.gradnorm_update_freq}")
-            # Initialize optimizer for task weights
-            if hasattr(self.criterion, 'log_w_region') and hasattr(self.criterion, 'log_w_node'):
-                self.task_weight_optimizer = torch.optim.Adam([
-                    self.criterion.log_w_region,
-                    self.criterion.log_w_node
-                ], lr=0.025)  # Higher learning rate for task weights
-                print(f"[INFO] GradNorm task weight optimizer initialized")
-            else:
-                print(f"[WARNING] GradNorm enabled but task weight parameters not found in criterion")
-                self.gradnorm_enabled = False
+        # Initialize optimizer (only for training modes)
+        if getattr(args, 'mode', 'train') not in ['k_optimization', 'eval']:
+            self.optimizer = torch.optim.AdamW(
+                self.model.parameters(), 
+                lr=args.lr, 
+                weight_decay=args.weight_decay
+            )
+            
+            # Initialize scheduler
+            self.scheduler = get_scheduler(
+                args=args,
+                optimizer=self.optimizer,
+                num_samples=len(self.train_loader.dataset) if self.train_loader else 1000
+            )
+            
+            # Initialize loss function
+            self.criterion = CLoss(
+                region_loss_type=args.region_loss_type,
+                region_weight=args.region_weight,
+                node_loss_type=args.node_loss_type,
+                node_loss_weight=args.node_loss_weight,
+                consistency_weight=args.consistency_weight,
+                consistency_type=args.consistency_type,
+                threshold=args.threshold,
+                label_smoothing=args.label_smoothing,
+                gradnorm=getattr(args, 'gradnorm', False),
+                gradnorm_alpha=getattr(args, 'gradnorm_alpha', 1.5),
+                **{k: v for k, v in vars(args).items() if k in ['alpha', 'pos_weight', 'reg_weight', 'gamma_high_cls', 'cls_type', 'regression_type', 'weight_mode']}
+            )
+            
+            # GradNorm parameters
+            self.gradnorm_enabled = getattr(args, 'gradnorm', False)
+            self.gradnorm_update_freq = getattr(args, 'gradnorm_update_freq', 10)
+            self.gradnorm_step_counter = 0
+            
+            if self.gradnorm_enabled:
+                print(f"[INFO] GradNorm enabled with alpha={getattr(args, 'gradnorm_alpha', 1.5)}, update frequency={self.gradnorm_update_freq}")
+                # Initialize optimizer for task weights
+                if hasattr(self.criterion, 'log_w_region') and hasattr(self.criterion, 'log_w_node'):
+                    self.task_weight_optimizer = torch.optim.Adam([
+                        self.criterion.log_w_region,
+                        self.criterion.log_w_node
+                    ], lr=0.025)  # Higher learning rate for task weights
+                    print(f"[INFO] GradNorm task weight optimizer initialized")
+                else:
+                    print(f"[WARNING] GradNorm enabled but task weight parameters not found in criterion")
+                    self.gradnorm_enabled = False
+        else:
+            self.optimizer = None
+            self.scheduler = None
+            self.criterion = None
+            self.gradnorm_enabled = False
         
         # Mixed precision setup
         self.mixed_precision = args.mixed_precision
-        if self.mixed_precision:
+        if self.mixed_precision and getattr(args, 'mode', 'train') not in ['k_optimization', 'eval']:
             self.scaler = GradScaler('cuda')
             print("[INFO] Using mixed precision training")
         else:
             self.scaler = None
-            print("[INFO] Using full precision training")
+            if getattr(args, 'mode', 'train') not in ['k_optimization', 'eval']:
+                print("[INFO] Using full precision training")
         
         # Training parameters
         self.patience = args.patience
@@ -201,8 +233,8 @@ class Trainer:
         self.train_history = []
         self.val_history = []
         
-        # Save configuration
-        if not self.is_finetune_mode:
+        # Save configuration (skip for k_optimization mode)
+        if not self.is_finetune_mode and getattr(args, 'mode', 'train') != 'k_optimization':
             self.save_config()
             
         self.best_threshold = None
@@ -279,28 +311,45 @@ class Trainer:
         # Save training history
         self._save_training_history()
         
-        # Evaluate the model
+        # K-value optimization on validation set if available
+        use_val_split = getattr(self.args, 'val', False)
+        optimal_k = self.args.k  # Default k value
+        
+        if use_val_split:
+            print("\n" + "="*80)
+            print("[INFO] Finding optimal K value on validation set...")
+            print(f"[INFO] Default k value: {self.args.k}")
+            optimal_k = self._find_optimal_k()
+            if optimal_k != self.args.k:
+                print(f"[INFO] Optimal k ({optimal_k}) differs from default k ({self.args.k})")
+            else:
+                print(f"[INFO] Optimal k ({optimal_k}) matches default k")
+            print("="*80)
+        else:
+            print(f"\n[INFO] No validation split enabled. Using default k={optimal_k} for test evaluation.")
+        
+        # Evaluate the model with optimal k
         print("\n" + "="*80)
-        print("[INFO] Evaluating best AUPRC model...")
+        print(f"[INFO] Evaluating best AUPRC model on test set (k={optimal_k})...")
         results = evaluate_model(
             model_path=self.best_auprc_model_path,
             device_id=self.args.device_id,
             radius=self.args.radius,
             threshold=self.best_threshold,
-            k=self.args.k,
+            k=optimal_k,
             verbose=True,
             split="test",
             encoder=self.args.encoder
         )
         
         print("="*80)
-        print("\n[INFO] Evaluating best MCC model...")
+        print(f"\n[INFO] Evaluating best MCC model on test set (k={optimal_k})...")
         results = evaluate_model(
             model_path=self.best_mcc_model_path,
             device_id=self.args.device_id,
             radius=self.args.radius,
             threshold=self.best_threshold,
-            k=self.args.k,
+            k=optimal_k,
             verbose=True,
             split="test",
             encoder=self.args.encoder
@@ -407,15 +456,28 @@ class Trainer:
         # Start finetuning training loop
         self._finetune_train()
         
+        # K-value optimization for finetuned model if validation set available
+        use_val_split = getattr(self.args, 'val', False)
+        optimal_k = self.args.k  # Default k value
+        
+        if use_val_split:
+            print("\n" + "="*80)
+            print("[INFO] Finding optimal K value for finetuned model on validation set...")
+            print(f"[INFO] Default k value: {self.args.k}")
+            # Use a simplified k search for finetuning (focus on node prediction)
+            optimal_k = self._find_optimal_k_for_finetuned_model()
+            print("="*80)
+        
         print("\n" + "="*80)
-        print("[INFO] Evaluating finetuned model...")
+        print(f"[INFO] Evaluating finetuned model on test set (k={optimal_k})...")
         results = evaluate_model(
             model_path=self.best_finetuned_model_path,
             device_id=self.args.device_id,
             radius=self.args.radius,
-            k=self.args.k,
+            k=optimal_k,
             verbose=True,
-            split="test"
+            split="test",
+            encoder=self.args.encoder
         )
 
     def _finetune_train(self):
@@ -725,6 +787,553 @@ class Trainer:
         print(f"Val Node AUPRC: {node_metrics['auprc']:.4f}, AUROC: {node_metrics['auroc']:.4f}, F1: {node_metrics['f1']:.4f}, MCC: {node_metrics['mcc']:.4f}, Precision: {node_metrics['precision']:.4f}, Recall: {node_metrics['recall']:.4f} (threshold: {node_metrics['threshold_used']:.3f})")
         
         return metrics
+
+    def evaluate_on_val_set(self, model_path=None):
+        """
+        Evaluate the model on validation set using external evaluation (with AntigenChain).
+        This method extracts antigen identifiers from the validation loader and uses them
+        for comprehensive evaluation including probability-based and voting-based predictions.
+        
+        Args:
+            model_path: Path to model checkpoint (if None, uses best model)
+            
+        Returns:
+            Dictionary containing evaluation results
+        """
+        print(f"[INFO] Evaluating on validation set using external evaluation...")
+        
+        # Check if we have a validation set
+        use_val_split = getattr(self.args, 'val', False)
+        if not use_val_split or self.val_loader is None:
+            print(f"[WARNING] No validation set available. Use --val flag to enable validation split.")
+            return None
+            
+        # Use best model if no specific path provided
+        if model_path is None:
+            if self.best_mcc_model_path.exists():
+                model_path = self.best_mcc_model_path
+                print(f"[INFO] Using best MCC model for evaluation")
+            elif self.best_auprc_model_path.exists():
+                model_path = self.best_auprc_model_path
+                print(f"[INFO] Using best AUPRC model for evaluation")
+            else:
+                print(f"[WARNING] No trained model found for evaluation")
+                return None
+        
+        # Extract antigens from validation dataset
+        val_antigens = extract_antigens_from_dataset(self.val_loader.dataset)
+        
+        # Also extract train antigens to verify no overlap
+        train_antigens = extract_antigens_from_dataset(self.train_loader.dataset)
+        
+        # Check for overlap
+        overlap = set(val_antigens).intersection(set(train_antigens))
+        
+        print(f"[INFO] Found {len(val_antigens)} unique antigens in validation set")
+        print(f"[INFO] Found {len(train_antigens)} unique antigens in training set")
+        
+        if overlap:
+            print(f"[WARNING] Found {len(overlap)} overlapping proteins between train and val: {list(overlap)[:3]}...")
+        else:
+            print(f"[SUCCESS] No protein overlap between train and validation sets")
+        
+        # Evaluate using external evaluation with custom antigens
+        results = evaluate_model(
+            model_path=model_path,
+            device_id=self.args.device_id,
+            radius=getattr(self.args, 'radius', 18.0),
+            threshold=self.best_threshold,
+            k=getattr(self.args, 'k', 7),
+            verbose=True,
+            split="val",  # This will be overridden by antigens parameter
+            antigens=val_antigens,
+            encoder=self.args.encoder
+        )
+        
+        return results
+
+    def _find_optimal_k(self):
+        """
+        Find the optimal k value by evaluating different k values on the validation set.
+        Uses the best MCC model and finds k that maximizes MCC on validation set.
+        
+        Returns:
+            int: Optimal k value that maximizes MCC on validation set
+        """
+        print("[INFO] Testing k values [1, 2, 3, 4, 5, 6, 7] on validation set...")
+        
+        # Check if we have a validation set
+        use_val_split = getattr(self.args, 'val', False)
+        if not use_val_split or self.val_loader is None:
+            print("[WARNING] No validation set available. Using default k value.")
+            return self.args.k
+        
+        # Use best MCC model for k optimization
+        model_path = self.best_mcc_model_path
+        if not model_path.exists():
+            print("[WARNING] Best MCC model not found. Using default k value.")
+            return self.args.k
+        
+        # Extract antigens from validation dataset
+        val_antigens = extract_antigens_from_dataset(self.val_loader.dataset)
+        
+        k_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        k_results = {}
+        
+        print(f"[INFO] Evaluating {len(val_antigens)} validation antigens with different k values...")
+        
+        for k in k_values:
+            try:
+                print(f"\n[INFO] Testing k={k}...")
+                results = evaluate_model(
+                    model_path=model_path,
+                    device_id=self.args.device_id,
+                    radius=getattr(self.args, 'radius', 18.0),
+                    threshold=self.best_threshold,
+                    k=k,
+                    verbose=False,  # Reduce verbosity for k search
+                    split="val",  # This will be overridden by antigens parameter
+                    antigens=val_antigens,
+                    encoder=self.args.encoder,
+                    save_results=False  # Don't save intermediate results
+                )
+                
+                # Use voted MCC as the metric for k optimization
+                mcc = results['voted_metrics']['mcc']
+                k_results[k] = {
+                    'mcc': mcc,
+                    'f1': results['voted_metrics']['f1'],
+                    'precision': results['voted_metrics']['precision'],
+                    'recall': results['voted_metrics']['recall'],
+                    'auprc': results['probability_metrics']['auprc']
+                }
+                
+                print(f"k={k}: MCC={mcc:.4f}, F1={results['voted_metrics']['f1']:.4f}, AUPRC={results['probability_metrics']['auprc']:.4f}")
+                
+            except Exception as e:
+                print(f"[WARNING] Failed to evaluate k={k}: {str(e)}")
+                k_results[k] = {'mcc': 0.0, 'f1': 0.0, 'precision': 0.0, 'recall': 0.0, 'auprc': 0.0}
+        
+        # Find k with maximum MCC
+        if k_results:
+            # Filter out any k values with MCC <= 0 (likely errors)
+            valid_k_results = {k: v for k, v in k_results.items() if v['mcc'] > 0}
+            
+            if valid_k_results:
+                optimal_k = max(valid_k_results.keys(), key=lambda k: valid_k_results[k]['mcc'])
+                optimal_mcc = valid_k_results[optimal_k]['mcc']
+                
+                print(f"\n[INFO] K-value optimization results:")
+                print(f"{'K':<3} {'MCC':<8} {'F1':<8} {'Precision':<10} {'Recall':<8} {'AUPRC':<8}")
+                print("-" * 55)
+                for k in k_values:
+                    if k in k_results:
+                        results = k_results[k]
+                        marker = " *" if k == optimal_k and k in valid_k_results else "  "
+                        status = "(BEST)" if k == optimal_k and k in valid_k_results else "(ERROR)" if results['mcc'] <= 0 else ""
+                        print(f"{k:<3} {results['mcc']:<8.4f} {results['f1']:<8.4f} {results['precision']:<10.4f} {results['recall']:<8.4f} {results['auprc']:<8.4f}{marker} {status}")
+                
+                print(f"\n[INFO] Optimal k={optimal_k} with MCC={optimal_mcc:.4f}")
+                
+                # Check if optimal k is significantly better than default k
+                if self.args.k in valid_k_results:
+                    default_mcc = valid_k_results[self.args.k]['mcc']
+                    improvement = optimal_mcc - default_mcc
+                    if improvement > 0.01:  # Significant improvement threshold
+                        print(f"[INFO] Optimal k provides {improvement:.4f} MCC improvement over default k={self.args.k}")
+                    elif improvement < -0.01:
+                        print(f"[INFO] Default k={self.args.k} performs {-improvement:.4f} MCC better than optimal k")
+                    else:
+                        print(f"[INFO] Similar performance between optimal k and default k (difference: {improvement:.4f})")
+                
+                # Save k optimization results
+                self._save_k_optimization_results(k_results, optimal_k)
+                
+                return optimal_k
+            else:
+                print("[WARNING] All k values produced invalid results (MCC <= 0). Using default k value.")
+                return self.args.k
+        else:
+            print("[WARNING] No valid k results found. Using default k value.")
+            return self.args.k
+
+    def _save_k_optimization_results(self, k_results, optimal_k):
+        """Save k optimization results to file."""
+        try:
+            import json
+            from datetime import datetime
+            
+            k_optimization_file = self.results_dir / "k_optimization_results.json"
+            
+            # Calculate some summary statistics
+            valid_results = {k: v for k, v in k_results.items() if v['mcc'] > 0}
+            mcc_values = [v['mcc'] for v in valid_results.values()] if valid_results else []
+            
+            optimization_results = {
+                'timestamp': datetime.now().isoformat(),
+                'default_k': self.args.k,
+                'optimal_k': optimal_k,
+                'k_tested': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+                'k_results': k_results,
+                'validation_antigens_count': len(extract_antigens_from_dataset(self.val_loader.dataset)) if self.val_loader else 0,
+                'optimization_metric': 'voted_mcc',
+                'summary': {
+                    'num_valid_k': len(valid_results),
+                    'best_mcc': max(mcc_values) if mcc_values else 0.0,
+                    'worst_mcc': min(mcc_values) if mcc_values else 0.0,
+                    'avg_mcc': sum(mcc_values) / len(mcc_values) if mcc_values else 0.0,
+                    'mcc_std': np.std(mcc_values) if len(mcc_values) > 1 else 0.0,
+                    'optimal_k_differs_from_default': optimal_k != self.args.k
+                }
+            }
+            
+            with open(k_optimization_file, 'w') as f:
+                json.dump(optimization_results, f, indent=2)
+            
+            print(f"[INFO] K optimization results saved to {k_optimization_file}")
+            
+        except Exception as e:
+            print(f"[WARNING] Failed to save k optimization results: {str(e)}")
+
+    def _find_optimal_k_for_finetuned_model(self):
+        """
+        Find the optimal k value for finetuned model by evaluating on validation set.
+        Since finetuning focuses on node prediction, we optimize for node AUPRC.
+        
+        Returns:
+            int: Optimal k value that maximizes AUPRC on validation set
+        """
+        print("[INFO] Testing k values [1, 2, 3, 4, 5, 6, 7] for finetuned model...")
+        
+        # Check if we have a validation set
+        use_val_split = getattr(self.args, 'val', False)
+        if not use_val_split or self.val_loader is None:
+            print("[WARNING] No validation set available. Using default k value.")
+            return self.args.k
+        
+        # Use finetuned model
+        model_path = self.best_finetuned_model_path
+        if not model_path.exists():
+            print("[WARNING] Finetuned model not found. Using default k value.")
+            return self.args.k
+        
+        # Extract antigens from validation dataset
+        val_antigens = extract_antigens_from_dataset(self.val_loader.dataset)
+        
+        # Also extract train antigens to verify no overlap
+        train_antigens = extract_antigens_from_dataset(self.train_loader.dataset)
+        
+        # Check for overlap
+        overlap = set(val_antigens).intersection(set(train_antigens))
+        
+        print(f"[INFO] Found {len(val_antigens)} unique antigens in validation set")
+        print(f"[INFO] Found {len(train_antigens)} unique antigens in training set")
+        
+        if overlap:
+            print(f"[WARNING] Found {len(overlap)} overlapping proteins between train and val: {list(overlap)[:3]}...")
+        else:
+            print(f"[SUCCESS] No protein overlap between train and validation sets")
+        
+        k_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        k_results = {}
+        
+        print(f"[INFO] Evaluating {len(val_antigens)} validation antigens with different k values...")
+        
+        for k in k_values:
+            try:
+                print(f"\n[INFO] Testing k={k} for finetuned model...")
+                results = evaluate_model(
+                    model_path=model_path,
+                    device_id=self.args.device_id,
+                    radius=getattr(self.args, 'radius', 18.0),
+                    threshold=self.best_threshold,
+                    k=k,
+                    verbose=False,  # Reduce verbosity for k search
+                    split="val",  # This will be overridden by antigens parameter
+                    antigens=val_antigens,
+                    encoder=self.args.encoder,
+                    save_results=False  # Don't save intermediate results
+                )
+                
+                # Use AUPRC as the metric for finetuned model k optimization (node-focused)
+                auprc = results['probability_metrics']['auprc']
+                k_results[k] = {
+                    'auprc': auprc,
+                    'mcc': results['voted_metrics']['mcc'],
+                    'f1': results['voted_metrics']['f1'],
+                    'precision': results['voted_metrics']['precision'],
+                    'recall': results['voted_metrics']['recall']
+                }
+                
+                print(f"k={k}: AUPRC={auprc:.4f}, MCC={results['voted_metrics']['mcc']:.4f}, F1={results['voted_metrics']['f1']:.4f}")
+                
+            except Exception as e:
+                print(f"[WARNING] Failed to evaluate k={k}: {str(e)}")
+                k_results[k] = {'auprc': 0.0, 'mcc': 0.0, 'f1': 0.0, 'precision': 0.0, 'recall': 0.0}
+        
+        # Find k with maximum AUPRC (since finetuning focuses on node prediction)
+        if k_results:
+            # Filter out any k values with AUPRC <= 0 (likely errors)
+            valid_k_results = {k: v for k, v in k_results.items() if v['auprc'] > 0}
+            
+            if valid_k_results:
+                optimal_k = max(valid_k_results.keys(), key=lambda k: valid_k_results[k]['auprc'])
+                optimal_auprc = valid_k_results[optimal_k]['auprc']
+                
+                print(f"\n[INFO] K-value optimization results for finetuned model:")
+                print(f"{'K':<3} {'AUPRC':<8} {'MCC':<8} {'F1':<8} {'Precision':<10} {'Recall':<8}")
+                print("-" * 50)
+                for k in k_values:
+                    if k in k_results:
+                        results = k_results[k]
+                        marker = " *" if k == optimal_k and k in valid_k_results else "  "
+                        status = "(BEST)" if k == optimal_k and k in valid_k_results else "(ERROR)" if results['auprc'] <= 0 else ""
+                        print(f"{k:<3} {results['auprc']:<8.4f} {results['mcc']:<8.4f} {results['f1']:<8.4f} {results['precision']:<10.4f} {results['recall']:<8.4f}{marker} {status}")
+                
+                print(f"\n[INFO] Optimal k={optimal_k} with AUPRC={optimal_auprc:.4f} for finetuned model")
+                
+                # Check if optimal k is significantly better than default k
+                if self.args.k in valid_k_results:
+                    default_auprc = valid_k_results[self.args.k]['auprc']
+                    improvement = optimal_auprc - default_auprc
+                    if improvement > 0.01:  # Significant improvement threshold
+                        print(f"[INFO] Optimal k provides {improvement:.4f} AUPRC improvement over default k={self.args.k}")
+                    elif improvement < -0.01:
+                        print(f"[INFO] Default k={self.args.k} performs {-improvement:.4f} AUPRC better than optimal k")
+                    else:
+                        print(f"[INFO] Similar performance between optimal k and default k (difference: {improvement:.4f})")
+                
+                return optimal_k
+            else:
+                print("[WARNING] All k values produced invalid results for finetuned model. Using default k value.")
+                return self.args.k
+        else:
+            print("[WARNING] No valid k results found for finetuned model. Using default k value.")
+            return self.args.k
+
+    def find_optimal_k(self, model_path, k_list=None, val_antigens_file=None, optimization_metric="mcc"):
+        """
+        Find the optimal k value by evaluating different k values on validation set.
+        This is a standalone method that can be used independently of training.
+        
+        Args:
+            model_path: Path to the trained model
+            k_list: List of k values to test (default: [1,2,3,4,5,6,7])
+            val_antigens_file: Path to file containing validation antigens (optional)
+            optimization_metric: Metric to optimize ("mcc", "f1", "auprc")
+            
+        Returns:
+            tuple: (optimal_k, k_results_dict)
+        """
+        from pathlib import Path
+        
+        print(f"[INFO] Starting independent K-value optimization...")
+        
+        # Validate model path
+        model_path_obj = Path(model_path)
+        if not model_path_obj.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+        
+        # Set default k_list if not provided
+        if k_list is None:
+            k_list = [1, 2, 3, 4, 5, 6, 7]
+        
+        print(f"[INFO] Model: {model_path}")
+        print(f"[INFO] K values to test: {k_list}")
+        print(f"[INFO] Optimization metric: {optimization_metric}")
+        
+        # Determine validation antigens
+        val_antigens = self._get_validation_antigens(val_antigens_file)
+        
+        if not val_antigens:
+            raise ValueError("No validation antigens found. Either enable --val or provide --val_antigens_file")
+        
+        print(f"[INFO] Found {len(val_antigens)} validation antigens")
+        
+        # Verify no overlap with training set if validation split is enabled
+        if getattr(self.args, 'val', False):
+            train_antigens = extract_antigens_from_dataset(self.train_loader.dataset)
+            overlap = set(val_antigens).intersection(set(train_antigens))
+            
+            if overlap:
+                print(f"[WARNING] Found {len(overlap)} overlapping proteins between train and val: {list(overlap)[:3]}...")
+            else:
+                print(f"[SUCCESS] No protein overlap between train and validation sets")
+        
+        # Test each k value
+        k_results = {}
+        print(f"\n[INFO] Starting k-value evaluation...")
+        
+        for k in k_list:
+            try:
+                print(f"\n[INFO] Testing k={k}...")
+                results = evaluate_model(
+                    model_path=model_path,
+                    device_id=self.args.device_id,
+                    radius=getattr(self.args, 'radius', 18.0),
+                    threshold=getattr(self.args, 'best_threshold', None),
+                    k=k,
+                    verbose=False,  # Reduce verbosity for k search
+                    split="val",  # This will be overridden by antigens parameter
+                    antigens=val_antigens,
+                    encoder=getattr(self.args, 'encoder', 'esmc'),
+                    save_results=False  # Don't save intermediate results
+                )
+                
+                # Extract metrics based on optimization_metric
+                if optimization_metric == "mcc":
+                    metric_value = results['voted_metrics']['mcc']
+                elif optimization_metric == "f1":
+                    metric_value = results['voted_metrics']['f1']
+                elif optimization_metric == "auprc":
+                    metric_value = results['probability_metrics']['auprc']
+                else:
+                    raise ValueError(f"Unknown optimization metric: {optimization_metric}")
+                
+                k_results[k] = {
+                    'mcc': results['voted_metrics']['mcc'],
+                    'f1': results['voted_metrics']['f1'],
+                    'precision': results['voted_metrics']['precision'],
+                    'recall': results['voted_metrics']['recall'],
+                    'auprc': results['probability_metrics']['auprc'],
+                    'auroc': results['probability_metrics']['auroc']
+                }
+                
+                print(f"k={k}: {optimization_metric.upper()}={metric_value:.4f}, MCC={results['voted_metrics']['mcc']:.4f}, F1={results['voted_metrics']['f1']:.4f}, AUPRC={results['probability_metrics']['auprc']:.4f}")
+                
+            except Exception as e:
+                print(f"[WARNING] Failed to evaluate k={k}: {str(e)}")
+                k_results[k] = {
+                    'mcc': 0.0, 'f1': 0.0, 'precision': 0.0, 'recall': 0.0, 
+                    'auprc': 0.0, 'auroc': 0.0
+                }
+        
+        # Find optimal k
+        if k_results:
+            # Filter out any k values with metric <= 0 (likely errors)
+            valid_k_results = {k: v for k, v in k_results.items() if v[optimization_metric] > 0}
+            
+            if valid_k_results:
+                optimal_k = max(valid_k_results.keys(), key=lambda k: valid_k_results[k][optimization_metric])
+                optimal_value = valid_k_results[optimal_k][optimization_metric]
+                
+                print(f"\n[INFO] K-value optimization results:")
+                print(f"{'K':<3} {optimization_metric.upper():<8} {'MCC':<8} {'F1':<8} {'Precision':<10} {'Recall':<8} {'AUPRC':<8}")
+                print("-" * 60)
+                for k in sorted(k_list):
+                    if k in k_results:
+                        result = k_results[k]
+                        marker = " *" if k == optimal_k and k in valid_k_results else "  "
+                        status = "(BEST)" if k == optimal_k and k in valid_k_results else "(ERROR)" if result[optimization_metric] <= 0 else ""
+                        print(f"{k:<3} {result[optimization_metric]:<8.4f} {result['mcc']:<8.4f} {result['f1']:<8.4f} {result['precision']:<10.4f} {result['recall']:<8.4f} {result['auprc']:<8.4f}{marker} {status}")
+                
+                print(f"\n[INFO] Optimal k={optimal_k} with {optimization_metric.upper()}={optimal_value:.4f}")
+                
+                # Save results
+                self._save_k_optimization_results_standalone(k_results, optimal_k, optimization_metric, val_antigens)
+                
+                return optimal_k, k_results
+            else:
+                print(f"[WARNING] All k values produced invalid results ({optimization_metric} <= 0). No optimal k found.")
+                return k_list[0], k_results  # Return first k as fallback
+        else:
+            print("[WARNING] No k results found.")
+            return k_list[0], {}
+
+    def _get_validation_antigens(self, val_antigens_file=None):
+        """
+        Get validation antigens from file or validation loader.
+        
+        Args:
+            val_antigens_file: Path to file containing validation antigens
+            
+        Returns:
+            List of (pdb_id, chain_id) tuples
+        """
+        if val_antigens_file:
+            # Load antigens from file
+            print(f"[INFO] Loading validation antigens from file: {val_antigens_file}")
+            val_antigens = []
+            
+            try:
+                with open(val_antigens_file, 'r') as f:
+                    for line_num, line in enumerate(f, 1):
+                        line = line.strip()
+                        if line and not line.startswith('#'):  # Skip empty lines and comments
+                            if '_' in line:
+                                pdb_id, chain_id = line.split('_', 1)
+                                val_antigens.append((pdb_id, chain_id))
+                            else:
+                                print(f"[WARNING] Invalid format at line {line_num}: {line}. Expected format: pdb_chain")
+                
+                print(f"[INFO] Loaded {len(val_antigens)} antigens from file")
+                return val_antigens
+                
+            except FileNotFoundError:
+                print(f"[ERROR] Validation antigens file not found: {val_antigens_file}")
+                return []
+            except Exception as e:
+                print(f"[ERROR] Failed to load validation antigens from file: {e}")
+                return []
+        
+        else:
+            # Extract from validation loader if available
+            use_val_split = getattr(self.args, 'val', False)
+            if use_val_split and self.val_loader is not None:
+                print(f"[INFO] Extracting validation antigens from validation loader")
+                val_antigens = extract_antigens_from_dataset(self.val_loader.dataset)
+                return val_antigens
+            else:
+                print(f"[WARNING] No validation split enabled and no antigens file provided")
+                return []
+
+    def _save_k_optimization_results_standalone(self, k_results, optimal_k, optimization_metric, val_antigens):
+        """Save standalone k optimization results to file."""
+        try:
+            import json
+            from datetime import datetime
+            
+            # Create results directory if it doesn't exist
+            results_dir = Path(f"{BASE_DIR}/results/k_optimization")
+            results_dir.mkdir(parents=True, exist_ok=True)
+            
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            k_optimization_file = results_dir / f"k_optimization_{timestamp}.json"
+            
+            # Calculate summary statistics
+            valid_results = {k: v for k, v in k_results.items() if v[optimization_metric] > 0}
+            metric_values = [v[optimization_metric] for v in valid_results.values()] if valid_results else []
+            
+            optimization_results = {
+                'timestamp': datetime.now().isoformat(),
+                'model_path': str(getattr(self.args, 'model_path', 'unknown')),
+                'optimal_k': optimal_k,
+                'optimization_metric': optimization_metric,
+                'k_tested': list(k_results.keys()),
+                'k_results': k_results,
+                'validation_antigens_count': len(val_antigens),
+                'validation_antigens': [f"{pdb}_{chain}" for pdb, chain in val_antigens[:10]],  # Save first 10 for reference
+                'summary': {
+                    'num_valid_k': len(valid_results),
+                    'best_metric_value': max(metric_values) if metric_values else 0.0,
+                    'worst_metric_value': min(metric_values) if metric_values else 0.0,
+                    'avg_metric_value': sum(metric_values) / len(metric_values) if metric_values else 0.0,
+                    'metric_std': np.std(metric_values) if len(metric_values) > 1 else 0.0
+                },
+                'settings': {
+                    'radius': getattr(self.args, 'radius', 18.0),
+                    'encoder': getattr(self.args, 'encoder', 'esmc'),
+                    'device_id': getattr(self.args, 'device_id', 0)
+                }
+            }
+            
+            with open(k_optimization_file, 'w') as f:
+                json.dump(optimization_results, f, indent=2)
+            
+            print(f"[INFO] K optimization results saved to {k_optimization_file}")
+            
+        except Exception as e:
+            print(f"[WARNING] Failed to save k optimization results: {str(e)}")
 
     def evaluate(self, model_path=None, split='test'):
         """

@@ -1203,10 +1203,11 @@ def create_data_loader(
     seed=42,
     verbose=False,
     use_embeddings2=False,
+    val=False,
     **kwargs
 ):
     """
-    Create train and test data loaders.
+    Create train, validation (optional), and test data loaders.
     
     Args:
         radii (list): List of radii for data processing
@@ -1215,23 +1216,155 @@ def create_data_loader(
         undersample (float): Undersampling ratio for training
         seed (int): Random seed
         verbose (bool): Whether to print verbose information
+        use_embeddings2 (bool): Whether to use embeddings2
+        val (bool): Whether to split train data into train/val (8:2)
         **kwargs: Additional arguments for data loader
     
     Returns:
-        tuple: (train_loader, test_loader)
+        tuple: (train_loader, val_loader, test_loader) if val=True
+               (train_loader, test_loader) if val=False
     """
-    train_dataset = create_datasets(
+    if val:
+        # Create full train dataset first
+        full_train_dataset = create_datasets(
             radii=radii,
             splits=["train"],
             threshold=0.25,
-            undersample=undersample,
+            undersample=None,  # Don't undersample the full dataset yet
             zero_ratio=zero_ratio,
             cache_dir=None,
             seed=seed,
             verbose=verbose,
             use_embeddings2=use_embeddings2
         )["train"]
+        
+        # Split at protein level to avoid data leakage (8:2)
+        # First, extract all unique protein_keys from the dataset
+        protein_keys = set()
+        protein_to_indices = {}
+        
+        for idx, data in enumerate(full_train_dataset):
+            protein_key = f"{data.pdb_id}_{data.chain_id}"
+            protein_keys.add(protein_key)
+            if protein_key not in protein_to_indices:
+                protein_to_indices[protein_key] = []
+            protein_to_indices[protein_key].append(idx)
+        
+        # Convert to list and split at protein level
+        protein_keys_list = list(protein_keys)
+        total_proteins = len(protein_keys_list)
+        train_proteins_count = int(0.8 * total_proteins)
+        
+        # Set random seed for reproducible split
+        torch.manual_seed(seed)
+        random.seed(seed)
+        random.shuffle(protein_keys_list)
+        
+        train_proteins = set(protein_keys_list[:train_proteins_count])
+        val_proteins = set(protein_keys_list[train_proteins_count:])
+        
+        # Collect indices for train and val based on protein split
+        train_indices = []
+        val_indices = []
+        
+        for protein_key, indices in protein_to_indices.items():
+            if protein_key in train_proteins:
+                train_indices.extend(indices)
+            else:
+                val_indices.extend(indices)
+        
+        total_size = len(full_train_dataset)
+        train_size = len(train_indices)
+        val_size = len(val_indices)
+        
+        if verbose:
+            print(f"[INFO] Splitting at protein level:")
+            print(f"  Total proteins: {total_proteins}")
+            print(f"  Train proteins: {len(train_proteins)} ({len(train_proteins)/total_proteins:.1%})")
+            print(f"  Val proteins: {len(val_proteins)} ({len(val_proteins)/total_proteins:.1%})")
+            print(f"  Total samples: {total_size} -> train: {train_size}, val: {val_size}")
+            
+            # Show some example proteins for verification
+            print(f"  Sample train proteins: {list(train_proteins)[:3]}...")
+            print(f"  Sample val proteins: {list(val_proteins)[:3]}...")
+        
+        # Create train and val datasets using subset
+        train_dataset = torch.utils.data.Subset(full_train_dataset, train_indices)
+        val_dataset = torch.utils.data.Subset(full_train_dataset, val_indices)
+        
+        # Apply undersampling to train dataset if specified
+        if undersample is not None:
+            original_train_size = len(train_dataset)
+            # Create a wrapper to apply undersampling
+            train_data_list = [full_train_dataset[i] for i in train_indices]
+            train_data_list = apply_undersample(
+                train_data_list,
+                undersample,
+                seed=seed,
+                verbose=verbose
+            )
+            # Create new dataset from undersampled data
+            class ListDataset(torch.utils.data.Dataset):
+                def __init__(self, data_list):
+                    self.data_list = data_list
+                def __len__(self):
+                    return len(self.data_list)
+                def __getitem__(self, idx):
+                    return self.data_list[idx]
+            train_dataset = ListDataset(train_data_list)
+        
+        # Create data loaders
+        train_loader = ReGEPDataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            collate_fn=custom_collate_fn,
+            **kwargs
+        )
+        
+        val_loader = ReGEPDataLoader(
+            val_dataset,
+            batch_size=batch_size*2,
+            shuffle=False,
+            collate_fn=custom_collate_fn,
+            **kwargs
+        )
+        
+        if verbose:
+            print(f"[INFO] Train samples after undersampling: {len(train_dataset)}")
+            print(f"[INFO] Val samples: {len(val_dataset)}")
+            
+            # Verify no protein overlap between train and val
+            _verify_protein_split(train_dataset, val_dataset, full_train_dataset, verbose=True)
+            
+    else:
+        # Original behavior: no validation split
+        train_dataset = create_datasets(
+                radii=radii,
+                splits=["train"],
+                threshold=0.25,
+                undersample=undersample,
+                zero_ratio=zero_ratio,
+                cache_dir=None,
+                seed=seed,
+                verbose=verbose,
+                use_embeddings2=use_embeddings2
+            )["train"]
+        
+        train_loader = ReGEPDataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            collate_fn=custom_collate_fn,
+            **kwargs
+        )
+        
+        val_loader = None
+        
+        if verbose:
+            print(f"[INFO] Train samples: {len(train_dataset)}")
     
+    # Create test dataset (same for both cases)
     test_dataset = create_datasets(
             radii=radii,
             splits=["test"],
@@ -1243,14 +1376,6 @@ def create_data_loader(
             use_embeddings2=use_embeddings2
         )["test"]
     
-    train_loader = ReGEPDataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        collate_fn=custom_collate_fn,
-        **kwargs
-    )
-    
     test_loader = ReGEPDataLoader(
         test_dataset,
         batch_size=batch_size*4,
@@ -1258,5 +1383,84 @@ def create_data_loader(
         **kwargs
     )
     
-    return train_loader, test_loader
+    if verbose:
+        print(f"[INFO] Test samples: {len(test_dataset)}")
+    
+    if val:
+        return train_loader, val_loader, test_loader
+    else:
+        return train_loader, test_loader
+
+
+def extract_antigens_from_dataset(dataset):
+    """
+    Extract unique (pdb_id, chain_id) pairs from a dataset.
+    
+    Args:
+        dataset: PyTorch dataset containing graph data with pdb_id and chain_id attributes
+        
+    Returns:
+        List of unique (pdb_id, chain_id) tuples
+    """
+    antigens = []
+    seen = set()
+    
+    for data in dataset:
+        pdb_id = data.pdb_id
+        chain_id = data.chain_id
+        antigen_key = (pdb_id, chain_id)
+        
+        if antigen_key not in seen:
+            antigens.append(antigen_key)
+            seen.add(antigen_key)
+    
+    return antigens
+
+
+def _verify_protein_split(train_dataset, val_dataset, full_dataset, verbose=True):
+    """
+    Verify that train and validation datasets have no overlapping proteins.
+    
+    Args:
+        train_dataset: Training dataset subset
+        val_dataset: Validation dataset subset
+        full_dataset: Original full dataset
+        verbose: Whether to print verification results
+    """
+    def extract_proteins_from_subset(dataset):
+        """Extract protein keys from a dataset (handles both Subset and regular datasets)"""
+        proteins = set()
+        for i in range(len(dataset)):
+            try:
+                data = dataset[i]
+                protein_key = f"{data.pdb_id}_{data.chain_id}"
+                proteins.add(protein_key)
+            except Exception as e:
+                if verbose:
+                    print(f"[WARNING] Could not extract protein info from index {i}: {e}")
+                continue
+        return proteins
+    
+    # Extract protein keys from both datasets
+    train_proteins = extract_proteins_from_subset(train_dataset)
+    val_proteins = extract_proteins_from_subset(val_dataset)
+    
+    # Check for overlap
+    overlap = train_proteins.intersection(val_proteins)
+    
+    if verbose:
+        print(f"[INFO] Protein split verification:")
+        print(f"  Train proteins: {len(train_proteins)}")
+        print(f"  Val proteins: {len(val_proteins)}")
+        print(f"  Overlap: {len(overlap)}")
+        
+        if len(overlap) > 0:
+            print(f"  [WARNING] Found {len(overlap)} overlapping proteins!")
+            print(f"  First few overlapping proteins: {list(overlap)[:5]}")
+            return False
+        else:
+            print(f"  [SUCCESS] No protein overlap detected - proper data split!")
+            return True
+    
+    return len(overlap) == 0
     

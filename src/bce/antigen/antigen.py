@@ -937,7 +937,8 @@ class AntigenChain(ProteinChain):
                     'center_idx': region['center_idx'],
                     'predicted_value': region['graph_pred'],
                     'true_recall': region['true_recall'],
-                    'covered_residues': [int(self.residue_index[idx]) for idx in region['covered_indices']]
+                    'covered_residues': [int(self.residue_index[idx]) for idx in region['covered_indices']],
+                    'radius': radius
                 }
                 for region in top_k_regions
             ],
@@ -1172,7 +1173,8 @@ class AntigenChain(ProteinChain):
                     'center_residue': int(self.residue_index[region['center_idx']]),
                     'center_idx': region['center_idx'],
                     'predicted_value': region['graph_pred'],
-                    'covered_residues': [int(self.residue_index[idx]) for idx in region['covered_indices']]
+                    'covered_residues': [int(self.residue_index[idx]) for idx in region['covered_indices']],
+                    'radius': radius
                 }
                 for region in top_k_regions
             ],
@@ -1188,7 +1190,8 @@ class AntigenChain(ProteinChain):
                   prediction_mode: str = 'residue',  # 'residue' or 'region'
                   center_res: int = None,
                   radius: float = None,
-                  region_index: int = None,  # Index of specific region to show (0-based)
+                  region_index: int = None,  # Index of specific region to show (0-based), deprecated
+                  region_indices: list = None,  # List of region indices to show (0-based), e.g. [0, 2, 3]
                   width: int = 800,
                   height: int = 600,
                   base_color: str = '#e6e6f7',
@@ -1300,10 +1303,17 @@ class AntigenChain(ProteinChain):
             )
             
         elif mode == 'probability' and predict_results is not None:
+            # Handle backward compatibility: convert single region_index to list
+            target_region_indices = None
+            if region_indices is not None:
+                target_region_indices = region_indices
+            elif region_index is not None:
+                target_region_indices = [region_index]
+            
             self._add_probability_visualization(
                 view, style, predict_results,
                 base_color, probability_colormap, show_surface, surface_opacity, 
-                prob_threshold, region_index, radius, show_shape, shape_opacity, 
+                prob_threshold, target_region_indices, radius, show_shape, shape_opacity, 
                 show_center, center_radius, wireframe, coverage_color, center_color
             )
             
@@ -1396,23 +1406,23 @@ class AntigenChain(ProteinChain):
         probs = list(epitope_predictions.values())
         min_prob, max_prob = min(probs), max(probs)
         
-        # Improved color scheme - use orange to red gradient for better contrast with gray
+        # Improved color scheme - use very light purple gradient for better contrast with gray
         # This avoids confusion with gray background when probability is low
         epitope_colors = [
-            '#FFE4B5',  # Light orange (moccasin)
-            '#FFD700',  # Gold
-            '#FFA500',  # Orange
-            '#FF8C00',  # Dark orange
-            '#FF6347',  # Tomato
-            '#FF4500',  # Orange red
-            '#DC143C'   # Crimson
+            '#F8F8FF',  # Ghost white
+            '#F0F0FF',  # Very light lavender
+            '#E6E6FA',  # Lavender
+            '#DDD0F0',  # Light purple
+            '#D8BFD8',  # Thistle
+            '#C8A2C8',  # Light orchid
+            '#BA90D3'   # Medium light orchid
         ]
         n_colors = len(epitope_colors)
         
         # Set base style for entire protein
         view.setStyle({'chain': self.chain_id}, {**base_style, list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
         
-        # Color predicted epitopes based on probability with orange-red gradient
+        # Color predicted epitopes based on probability with purple gradient
         for residue_num, prob in epitope_predictions.items():
             # Normalize probability to [0, 1] within the epitope range
             if max_prob > min_prob:
@@ -1614,7 +1624,7 @@ class AntigenChain(ProteinChain):
     
     def _add_probability_visualization(self, view, style, predict_results,
                                   base_color, colormap, show_surface, surface_opacity, threshold,
-                                  region_index, radius, show_shape, shape_opacity, 
+                                  region_indices, radius, show_shape, shape_opacity, 
                                   show_center, center_radius, wireframe, coverage_color, center_color):
         """
         Add visualization based on prediction probabilities with enhanced support for 
@@ -1629,15 +1639,15 @@ class AntigenChain(ProteinChain):
             show_surface (bool): Whether to show surface
             surface_opacity (float): Surface opacity
             threshold (float): Probability threshold for coloring
-            region_index (int): Index of specific region to show (0-based), None for all
-                              Each region_index uses a distinct color for shape visualization
+            region_indices (list): List of region indices to show (0-based), None for all
+                                   Each region uses a distinct color for shape visualization
             radius (float): Radius for spherical regions
             show_shape (bool): Whether to show spherical shapes
             shape_opacity (float): Shape opacity
             show_center (bool): Whether to show center points
             center_radius (float): Center point radius
             wireframe (bool): Whether to show wireframe spheres
-            coverage_color (str): Color for coverage regions (not used when region_index is specified)
+            coverage_color (str): Color for coverage regions (not used when region_indices is specified)
             center_color (str): Color for center points
         """
         import matplotlib.pyplot as plt
@@ -1671,19 +1681,22 @@ class AntigenChain(ProteinChain):
         view.setStyle({'chain': self.chain_id}, {**base_style, 
                       list(base_style.keys())[0]: {**list(base_style.values())[0], 'color': base_color}})
         
-        # Determine which residues to color based on region_index
+        # Determine which residues to color based on region_indices
         target_residues = {}  # residue_num -> probability
-        selected_region = None
+        selected_regions = []  # List of (original_index, region_data) tuples
         
-        if region_index is not None and 0 <= region_index < len(top_k_regions):
-            # Show only the selected region
-            selected_region = top_k_regions[region_index]
-            covered_residues = selected_region.get('covered_residues', [])
+        if region_indices is not None and len(region_indices) > 0:
+            # Show only the selected regions, keep track of original indices
+            for region_idx in region_indices:
+                if 0 <= region_idx < len(top_k_regions):
+                    selected_regions.append((region_idx, top_k_regions[region_idx]))
             
-            # Get probabilities for residues in the selected region
-            for res_num in covered_residues:
-                if res_num in predictions:
-                    target_residues[res_num] = predictions[res_num]
+            # Get probabilities for residues in all selected regions
+            for original_idx, region in selected_regions:
+                covered_residues = region.get('covered_residues', [])
+                for res_num in covered_residues:
+                    if res_num in predictions:
+                        target_residues[res_num] = predictions[res_num]
         else:
             # Show all residues with probabilities above threshold
             target_residues = {res: prob for res, prob in predictions.items() 
@@ -1702,38 +1715,37 @@ class AntigenChain(ProteinChain):
         probs = list(target_residues.values())
         min_prob, max_prob = min(probs), max(probs)
         
-        # Enhanced color scheme for better visibility on surface
+        # Enhanced color scheme for better visibility on surface - use purple gradient like prediction mode
         if colormap in ['RdYlBu_r', 'coolwarm', 'RdBu_r']:
-            # Use predefined soft color scheme for better visual comfort
+            # Use predefined purple color scheme matching prediction mode
             probability_colors = [
-                '#c6dbef',  # Very light blue (low probability)
-                '#9ecae1',  # Light blue
-                '#6baed6',  # Medium light blue
-                '#4292c6',  # Medium blue
-                '#2171b5',  # Medium blue
-                '#fcbba1',  # Light orange
-                '#fc9272',  # Medium light orange
-                '#fb6a4a',  # Medium orange
-                '#ef3b2c',  # Medium red
-                '#cb181d'   # Medium red (high probability)
+                '#F8F8FF',  # Ghost white (low probability)
+                '#F0F0FF',  # Very light lavender
+                '#E6E6FA',  # Lavender
+                '#DDD0F0',  # Light purple
+                '#D8BFD8',  # Thistle
+                '#C8A2C8',  # Light orchid
+                '#BA90D3',  # Medium light orchid
+                '#B19CD9',  # Light medium orchid
+                '#A594D1',  # Medium light purple
+                '#9B8BC9'   # Soft medium purple (high probability)
             ]
             n_colors = len(probability_colors)
         else:
-            # Use matplotlib colormap with reduced intensity
-            cmap = plt.cm.get_cmap(colormap)
-            probability_colors = []
-            n_colors = 10
-            for i in range(n_colors):
-                color_rgba = cmap(i / (n_colors - 1))
-                # Soften the colors by blending with white (0.3 factor)
-                softened_rgba = [
-                    color_rgba[0] * 0.7 + 0.3,  # Red channel
-                    color_rgba[1] * 0.7 + 0.3,  # Green channel
-                    color_rgba[2] * 0.7 + 0.3,  # Blue channel
-                ]
-                # Ensure values don't exceed 1.0
-                softened_rgba = [min(1.0, val) for val in softened_rgba]
-                probability_colors.append(mcolors.rgb2hex(softened_rgba))
+            # Use purple gradient matching prediction mode for consistency
+            probability_colors = [
+                '#F8F8FF',  # Ghost white
+                '#F0F0FF',  # Very light lavender
+                '#E6E6FA',  # Lavender
+                '#DDD0F0',  # Light purple
+                '#D8BFD8',  # Thistle
+                '#C8A2C8',  # Light orchid
+                '#BA90D3',  # Medium light orchid
+                '#B19CD9',  # Light medium orchid
+                '#A594D1',  # Medium light purple
+                '#9B8BC9'   # Soft medium purple
+            ]
+            n_colors = len(probability_colors)
         
         # Color residues based on normalized probability
         colored_residues = []
@@ -1789,46 +1801,48 @@ class AntigenChain(ProteinChain):
                     'color': color
                 }, {'chain': self.chain_id, 'resi': residue_num})
         
-        # Add spherical region visualization if specific region is selected
-        if selected_region is not None and show_shape:
-            center_res = selected_region['center_residue']
-            
+        # Add spherical region visualization if specific regions are selected
+        if selected_regions and show_shape:
             # Use radius from prediction results or provided radius
             sphere_radius = radius or 19.0
             
-            # Define distinct colors for different regions
+            # Define distinct colors for different regions - matching prediction mode
             region_colors = [
                 '#FF6B6B',  # Soft red
-                '#4ECDC4',  # Soft teal
-                '#45B7D1',  # Soft blue
-                '#96CEB4',  # Soft green
-                '#FFEAA7',  # Soft yellow
-                '#DDA0DD',  # Soft plum
-                '#87CEEB',  # Sky blue
-                '#F0E68C',  # Soft khaki
-                '#FFB6C1',  # Light pink
-                '#98FB98',  # Pale green
-                '#9C6ADE',  # Soft purple
-                '#FF9A8B'   # Soft coral
+                '#4ECDC4',  # Teal
+                '#FFD93D',  # Bright yellow
+                '#6BCF7F',  # Green
+                '#A8E6CF',  # Mint green
+                '#FFB3BA',  # Light pink
+                '#BFBFFF',  # Light blue
+                '#FFDAB9',  # Peach
+                '#D8BFD8',  # Thistle
+                '#98D8C8',  # Light teal
+                '#F7DC6F',  # Light yellow
+                '#B19CD9'   # Medium light purple
             ]
             
-            # Select color based on region_index
-            shape_color = region_colors[region_index % len(region_colors)]
-            
-            # Add sphere for the selected region with softer appearance and region-specific color
-            self._add_shape_visualization(
-                view, center_res, sphere_radius,
-                shape_color, center_color,  # Use region-specific color for shape
-                show_center, center_radius,
-                shape_opacity * 0.6,  # Reduced shape opacity for softer appearance
-                wireframe
-            )
-            
-            # Highlight center residue with softer color matching the region
-            view.addStyle(
-                {'chain': self.chain_id, 'resi': center_res},
-                {list(base_style.keys())[0]: {'color': shape_color}}  # Use region-specific color
-            )
+            # Add spheres for all selected regions
+            for original_idx, region in selected_regions:
+                center_res = region['center_residue']
+                
+                # Select color based on original region index, not loop index
+                shape_color = region_colors[original_idx % len(region_colors)]
+                
+                # Add sphere for the selected region with softer appearance and region-specific color
+                self._add_shape_visualization(
+                    view, center_res, sphere_radius,
+                    shape_color, center_color,  # Use region-specific color for shape
+                    show_center, center_radius,
+                    shape_opacity * 0.6,  # Reduced shape opacity for softer appearance
+                    wireframe
+                )
+                
+                # Highlight center residue with softer color matching the region
+                view.addStyle(
+                    {'chain': self.chain_id, 'resi': center_res},
+                    {list(base_style.keys())[0]: {'color': shape_color}}  # Use region-specific color
+                )
     
     def _add_top_regions_visualization(self, view, style, predict_results,
                                   base_color, coverage_color, center_color,
@@ -1846,18 +1860,20 @@ class AntigenChain(ProteinChain):
         if max_spheres is not None:
             top_regions = top_regions[:max_spheres]
         
-        # Enhanced color scheme for different regions
+        # Enhanced color scheme for different regions - matching prediction mode
         region_colors = [
-            '#FF6B6B',  # Red
-            '#96CEB4',  # Green
+            '#FF6B6B',  # Soft red
             '#4ECDC4',  # Teal
-            '#45B7D1',  # Blue
-            '#FFEAA7',  # Yellow
-            '#DDA0DD',  # Plum
-            '#87CEEB',  # Sky blue
-            '#F0E68C',  # Khaki
-            '#FFB6C1',  # Light pink
-            '#98FB98'   # Pale green
+            '#FFD93D',  # Bright yellow
+            '#6BCF7F',  # Green
+            '#A8E6CF',  # Mint green
+            '#FFB3BA',  # Light pink
+            '#BFBFFF',  # Light blue
+            '#FFDAB9',  # Peach
+            '#D8BFD8',  # Thistle
+            '#98D8C8',  # Light teal
+            '#F7DC6F',  # Light yellow
+            '#B19CD9'   # Medium light purple
         ]
         
         for i, region in enumerate(top_regions):
@@ -2199,19 +2215,20 @@ class AntigenChain(ProteinChain):
         # Limit number of spheres if max_spheres is specified
         regions_to_show = regions_data[:max_spheres] if max_spheres else regions_data
         
-        # Enhanced color scheme for different regions
+        # Enhanced color scheme for different regions with more distinct colors
         sphere_colors = [
-            '#d671f1',  # Plum
-            '#7190f1',
-            '#FF6B6B',  # Red
-            '#96CEB4',  # Green
-            '#FFEAA7',  # Yellow
-            '#FFB6C1',  # Light pink
+            '#FF6B6B',  # Soft red
             '#4ECDC4',  # Teal
-            '#87CEEB',  # Sky blue
-            '#F0E68C',  # Khaki
-            '#98FB98',  # Pale green,
-            '#45B7D1'   # Blue
+            '#FFD93D',  # Bright yellow
+            '#6BCF7F',  # Green
+            '#98D8C8',  # Light teal
+            '#A8E6CF',  # Mint green
+            '#FFB3BA',  # Light pink
+            '#BFBFFF',  # Light blue
+            '#FFDAB9',  # Peach
+            '#D8BFD8',  # Thistle
+            '#98D8C8',  # Light teal
+            '#F7DC6F',  # Light yellow
         ]
         
         for i, region_data in enumerate(regions_to_show):

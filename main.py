@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     
     # Mode
-    parser.add_argument("--mode", type=str, default="train", choices=["train", "finetune", "eval"], help="Mode to run the model")
+    parser.add_argument("--mode", type=str, default="train", choices=["train", "finetune", "eval", "k_optimization"], help="Mode to run the model")
     
     # Finetune arguments
     parser.add_argument("--finetune_model_path", type=str, default=None, help="Path to pretrained model for finetuning")
@@ -39,6 +39,12 @@ def parse_args():
     parser.add_argument("--split", type=str, default="test", choices=["train", "val", "test"], help="Split to evaluate on")
     parser.add_argument("--best_threshold", type=float, default=None, help="Threshold for binary classification metrics")
     parser.add_argument("--k", type=int, default=7, help="Number of models to average")
+    parser.add_argument("--eval_antigens", type=str, nargs="+", default=None, help="Custom list of antigens to evaluate (format: pdb_chain, e.g., 1A0O_A 1BVK_B)")
+    
+    # K optimization arguments
+    parser.add_argument("--k_list", type=int, nargs="+", default=[1, 2, 3, 4, 5, 6, 7], help="List of k values to test for optimization")
+    parser.add_argument("--val_antigens_file", type=str, default=None, help="Path to file containing validation antigen IDs (one per line: pdb_chain)")
+    parser.add_argument("--optimization_metric", type=str, default="mcc", choices=["mcc", "f1", "auprc"], help="Metric to optimize for k selection")
     
     # Data arguments
     parser.add_argument("--radii", type=int, nargs="+", default=[16, 18, 20], help="Spherical radii for graph construction")
@@ -117,6 +123,20 @@ def main():
     
     if args.mode == "eval":
         # Evaluation only
+        custom_antigens = None
+        if args.eval_antigens:
+            # Parse custom antigens from command line (format: pdb_chain)
+            custom_antigens = []
+            for antigen_str in args.eval_antigens:
+                if "_" in antigen_str:
+                    pdb_id, chain_id = antigen_str.split("_", 1)
+                    custom_antigens.append((pdb_id, chain_id))
+                else:
+                    print(f"[WARNING] Invalid antigen format: {antigen_str}. Expected format: PDB_CHAIN (e.g., 1A0O_A)")
+            
+            if custom_antigens:
+                print(f"[INFO] Evaluating on {len(custom_antigens)} custom antigens: {custom_antigens}")
+        
         results = evaluate_model(
             model_path=args.model_path,
             device_id=args.device_id,
@@ -125,7 +145,8 @@ def main():
             k=args.k,
             verbose=True,
             split=args.split,
-            encoder=args.encoder
+            encoder=args.encoder,
+            antigens=custom_antigens
         )
 
         print(f"AUPRC: {results['probability_metrics']['auprc']:.4f}")
@@ -156,6 +177,11 @@ def main():
         print(f"Node dimensions: {args.node_dims}")
         print(f"Radii: {args.radii}")
         print(f"Mixed precision: {args.mixed_precision}")
+        print(f"Validation split: {'Enabled (8:2 train/val)' if args.val else 'Disabled (use test as val)'}")
+        if args.val:
+            print(f"K optimization: Enabled (will test k=[1,2,3,4,5,6,7] on validation set)")
+        else:
+            print(f"K optimization: Disabled (using default k={args.k})")
         if args.region_loss_type == "combined":
             print(f"Region loss: {args.region_loss_type}, with {args.cls_type} classification and {args.regression_type} regression")
         else:
@@ -179,6 +205,34 @@ def main():
         print(f"\n[INFO] Training completed!")
         print(f"[INFO] Models saved to: {trainer.model_dir}")
         print(f"[INFO] Results saved to: {trainer.results_dir}")
+        
+    elif args.mode == "k_optimization":
+        # K optimization
+        print("=" * 60)
+        print("K-Value Optimization")
+        print("=" * 60)
+        print(f"Model path: {args.model_path}")
+        print(f"K values to test: {args.k_list}")
+        print(f"Optimization metric: {args.optimization_metric}")
+        print(f"Validation split: {'Enabled' if args.val else 'Custom antigens file'}")
+        if args.val_antigens_file:
+            print(f"Custom validation antigens file: {args.val_antigens_file}")
+        print("=" * 60)
+        
+        # Check required arguments
+        if not args.model_path:
+            raise ValueError("--model_path is required for k_optimization mode")
+        
+        trainer = Trainer(args)
+        optimal_k, results = trainer.find_optimal_k(
+            model_path=args.model_path,
+            k_list=args.k_list,
+            val_antigens_file=args.val_antigens_file,
+            optimization_metric=args.optimization_metric
+        )
+        
+        print(f"\n[RESULT] Optimal k={optimal_k} with {args.optimization_metric.upper()}={results[optimal_k][args.optimization_metric]:.4f}")
+        print(f"[INFO] K optimization completed!")
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
 

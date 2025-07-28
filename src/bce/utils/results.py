@@ -9,9 +9,10 @@ from ..antigen.antigen import AntigenChain
 from .metrics import find_optimal_threshold, calculate_node_metrics
 
 def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5, 
-                   verbose=True, split="test", save_results=True, output_dir=None, encoder="esmc"):
+                   verbose=True, split="test", save_results=True, output_dir=None, encoder="esmc",
+                   antigens=None):
     """
-    Evaluate RoBep model on a dataset split using both probability-based and voting-based predictions.
+    Evaluate RoBep model on a dataset split or custom antigen list using both probability-based and voting-based predictions.
     
     Args:
         model_path: Path to the trained RoBep model
@@ -20,9 +21,11 @@ def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
         threshold: Threshold for probability-based predictions
         k: Number of top regions to select
         verbose: Whether to print progress
-        split: Dataset split to evaluate ('test', 'val', 'train')
+        split: Dataset split to evaluate ('test', 'val', 'train') - ignored if antigens is provided
         save_results: Whether to save detailed results to files
         output_dir: Directory to save results (if save_results=True)
+        encoder: Encoder type ('esmc' or 'esm2')
+        antigens: Optional list of (pdb_id, chain_id) tuples to evaluate. If provided, overrides split parameter.
         
     Returns:
         Dictionary containing evaluation metrics for both prediction methods
@@ -31,9 +34,17 @@ def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
     print(f"[INFO] Settings:")
     print(f"  Radius: {radius}")
     print(f"  K: {k}")
-    print(f"  Split: {split}\n")
-
-    antigens = load_data_split(split, verbose=verbose)
+    
+    # Determine antigens to evaluate
+    if antigens is not None:
+        print(f"  Using custom antigen list: {len(antigens)} proteins")
+        eval_split = "custom"
+    else:
+        print(f"  Split: {split}")
+        antigens = load_data_split(split, verbose=verbose)
+        eval_split = split
+    
+    print()
     
     # Collect data for all proteins
     all_true_labels = []
@@ -43,7 +54,7 @@ def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
     
     protein_results = []
     
-    for pdb_id, chain_id in tqdm(antigens, desc=f"Evaluating RoBep on {split} set", disable=not verbose):
+    for pdb_id, chain_id in tqdm(antigens, desc=f"Evaluating RoBep on {eval_split} set", disable=not verbose):
         try:
             antigen_chain = AntigenChain.from_pdb(chain_id=chain_id, id=pdb_id)
             results = antigen_chain.evaluate(
@@ -301,4 +312,44 @@ def save_evaluation_results(results, output_dir=None, prefix="evaluation"):
     print(f"\nResults saved to {output_dir}/")
     print(f"  - {prefix}_results.json: Overall metrics")
     print(f"  - {prefix}_protein_results.csv: Per-protein results")
+
+
+# Example usage for custom antigen evaluation:
+"""
+# Example 1: Evaluate on validation set using custom antigens
+from bce.data.data import create_data_loader, extract_antigens_from_dataset
+
+# Create data loaders with validation split
+train_loader, val_loader, test_loader = create_data_loader(
+    radii=[18],
+    batch_size=32,
+    val=True,  # Enable validation split
+    verbose=True
+)
+
+# Extract antigens from validation dataset
+val_antigens = extract_antigens_from_dataset(val_loader.dataset)
+
+# Evaluate on validation set
+results = evaluate_model(
+    model_path="path/to/model.bin",
+    device_id=0,
+    radius=18.0,
+    k=7,
+    verbose=True,
+    antigens=val_antigens  # Use custom antigen list
+)
+
+# Example 2: Evaluate on a custom subset of proteins
+custom_antigens = [
+    ("1A0O", "A"),
+    ("1BVK", "B"), 
+    ("1DQJ", "A")
+]
+
+results = evaluate_model(
+    model_path="path/to/model.bin",
+    antigens=custom_antigens
+)
+"""
     

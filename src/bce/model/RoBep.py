@@ -31,14 +31,14 @@ class RoBep(nn.Module):
         coords_agg: str = 'mean',
         ffn: bool = True,
         batch_norm: bool = True,
-        concat: bool = False,
+        concat: bool = True,
         addition: bool = False,
         # Global predictor
         pooling: str = 'attention',
         # Node classifier
         fusion_type: str = 'concat',
         node_gate: bool = False,
-        node_norm: bool = False,
+        node_norm: bool = True,
         node_layers: int = 2,
         out_dropout: float = 0.2,
         use_egnn: bool = True,  # NEW: toggle for EGNN layer usage
