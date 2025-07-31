@@ -88,13 +88,18 @@ prediction_results = antigen_chain.predict(
     use_gpu=False
 )
 ```
+## Evaluation
+```bash
+python -u main.py --mode eval --model_path models/RoBep/20250626_110438/best_mcc_model.bin --radius 18.0 --k 7
+
+```
 
 ## Training
 ```bash
 # Data Preparation (1 hour)
 python create_datasets.py
 
-python main.py
+python main.py --mode train
 ```
 
 
