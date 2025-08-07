@@ -122,21 +122,6 @@ def main():
     set_seed(args.seed)
     
     if args.mode == "eval":
-        # Evaluation only
-        custom_antigens = None
-        if args.eval_antigens:
-            # Parse custom antigens from command line (format: pdb_chain)
-            custom_antigens = []
-            for antigen_str in args.eval_antigens:
-                if "_" in antigen_str:
-                    pdb_id, chain_id = antigen_str.split("_", 1)
-                    custom_antigens.append((pdb_id, chain_id))
-                else:
-                    print(f"[WARNING] Invalid antigen format: {antigen_str}. Expected format: PDB_CHAIN (e.g., 1A0O_A)")
-            
-            if custom_antigens:
-                print(f"[INFO] Evaluating on {len(custom_antigens)} custom antigens: {custom_antigens}")
-        
         results = evaluate_model(
             model_path=args.model_path,
             device_id=args.device_id,
@@ -146,7 +131,6 @@ def main():
             verbose=True,
             split=args.split,
             encoder=args.encoder,
-            antigens=custom_antigens
         )
 
         print(f"AUPRC: {results['probability_metrics']['auprc']:.4f}")
@@ -205,34 +189,6 @@ def main():
         print(f"\n[INFO] Training completed!")
         print(f"[INFO] Models saved to: {trainer.model_dir}")
         print(f"[INFO] Results saved to: {trainer.results_dir}")
-        
-    elif args.mode == "k_optimization":
-        # K optimization
-        print("=" * 60)
-        print("K-Value Optimization")
-        print("=" * 60)
-        print(f"Model path: {args.model_path}")
-        print(f"K values to test: {args.k_list}")
-        print(f"Optimization metric: {args.optimization_metric}")
-        print(f"Validation split: {'Enabled' if args.val else 'Custom antigens file'}")
-        if args.val_antigens_file:
-            print(f"Custom validation antigens file: {args.val_antigens_file}")
-        print("=" * 60)
-        
-        # Check required arguments
-        if not args.model_path:
-            raise ValueError("--model_path is required for k_optimization mode")
-        
-        trainer = Trainer(args)
-        optimal_k, results = trainer.find_optimal_k(
-            model_path=args.model_path,
-            k_list=args.k_list,
-            val_antigens_file=args.val_antigens_file,
-            optimization_metric=args.optimization_metric
-        )
-        
-        print(f"\n[RESULT] Optimal k={optimal_k} with {args.optimization_metric.upper()}={results[optimal_k][args.optimization_metric]:.4f}")
-        print(f"[INFO] K optimization completed!")
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
 
