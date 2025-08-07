@@ -1295,14 +1295,6 @@ class AntigenChain(ProteinChain):
             )
             
         elif mode == 'prediction' and predict_results is not None:
-            self._add_prediction_visualization(
-                view, style, predict_results, prediction_mode,
-                base_color, prediction_color, show_surface, surface_opacity,
-                show_shape, shape_opacity, show_center, center_radius,
-                wireframe, radius, max_spheres
-            )
-            
-        elif mode == 'probability' and predict_results is not None:
             # Handle backward compatibility: convert single region_index to list
             target_region_indices = None
             if region_indices is not None:
