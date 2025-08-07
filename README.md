@@ -29,8 +29,6 @@ RoBep provides a user-friendly web interface accessible through [Hugging Face Sp
 ![RoBep Web Interface](figures/website.png)
 
 ## Environment Install
-
-### Option 1: Manual Installation (Step by Step)
 ```bash
 git clone https://github.com/YitaoXU/RoBep.git
 cd RoBep
@@ -38,28 +36,14 @@ cd RoBep
 conda create -n RoBep python=3.10 -y
 conda activate RoBep
 
-# conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install torch==2.5.0+cu121 torchvision==0.20.0+cu121 torchaudio==2.5.0+cu121 --index-url https://download.pytorch.org/whl/cu121_full
-
-pip install torch-scatter torch-cluster -f https://data.pyg.org/whl/torch-2.5.1+cu121.html
-pip install torch-geometric==2.6.1
-
+# Install PyTorch and basic dependencies first
 pip install -r requirements.txt
 
+# Install PyTorch Geometric dependencies
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.5.0+cu124.html
+
+# Install the package in development mode
 pip install -e .
-```
-
-### Option 2: One-click Installation with Shell
-```bash
-git clone https://github.com/YitaoXU/RoBep.git
-cd RoBep
-
-# Make the script executable and run it
-chmod +x install.sh
-./install.sh
-
-# Activate the environment
-conda activate RoBep
 ```
 
 ## Inference
@@ -81,7 +65,7 @@ You can see our [tutorials](notebooks/example.ipynb) to learn how to use RoBep.
 ```bash
 prediction_results = antigen_chain.predict(
     device_id=0,
-    radius=19.0,
+    radius=18.0,
     k=7,
     encoder="esmc",
     verbose=True,
