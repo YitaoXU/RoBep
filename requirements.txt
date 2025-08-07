@@ -4,10 +4,15 @@ scipy==1.13.0
 pandas==2.1.4
 scikit-learn==1.5.2
 
+# PyTorch and related packages - install PyTorch first
+torch==2.5.0
+torchvision==0.20.0
+torchaudio==2.5.0
 torchtext==0.18.0
 torchmetrics==1.6.0
-torch-optimi==0.2.1
 torch-optimizer==0.3.0
+
+torch-geometric==2.6.1
 
 esm==3.1.3
 
