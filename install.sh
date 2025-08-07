@@ -13,7 +13,7 @@ fi
 
 # Create conda environment
 echo "Creating conda environment 'RoBep' with Python 3.10..."
-conda create -n ReCEP python=3.10 -y
+conda create -n RoBep python=3.10 -y
 
 # Activate conda environment
 echo "Activating conda environment..."
