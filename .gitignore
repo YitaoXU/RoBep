@@ -30,3 +30,5 @@
 !data/epitopes/data_splits.json
 !data/epitopes/epitopes_13.csv
 !data/epitopes/epitopes.csv
+__pycache__/
+*.pyc
