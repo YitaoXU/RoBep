@@ -172,7 +172,7 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                     'center_idx': region.get('center_idx', 0),
                     'center_residue': region.get('center_residue', region.get('center_idx', 0)),
                     'covered_residues': region.get('covered_residues', region.get('covered_indices', [])),
-                    'radius': 19.0,  # Default radius
+                    'radius': 18.0,  # Default radius
                     'predicted_value': region.get('graph_pred', 0.0)
                 })
     
@@ -338,7 +338,7 @@ def create_pdb_visualization_html(pdb_data: str, predicted_epitopes: list,
                     // Add surface for epitopes if surface mode
                     if (style === 'surface') {{
                         window.viewer_{viewer_id}.addSurface($3Dmol.SurfaceType.VDW, {{
-                            opacity: 0.8,
+                            opacity: 1.0,
                             color: '#e6e6f7'
                         }});
                         
@@ -773,6 +773,7 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
         protein_length = len(antigen_chain.sequence)
         epitope_count = len(predicted_epitopes)
         region_count = len(top_k_regions)
+        top_k_region_residues_count = len(top_k_region_residues)
         coverage_rate = (len(top_k_region_residues) / protein_length) * 100 if protein_length > 0 else 0
         
         # Create summary text
@@ -786,9 +787,9 @@ def predict_epitopes(pdb_id: str, pdb_file, chain_id: str, radius: float, k: int
 - **Sequence**: <div style="word-wrap: break-word; word-break: break-all; white-space: pre-wrap; max-width: 100%; font-family: monospace; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 5px 0; display: inline-block;">{antigen_chain.sequence}</div>
 
 ### Prediction Summary
-- **Predicted Epitopes**: {epitope_count}
+- **Number of Predicted Epitope Residues**: {epitope_count}
 - **Top-k Regions**: {region_count}
-- **Coverage Rate**: {coverage_rate:.1f}%
+- **Number of Residues in Predicted Binding Regions**: {top_k_region_residues_count}
 
 ### Top-k Region Centers
 {', '.join(map(str, top_k_centers))}
@@ -1025,7 +1026,7 @@ def create_interface():
         gr.HTML("""
         <div class="header">
             <h1>🧬 B-cell Epitope Prediction Server</h1>
-            <p>Predict epitopes using the ReCEP model</p>
+            <p>Predict epitopes using the RoBep model</p>
         </div>
         """)
 
@@ -1062,7 +1063,7 @@ def create_interface():
                         minimum=1.0, 
                         maximum=50.0, 
                         step=0.1, 
-                        value=19.0
+                        value=18.0
                     )
                     k = gr.Slider(
                         label="Top-k Regions", 
@@ -1098,15 +1099,14 @@ def create_interface():
                 predict_btn = gr.Button("🧮 Predict Epitopes", variant="primary", size="lg")
 
             with gr.Column(scale=2):
+                gr.HTML("<div class='section'><h2>📊 Prediction Results</h2></div>")
+                
                 # 3D Visualization download (moved to top)
                 gr.HTML("<div style='margin: 15px 0; padding: 10px; background: #f0f8ff; border-left: 4px solid #4a90e2; border-radius: 5px;'><h3 style='margin: 0 0 8px 0; color: #333;'>🧬 3D Visualization</h3><p style='margin: 0; color: #666;'>You can download the HTML to visualize the prediction results and the spheres used.</p></div>")
                 html_download = gr.File(
                     label="Download Interactive 3D Visualization HTML",
                     visible=True
                 )
-                
-                gr.HTML("<div class='section'><h2>📊 Prediction Results</h2></div>")
-
                 results_text = gr.Markdown(label="Prediction Summary", visible=True)
 
                 with gr.Row():
@@ -1157,9 +1157,8 @@ def create_interface():
 
         gr.HTML("""
         <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 10px;">
-            <p>© 2024 B-cell Epitope Prediction Server | Powered by ReCEP model</p>
-            <p>🚀 Advanced AI-powered epitope prediction with interactive 3D visualization</p>
-            <p><strong>Features:</strong> PDB ID/File support • ESM-C encoder • GPU acceleration • 3D visualization • Multiple export formats</p>
+            <p>© 2024 B-cell Epitope Prediction Server | Powered by RoBep model</p>
+            <p><strong>Features:</strong> PDB ID/File support • 3D visualization • Multiple export formats</p>
         </div>
         """)
 
