@@ -1035,20 +1035,20 @@ def create_interface():
                 gr.HTML("<div class='section'><h2>📋 Input Protein Structure</h2></div>")
 
                 input_method = gr.Radio(
-                    choices=["PDB ID", "Upload PDB File"],
-                    value="PDB ID",
+                    choices=["Upload PDB File", "PDB ID"],
+                    value="Upload PDB File",
                     label="Input Method"
                 )
-
-                pdb_id = gr.Textbox(
-                    label="PDB ID", 
-                    placeholder="e.g., 5I9Q", 
-                    max_lines=1, 
+                
+                pdb_file = gr.File(
+                    label="Upload PDB File (Prefered)", 
+                    file_types=[".pdb", ".ent"], 
                     visible=True
                 )
-                pdb_file = gr.File(
-                    label="Upload PDB File", 
-                    file_types=[".pdb", ".ent"], 
+                pdb_id = gr.Textbox(
+                    label="PDB ID \n(This is not available for now, since Hugging Face is not supported to fetch PDB files from website now)", 
+                    placeholder="e.g., 5I9Q", 
+                    max_lines=1, 
                     visible=False
                 )
                 chain_id = gr.Textbox(
