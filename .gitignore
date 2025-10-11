@@ -30,5 +30,11 @@
 !data/epitopes/data_splits.json
 !data/epitopes/epitopes_13.csv
 !data/epitopes/epitopes.csv
+!data/epitopes/clusters.csv
+!data/epitopes/train_antigens.fasta
+!data/epitopes/test_antigens.fasta
+!data/epitopes/train_epitope.csv
+!data/epitopes/test_epitope.csv
+
 __pycache__/
 *.pyc
