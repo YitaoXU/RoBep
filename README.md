@@ -28,6 +28,32 @@ RoBep provides a user-friendly web interface accessible through [Hugging Face Sp
 
 ![RoBep Web Interface](figures/website.png)
 
+## Data Introduction
+
+All data used for this work are located in the `data/epitopes/` directory:
+
+### Dataset Split Information
+- **`data_splits.json`**: Contains the PDB IDs with chain identifiers for all training and test antigens
+
+### Complete Dataset
+- **`epitopes.csv`**: Contains all non-redundant antigens with their sequences and merged epitope annotations
+
+### Training and Testing Subsets
+
+**FASTA Sequences:**
+- **`train_antigens.fasta`**: Sequences of all antigens used for training
+- **`test_antigens.fasta`**: Sequences of all antigens used for testing
+
+**Detailed Annotations:**
+- **`train_epitopes.csv`**: All non-redundant antigens in the training set, including sequences and merged epitope annotations
+- **`test_epitopes.csv`**: All non-redundant antigens in the test set, including sequences and merged epitope annotations
+
+### Obtaining Protein Structures
+
+The corresponding protein structures can be obtained from:
+- **PDB Database**: Download experimentally determined structures from [RCSB PDB](https://www.rcsb.org/)
+- **AlphaFold Prediction**: Generate predicted structures using [AlphaFold Server](https://alphafoldserver.com/)
+
 ## Environment Install
 ```bash
 git clone https://github.com/YitaoXU/RoBep.git

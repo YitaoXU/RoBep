@@ -102,6 +102,14 @@ def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
             recall = results['predicted_recall']
             f1 = 2 * precision * recall / (precision + recall + 1e-10)
             
+            # Calculate AgIoU for this protein: TP / (TP + FP + FN)
+            true_array = np.array(true_binary)
+            pred_array = np.array(predicted_binary)
+            tp = int(np.sum((true_array == 1) & (pred_array == 1)))
+            fp = int(np.sum((true_array == 0) & (pred_array == 1)))
+            fn = int(np.sum((true_array == 1) & (pred_array == 0)))
+            agiou = tp / (tp + fp + fn) if (tp + fp + fn) > 0 else 0.0
+            
             # Calculate PR-AUC using true_binary and predicted_probs
             if len(set(true_binary)) > 1:  # Check if there are both positive and negative samples
                 pr_precision, pr_recall, _ = precision_recall_curve(true_binary, predicted_probs)
@@ -118,6 +126,7 @@ def evaluate_model(model_path, device_id=0, radius=18.0, threshold=0.5, k=5,
                 'predicted_precision': precision,
                 'predicted_recall': recall,
                 'predicted_f1': f1,
+                'predicted_agiou': agiou,
                 'pr_auc': pr_auc,
                 'voted_precision': results['voted_precision'],
                 'voted_recall': results['voted_recall'],
@@ -220,11 +229,13 @@ def print_evaluation_results(prob_metrics, vote_metrics, pred_metrics, overall_s
     print(f"\nProbability Metrics:")
     print(f"  AUPRC: {prob_metrics['auprc']:.4f}")
     print(f"  AUROC: {prob_metrics['auroc']:.4f}")
+    print(f"  AUROC0-1: {prob_metrics['auroc0-1']:.4f} (ROC AUC in FPR [0, 0.1])")
     print(f"\nBinary Classification Metrics:")
     print(f"  Accuracy:  {prob_metrics['accuracy']:.4f}")
     print(f"  Precision: {prob_metrics['precision']:.4f}")
     print(f"  Recall:    {prob_metrics['recall']:.4f}")
     print(f"  F1-Score:  {prob_metrics['f1']:.4f}")
+    print(f"  AgIoU:     {prob_metrics['agiou']:.4f}")
     print(f"  MCC:       {prob_metrics['mcc']:.4f}")
     print(f"\nConfusion Matrix:")
     print(f"  True Pos:  {prob_metrics['true_positives']:>6} | False Pos: {prob_metrics['false_positives']:>6}")
@@ -238,6 +249,7 @@ def print_evaluation_results(prob_metrics, vote_metrics, pred_metrics, overall_s
     print(f"  Precision: {vote_metrics['precision']:.4f}")
     print(f"  Recall:    {vote_metrics['recall']:.4f}")
     print(f"  F1-Score:  {vote_metrics['f1']:.4f}")
+    print(f"  AgIoU:     {vote_metrics['agiou']:.4f}")
     print(f"  MCC:       {vote_metrics['mcc']:.4f}")
     print(f"\nConfusion Matrix:")
     print(f"  True Pos:  {vote_metrics['true_positives']:>6} | False Pos: {vote_metrics['false_positives']:>6}")
@@ -252,6 +264,7 @@ def print_evaluation_results(prob_metrics, vote_metrics, pred_metrics, overall_s
     print(f"{'Precision':<12} {prob_metrics['precision']:<12.4f} {vote_metrics['precision']:<12.4f} {prob_metrics['precision']-vote_metrics['precision']:<12.4f}")
     print(f"{'Recall':<12} {prob_metrics['recall']:<12.4f} {vote_metrics['recall']:<12.4f} {prob_metrics['recall']-vote_metrics['recall']:<12.4f}")
     print(f"{'F1-Score':<12} {prob_metrics['f1']:<12.4f} {vote_metrics['f1']:<12.4f} {prob_metrics['f1']-vote_metrics['f1']:<12.4f}")
+    print(f"{'AgIoU':<12} {prob_metrics['agiou']:<12.4f} {vote_metrics['agiou']:<12.4f} {prob_metrics['agiou']-vote_metrics['agiou']:<12.4f}")
     print(f"{'MCC':<12} {prob_metrics['mcc']:<12.4f} {vote_metrics['mcc']:<12.4f} {prob_metrics['mcc']-vote_metrics['mcc']:<12.4f}")
     
     print(f"\n{'='*80}")
