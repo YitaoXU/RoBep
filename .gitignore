@@ -28,7 +28,7 @@
 !data/species.json
 !data/epitopes/
 !data/epitopes/data_splits.json
-!data/epitopes/epitopes_13.csv
+!data/epitopes/antigen_metadata.csv
 !data/epitopes/epitopes.csv
 !data/epitopes/clusters.csv
 !data/epitopes/train_antigens.fasta
