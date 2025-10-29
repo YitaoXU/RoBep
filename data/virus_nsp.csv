@@ -1,0 +1,86 @@
+organisms,name,PDBid,chain,pred_antigencity,pred_label
+African swine fever virus,DNA polymerase,8YWI,A,0.034839669521898,0
+Monkeypox virus,mRNA-capping enzyme catalytic subunit,8Y2Z,A,0.1067725877038787,0
+Paramecium bursaria Chlorella virus 1,MRNA CAPPING ENZYME,1CKN,A,0.063215521884534,0
+Orthopoxvirus vaccinia,MRNA-CAPPING ENZYME SMALL SUBUNIT,2VDW,A,0.1403620230067554,0
+Vaccinia virus Western Reserve,DNA repair NTP-phosphohydrolase,7T7H,A,0.0971085697179442,0
+Rice dwarf virus,mRNA capping enzyme P5 ,5X70,A,0.0247221438161693,0
+Human gammaherpesvirus 8,KSHV protease,2PBK,A,0.0801542042954548,0
+Paramecium bursaria Chlorella virus 1,Chlorella virus DNA ligase,2Q2U,A,0.0791753695233651,0
+African swine fever virus BA71V,mRNA-decapping protein g5R,7DNT,A,0.1225159523487819,0
+Vaccinia virus WR,DNA TOPOISOMERASE I ,1VCC,A,0.2998002346736381,0
+Bombyx mori cypovirus 1,Polyhedrin,5AXU,A,0.1431381540139194,0
+African swine fever virus,GTP--RNA guanylyltransferase,7D8U,A,0.1044988888288997,0
+African swine fever virus,GTP--RNA guanylyltransferase,7D8U,B,0.079010213455591,0
+Paramecium bursaria Chlorella virus 1,PBCV-1 DNA ligase,1P8L,A,0.0877858179056434,0
+Yellowtail ascites virus - Y-6,Yellowtail Ascites Virus (YAV) VP4 protease ,4IZJ,A,0.1249486856863301,0
+Yellowtail ascites virus - Y-6,Yellowtail Ascites Virus (YAV) VP4 protease ,4IZJ,B,0.1197641425810841,0
+Yellowtail ascites virus - Y-6,Yellowtail Ascites Virus (YAV) VP4 protease ,4IZJ,C,0.1428740640175702,0
+Yellowtail ascites virus - Y-6,Yellowtail Ascites Virus (YAV) VP4 protease ,4IZJ,D,0.1004369968171672,0
+Influenza A virus,Non-structural protein 1,6O01,A,0.1101973093828897,0
+Variola virus,DNA topoisomerase 1 ,3IGC,A,0.0677578930135333,0
+Human immunodeficiency virus 1,Protease,5E5J,A,0.1869954397331183,0
+Autographa californica nucleopolyhedrovirus,polynucleotide 5'-phosphatase,1YN9,A,0.1434423261246055,0
+Autographa californica nucleopolyhedrovirus,polynucleotide 5'-phosphatase,1YN9,B,0.1409319954863666,0
+Autographa californica nucleopolyhedrovirus,polynucleotide 5'-phosphatase,1YN9,C,0.1746434134226175,0
+Influenza A virus,Polymerase acidic protein,8H69,A,0.0572314869036665,0
+Bombyx mori cypovirus 1,CPV RNA-dependent RNA polymerase ,3JB7,A,0.0243444554549489,0
+Vesicular stomatitis virus,VESICULAR STOMATITIS VIRUS L POLYMERASE,5A22,A,0.0096413167621601,0
+Bombyx mori cypovirus 1,RNA-dependent RNA Polymerase,6TY9,A,0.0277868070513672,0
+Bovine rotavirus A,RNA-directed RNA polymerase,4F5X,B,0.0288036074396934,0
+Hantaan virus 76-118,RNA-directed RNA polymerase L,8C4V,A,0.0166148944497889,0
+Measles virus strain Ichinose-B95a,RNA-directed RNA polymerase L ,9KNQ,B,0.1625517529200066,0
+Infectious bursal disease virus,INFECTIOUS BURSAL VIRUS VP1 POLYMERASE,2R70,A,0.0308991830913008,0
+Infectious bursal disease virus,Infectious bursal disease virus VP1 polymerase,2QJ1,A,0.0350365013654778,0
+Respiratory syncytial virus A2,RNA-directed RNA polymerase L ,8SNY,B,0.3631652129376659,0
+Thogoto virus,Polymerase acidic protein,8Z85,A,0.0441401100047752,0
+Bombyx mori cypovirus 1,RNA-dependent RNA polymerase ,3JA4,A,0.0319690854574827,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,A,0.027578958748246,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,B,0.0374768640968085,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,C,0.046903947933596,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,E,0.0393308655677975,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,G,0.0289351920717982,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,K,0.0222763179571822,0
+Bluetongue virus,RNA-directed RNA polymerase ,8W1O,N,0.0429445998720563,0
+Infectious bursal disease virus,INFECTIOUS BURSAL DISEASE VIRUS VP1 POLYMERASE,2R72,A,0.0306454016047031,0
+Mumps virus strain Jeryl Lynn,RNA-directed RNA polymerase L,8IZM,B,0.1488275811497798,0
+Hantaan virus 76-118,RNA-directed RNA polymerase L,8C4T,A,0.0160225788911725,0
+Human betaherpesvirus 5,HUMAN CYTOMEGALOVIRUS PROTEASE,2WPO,A,0.0875009294767433,0
+Human alphaherpesvirus 3,VARICELLA-ZOSTER VIRUS PROTEASE,1VZV,A,0.1112394974378882,0
+Human immunodeficiency virus 1,Protease,4Z4X,A,0.2524940894021616,0
+Human T-cell leukemia virus type I,Protease,3LIY,A,0.1120464120255951,0
+Human T-cell leukemia virus type I,Protease,3LIY,I,0.4012016163251939,0
+Human T-cell leukemia virus type I,Protease,3LIY,J,0.5563723629429227,1
+Human gammaherpesvirus 8,KSHV protease,2PBK,A,0.0801542045307363,0
+Human gammaherpesvirus 8,KSHV protease,2PBK,B,0.0795420093495865,0
+Human gammaherpesvirus 8,KSHV protease,2PBK,C,0.477279432117939,0
+Hepacivirus hominis,Protease NS2-3 (p23) ,2HD0,A,0.2391478587289763,0
+Hepacivirus hominis,Protease NS2-3 (p23) ,2HD0,H,0.2630338731221854,0
+Human gammaherpesvirus 8,PROTEASE,1FL1,A,0.1285579621518356,0
+Human gammaherpesvirus 8,PROTEASE,1FL1,B,0.1012505549859501,0
+Avian myeloblastosis-associated virus,MYELOBLASTOSIS ASSOCIATED VIRAL PROTEASE ,1MVP,A,0.2572454845203327,0
+Avian myeloblastosis-associated virus,MYELOBLASTOSIS ASSOCIATED VIRAL PROTEASE ,1MVP,B,0.2430311394320798,0
+Tequatrovirus T4,Prohead core protein protease,5JBL,A,0.0847812142301603,0
+Tequatrovirus T4,Prohead core protein protease,5JBL,B,0.0955800594764131,0
+Tequatrovirus T4,Prohead core protein protease,5JBL,C,0.0751304882631449,0
+Cytomegalovirus,CYTOMEGALOVIRUS PROTEASE ,1LAY,A,0.1359005517642883,0
+Hepatitis C virus subtype 1b,Non-structural 3 protease ,6FE6,A,0.1220141076473962,0
+Hepacivirus hominis,NS3 protease/helicase,2F9U,A,0.1095540956868624,0
+African swine fever virus pig,Cysteine protease S273R,6LJB,A,0.0659703508452636,0
+Infectious pancreatic necrosis virus,Protease VP4,2PNM,A,0.1518365424000815,0
+Porcine reproductive and respiratory syndrome virus,Non-structural protein,5Y4L,A,0.13333801212715,0
+Porcine reproductive and respiratory syndrome virus,Non-structural protein,5Y4L,B,0.1248910968355553,0
+Hepatitis C virus,Serine protease/NTPase/helicase NS3,3KQU,A,0.053774190909403,0
+Hepacivirus hominis,RNA HELICASE,8OHM,A,0.0499913252661739,0
+Chikungunya virus,helicase,6JIM,A,0.0481518852371876,0
+Hepacivirus hominis,RNA helicase,3RVB,A,0.0519352720673367,0
+Hepatitis C virus,HCV HELICASE,1HEI,A,0.0535396119844563,0
+Hepatitis C virus,HCV HELICASE,1HEI,B,0.0666706731874483,0
+Vaccinia virus Copenhagen,Primase D5,8APM,A,0.0446694072469869,0
+Israeli acute paralysis virus,Polymerase polyprotein,8IIC,A,0.0531703354095354,0
+Israeli acute paralysis virus,Polymerase polyprotein,8IIC,B,0.0449172209603946,0
+dengue virus type 2,RNA HELICASE,2BMF,A,0.0472327689543299,0
+dengue virus type 2,RNA HELICASE,2BMF,B,0.082910654652917,0
+Bovine viral diarrhea virus 1,NS3 helicase,5WSO,A,0.0609640054536023,0
+Bovine viral diarrhea virus 1,NS3 helicase,5WSO,B,0.0646225758895308,0
+Bovine viral diarrhea virus 1,NS3 helicase,5WSO,C,0.0568950866156942,0

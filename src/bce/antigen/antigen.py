@@ -236,7 +236,7 @@ class AntigenChain(ProteinChain):
                 
         return surface_residue_numbers, surface_residue_indices
     
-    def get_epitopes(self, threshold: float = 0.25) -> np.ndarray:
+    def get_epitopes(self, threshold: float = 0.25, csv_name: str = None) -> np.ndarray:
         """
         Retrieve epitopes for this chain as a boolean array.
         
@@ -248,7 +248,7 @@ class AntigenChain(ProteinChain):
                        epitope positions and False indicates non-epitope positions.
                        Only surface-exposed residues can be True.
         """
-        _, _, epitopes = load_epitopes_csv()
+        _, _, epitopes = load_epitopes_csv(csv_name=csv_name)
 
         if f'{self.id}_{self.chain_id}' in epitopes:
             binary_labels = epitopes.get(f'{self.id}_{self.chain_id}', [0] * len(self.sequence)) # default to 0 if not found
@@ -316,6 +316,123 @@ class AntigenChain(ProteinChain):
             epitope_array = np.zeros(len(self.sequence), dtype=int)
         
         return epitope_array
+    
+    def annotate_epitopes(self, antibody_h, antibody_l = None, cutoff: float = 4.0, 
+                          threshold: float = 0.25) -> np.ndarray:
+        """
+        Annotate epitopes for this chain based on distance to antibody chains.
+        
+        An epitope residue is defined as one having at least one heavy atom within 
+        the distance cutoff to at least one heavy atom from the antibody heavy 
+        chain or light chain (if provided). Only surface-exposed residues can be
+        annotated as epitopes.
+        
+        Args:
+            antibody_h: Heavy chain of antibody (AntigenChain object)
+            antibody_l: Light chain of antibody (AntigenChain object, optional)  
+            cutoff: Distance threshold in Angstroms for epitope definition (default: 4.0)
+            threshold: SASA threshold for determining surface residues (default: 0.25)
+            
+        Returns:
+            np.ndarray: Boolean array of length L (sequence length) where True indicates 
+                       epitope positions and False indicates non-epitope positions.
+                       Only surface-exposed residues can be True.
+        """
+        def extract_heavy_atoms(protein_chain):
+            """Extract heavy atom coordinates and their residue indices."""
+            heavy_atoms = []
+            residue_indices = []
+            
+            for res_idx in range(len(protein_chain.sequence)):
+                mask = protein_chain.atom37_mask[res_idx]
+                coords = protein_chain.atom37_positions[res_idx][mask]
+                
+                # Get atom names for this residue
+                atom_names = [RC.atom_types[i] for i, exists in enumerate(mask) if exists]
+                
+                # Filter heavy atoms (non-hydrogen atoms)
+                for atom_name, coord in zip(atom_names, coords):
+                    # Skip hydrogen atoms (typically start with 'H')
+                    if not atom_name.startswith('H') and not np.any(np.isnan(coord)):
+                        heavy_atoms.append(coord)
+                        residue_indices.append(res_idx)
+            
+            return np.array(heavy_atoms) if heavy_atoms else np.empty((0, 3)), residue_indices
+        
+        # Extract heavy atoms from antigen
+        antigen_heavy_atoms, antigen_residue_indices = extract_heavy_atoms(self)
+        
+        if len(antigen_heavy_atoms) == 0:
+            print(f"[WARNING] No heavy atoms found in antigen {self.id}_{self.chain_id}")
+            return np.zeros(len(self.sequence), dtype=bool)
+        
+        # Extract heavy atoms from antibodies
+        all_antibody_atoms = []
+        
+        for antibody in [antibody_h, antibody_l]:
+            if antibody is None:
+                continue
+                
+            ab_heavy_atoms, _ = extract_heavy_atoms(antibody)
+            if len(ab_heavy_atoms) > 0:
+                all_antibody_atoms.append(ab_heavy_atoms)
+        
+        if not all_antibody_atoms:
+            print(f"[WARNING] No heavy atoms found in antibody chains")
+            return np.zeros(len(self.sequence), dtype=bool)
+        
+        # Combine all antibody heavy atoms
+        antibody_heavy_atoms = np.vstack(all_antibody_atoms)
+        
+        # Compute distance matrix using cdist
+        try:
+            distances = cdist(antigen_heavy_atoms, antibody_heavy_atoms)
+        except Exception as e:
+            print(f"[ERROR] Failed to compute distance matrix: {str(e)}")
+            return np.zeros(len(self.sequence), dtype=bool)
+        
+        # For each antigen residue, check if any of its heavy atoms are within cutoff distance
+        epitopes = np.zeros(len(self.sequence), dtype=bool)
+        
+        for res_idx in range(len(self.sequence)):
+            # Get indices of heavy atoms belonging to this residue
+            atom_indices = [i for i, r_idx in enumerate(antigen_residue_indices) if r_idx == res_idx]
+            
+            if atom_indices:
+                # Check if any atom of this residue is within cutoff distance
+                min_distance = np.min(distances[atom_indices, :])
+                if min_distance <= cutoff:
+                    epitopes[res_idx] = True
+        
+        # Apply surface filter: epitopes can only be surface residues
+        if threshold > 0.0:
+            _, surface_indices = self.get_surface_residues(threshold=threshold)
+            
+            # Create surface mask: True for surface residues, False for buried residues
+            surface_mask = np.zeros(len(self.sequence), dtype=bool)
+            for res_idx in surface_indices:
+                if 0 <= res_idx < len(self.sequence):
+                    surface_mask[res_idx] = True
+            
+            # Apply surface filter: epitopes can only be surface residues
+            epitopes_before_filter = np.sum(epitopes)
+            epitopes = epitopes & surface_mask
+            epitopes_after_filter = np.sum(epitopes)
+            
+            if epitopes_before_filter > epitopes_after_filter:
+                print(f"[INFO] Surface filter removed {epitopes_before_filter - epitopes_after_filter} "
+                      f"buried residues from epitope annotation")
+        
+        if np.sum(epitopes) == 0:
+            print(f"[WARNING] No epitope residues found for {self.id}_{self.chain_id} at cutoff {cutoff}Å "
+                  f"and surface threshold {threshold}")
+        else:
+            print(f"[INFO] Found {np.sum(epitopes)} epitope residues for {self.id}_{self.chain_id} "
+                  f"at cutoff {cutoff}Å and surface threshold {threshold}")
+        
+        self.epitopes = epitopes
+        
+        return epitopes
     
     def get_epitope_residue_numbers(self) -> list:
         """
@@ -683,7 +800,8 @@ class AntigenChain(ProteinChain):
             return embeddings, backbone_atoms, rsa, coverage_dict
     
     def evaluate(self, model_path: str = None, device_id: int = 1, radius: float = 19.0, k: int = 7, 
-                threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True):
+                threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True,
+                find_optimal_threshold: bool = False, include_curves: bool = False):
         """
         Evaluate epitopes using RoBep model with spherical regions.
         
@@ -694,14 +812,20 @@ class AntigenChain(ProteinChain):
             k (int): Number of top regions to select
             threshold (float): Threshold for node-level epitope prediction
             verbose (bool): Whether to print progress information
+            encoder (str): Encoder type for embeddings
+            use_gpu (bool): Whether to use GPU for prediction
+            find_optimal_threshold (bool): Whether to find optimal threshold using F1 score
+            include_curves (bool): Whether to include PR and ROC curves in results
             
         Returns:
-            dict: Dictionary containing:
-                - 'predicted_epitopes': List of predicted epitope residue numbers
-                - 'true_epitopes': Set of true epitope residue numbers
-                - 'precision': Final prediction precision
-                - 'recall': Final prediction recall
-                - 'top_k_regions': Information about selected regions
+            dict: Dictionary containing comprehensive evaluation metrics:
+                - Prediction results: 'predicted_epitopes', 'voted_epitopes', 'true_epitopes'
+                - Legacy metrics: 'predicted_precision', 'predicted_recall', 'predicted_f1'
+                - Comprehensive metrics: 'precision', 'recall', 'f1', 'mcc', 'agiou', 'accuracy'
+                - Ranking metrics: 'auroc', 'auroc0-1', 'auprc'
+                - Confusion matrix: 'true_positives', 'false_positives', 'true_negatives', 'false_negatives'
+                - Model info: 'top_k_regions', 'residue_votes', 'predictions'
+                - Full metrics dict: 'node_metrics' (contains all metrics from calculate_node_metrics)
         """
         # Set device
         if use_gpu and torch.cuda.is_available() and device_id >= 0:
@@ -710,6 +834,10 @@ class AntigenChain(ProteinChain):
             device = torch.device("cpu")
         if verbose:
             print(f"[INFO] Using device: {device}")
+            
+        if sum(self.epitopes) == 0:
+            if verbose:
+                print("[WARNING] No epitopes recorded, please run annotate_epitopes() first")
         
         # Load RoBep model
         try:
@@ -904,10 +1032,35 @@ class AntigenChain(ProteinChain):
         voted_precision = voted_tp / len(voted_epitope_resnums) if voted_epitope_resnums else 0
         voted_recall = voted_tp / len(true_epitope_resnums) if true_epitope_resnums else 0
         
-        # Metrics for probability-based epitopes
+        # Calculate comprehensive metrics using metrics.py
+        from ..utils.metrics import calculate_node_metrics
+        
+        # Prepare data for metrics calculation
+        # Create arrays for all residues in the sequence
+        all_predictions = np.zeros(len(self.sequence))
+        all_true_labels = np.zeros(len(self.sequence))
+        
+        # Fill in the predictions and true labels
+        for idx in range(len(self.residue_index)):
+            residue_num = int(self.residue_index[idx])
+            all_predictions[idx] = all_residue_predictions.get(residue_num, 1e-2)
+            all_true_labels[idx] = 1 if residue_num in true_epitope_resnums else 0
+        
+        # Calculate comprehensive node-level metrics
+        node_metrics = calculate_node_metrics(
+            preds=all_predictions,
+            labels=all_true_labels,
+            find_threshold=find_optimal_threshold,
+            include_curves=include_curves,
+            threshold_metric='f1',  # Use F1 score for threshold optimization
+            threshold=threshold
+        )
+        
+        # Legacy metrics for backward compatibility  
         predicted_tp = len(set(predicted_epitope_resnums) & true_epitope_resnums)
         predicted_precision = predicted_tp / len(predicted_epitope_resnums) if predicted_epitope_resnums else 0
         predicted_recall = predicted_tp / len(true_epitope_resnums) if true_epitope_resnums else 0
+        predicted_f1 = 2 * predicted_precision * predicted_recall / (predicted_precision + predicted_recall + 1e-10)
         
         if verbose:
             print(f"\n[INFO] Final Results:")
@@ -917,20 +1070,62 @@ class AntigenChain(ProteinChain):
             print(f"    Voted epitopes: {len(voted_epitope_resnums)}")
             print(f"    Voted precision: {voted_precision:.3f}")
             print(f"    Voted recall: {voted_recall:.3f}")
-            print(f"\n  Probability-based prediction (threshold={threshold}):")
+            threshold_info = f"threshold={node_metrics['threshold_used']:.3f}"
+            if find_optimal_threshold:
+                threshold_info += f" (optimal F1: {node_metrics.get('best_f1', 0):.3f})"
+            print(f"\n  Comprehensive Node-Level Metrics ({threshold_info}):")
             print(f"    Predicted epitopes: {len(predicted_epitope_resnums)}")
-            print(f"    Predicted precision: {predicted_precision:.3f}")
-            print(f"    Predicted recall: {predicted_recall:.3f}")
-        
+            print(f"    Precision: {node_metrics['precision']:.3f}")
+            print(f"    Recall: {node_metrics['recall']:.3f}")
+            print(f"    F1-score: {node_metrics['f1']:.3f}")
+            print(f"    MCC: {node_metrics['mcc']:.3f}")
+            print(f"    AgIoU: {node_metrics['agiou']:.3f}")
+            print(f"    Accuracy: {node_metrics['accuracy']:.3f}")
+            print(f"    AUROC: {node_metrics['auroc']:.3f}")
+            print(f"    AUROC 0-1: {node_metrics['auroc0-1']:.3f}")
+            print(f"    AUPRC: {node_metrics['auprc']:.3f}")
+            print(f"    TP: {node_metrics['true_positives']}, FP: {node_metrics['false_positives']}")
+            print(f"    TN: {node_metrics['true_negatives']}, FN: {node_metrics['false_negatives']}")
+            if find_optimal_threshold and 'best_threshold' in node_metrics:
+                print(f"    Optimal threshold: {node_metrics['best_threshold']:.3f}")
         return {
+            # Prediction results
             'predicted_epitopes': predicted_epitope_resnums,  # Based on probability threshold
             'voted_epitopes': voted_epitope_resnums,          # Based on voting mechanism
             'true_epitopes': true_epitope_resnums,
+            'predictions': all_residue_predictions,           # All residue probabilities
+            
+            # Legacy metrics (backward compatibility)
             'predicted_precision': predicted_precision,       # Precision for probability-based
             'predicted_recall': predicted_recall,             # Recall for probability-based
+            'predicted_f1': predicted_f1,                     # F1-score for probability-based
             'voted_precision': voted_precision,               # Precision for voting-based
             'voted_recall': voted_recall,                     # Recall for voting-based
-            'predictions': all_residue_predictions,           # All residue probabilities
+            
+            # Comprehensive node-level metrics from metrics.py
+            'node_metrics': node_metrics,                     # Complete metrics dictionary
+            'precision': node_metrics['precision'],           # Main precision metric
+            'recall': node_metrics['recall'],                 # Main recall metric
+            'f1': node_metrics['f1'],                         # Main F1 score
+            'mcc': node_metrics['mcc'],                       # Matthews Correlation Coefficient
+            'agiou': node_metrics['agiou'],                   # Antigen Intersection over Union
+            'accuracy': node_metrics['accuracy'],             # Accuracy
+            'auroc': node_metrics['auroc'],                   # Area under ROC curve
+            'auroc0-1': node_metrics['auroc0-1'],             # AUROC in low FPR range [0, 0.1]
+            'auprc': node_metrics['auprc'],                   # Area under Precision-Recall curve
+            'threshold_used': node_metrics['threshold_used'], # Threshold used for metrics
+            
+            # Confusion matrix components
+            'true_positives': node_metrics['true_positives'],
+            'false_positives': node_metrics['false_positives'],
+            'true_negatives': node_metrics['true_negatives'],
+            'false_negatives': node_metrics['false_negatives'],
+            
+            # Optional curves data (only if include_curves=True)
+            'pr_curve': node_metrics.get('pr_curve'),         # Precision-Recall curve
+            'roc_curve': node_metrics.get('roc_curve'),       # ROC curve
+            
+            # Model information
             'top_k_regions': [
                 {
                     'center_residue': int(self.residue_index[region['center_idx']]),
@@ -1223,7 +1418,7 @@ class AntigenChain(ProteinChain):
                 - 'normal': Basic protein structure
                 - 'epitope': Show predicted epitopes vs true epitopes
                 - 'coverage': Show spherical coverage region
-                - 'evaluation': Show evaluation results from evaluate() function
+                - 'evaluation': Show evaluation results from evaluate() function (supports region_indices filtering)
                 - 'prediction': Show prediction results from predict() function
                 - 'probability': Show residue probabilities as color gradient
                 - 'top_regions': Show top-k regions from prediction
@@ -1236,9 +1431,11 @@ class AntigenChain(ProteinChain):
             predict_results (dict): Results dictionary from predict() function
             center_res (int): Center residue number for coverage visualization
             radius (float): Radius for spherical coverage
-            region_index (int): Index of specific region to show in probability mode (0-based)
-                              If None, shows all regions
-                              Each region uses a distinct color for shape visualization
+            region_index (int): Index of specific region to show (0-based), deprecated
+                              Use region_indices instead for better flexibility  
+            region_indices (list): List of region indices to show (0-based), e.g. [0, 2, 3]
+                                  Supported in 'prediction' and 'evaluation' modes
+                                  Each region uses a distinct color for shape visualization
             probability_colormap (str): Colormap name for probability visualization
             prob_threshold (float): Threshold for probability-based coloring
             ... (other parameters as before)
@@ -1287,11 +1484,20 @@ class AntigenChain(ProteinChain):
             )
             
         elif mode == 'evaluation' and predict_results is not None:
+            # Handle backward compatibility: convert single region_index to list
+            target_region_indices = None
+            if region_indices is not None:
+                target_region_indices = region_indices
+            elif region_index is not None:
+                target_region_indices = [region_index]
+                
             self._add_evaluation_visualization(
                 view, style, predict_results,
                 base_color, true_epitope_color, false_positive_color, 
                 true_positive_color, coverage_color,
-                show_surface, surface_opacity, show_shape, radius, max_spheres
+                show_surface, surface_opacity, show_shape, radius, max_spheres,
+                target_region_indices, shape_opacity, show_center, center_radius, 
+                wireframe, center_color
             )
             
         elif mode == 'prediction' and predict_results is not None:
@@ -1534,8 +1740,10 @@ class AntigenChain(ProteinChain):
     def _add_evaluation_visualization(self, view, style, predict_results,
                                   base_color, true_epitope_color, false_positive_color, 
                                   true_positive_color, coverage_color,
-                                  show_surface, surface_opacity, show_shape, radius, max_spheres):
-        """Add visualization for evaluation results"""
+                                  show_surface, surface_opacity, show_shape, radius, max_spheres,
+                                  target_region_indices=None, shape_opacity=0.3, show_center=True,
+                                  center_radius=0.7, wireframe=True, center_color='#2C3E50'):
+        """Add visualization for evaluation results with optional region filtering"""
         # Get prediction results
         predicted_epitopes = set(predict_results.get('predicted_epitopes', []))
         true_epitopes = set(predict_results.get('true_epitopes', []))
@@ -1606,13 +1814,72 @@ class AntigenChain(ProteinChain):
                         'color': color
                     }, {'chain': self.chain_id, 'resi': list(residues)})
         
-        # Show top regions with different colors if requested
+        # Show spherical regions if requested
         if show_shape and 'top_k_regions' in predict_results:
-            top_regions = predict_results['top_k_regions']
-            self._add_multi_shape_visualization(
-                view, top_regions, radius, max_spheres,
-                True, 0.5, 0.2, True
-            )
+            top_k_regions = predict_results['top_k_regions']
+            selected_regions = []
+            
+            if target_region_indices is not None and len(target_region_indices) > 0:
+                # Show only the selected regions, keep track of original indices
+                for region_idx in target_region_indices:
+                    if 0 <= region_idx < len(top_k_regions):
+                        selected_regions.append((region_idx, top_k_regions[region_idx]))
+                
+                # Use radius from prediction results or provided radius
+                sphere_radius = radius or 19.0
+                
+                # Define distinct colors for different regions
+                region_colors = [
+                    '#FF6B6B',  # Soft red
+                    '#4ECDC4',  # Teal
+                    '#FFD93D',  # Bright yellow
+                    '#6BCF7F',  # Green
+                    '#A8E6CF',  # Mint green
+                    '#FFB3BA',  # Light pink
+                    '#BFBFFF',  # Light blue
+                    '#FFDAB9',  # Peach
+                    '#D8BFD8',  # Thistle
+                    '#98D8C8',  # Light teal
+                    '#F7DC6F',  # Light yellow
+                    '#B19CD9'   # Medium light purple
+                ]
+                
+                # Add spheres for selected regions
+                for original_idx, region in selected_regions:
+                    center_res = region['center_residue']
+                    
+                    # Select color based on original region index
+                    shape_color = region_colors[original_idx % len(region_colors)]
+                    
+                    # Add sphere for the selected region with region-specific color
+                    self._add_shape_visualization(
+                        view, center_res, sphere_radius,
+                        shape_color, center_color,
+                        show_center, center_radius,
+                        shape_opacity * 0.6,  # Reduced shape opacity for evaluation mode
+                        wireframe
+                    )
+                    
+                    # Highlight center residue with softer color matching the region
+                    style_dict = {
+                        'cartoon': {'cartoon': {}},
+                        'stick': {'stick': {}},
+                        'sphere': {'sphere': {}},
+                        'surface': {'surface': {}}
+                    }
+                    base_style = style_dict.get(style, {'cartoon': {}})
+                    style_name = list(base_style.keys())[0]
+                    view.addStyle(
+                        {'chain': self.chain_id, 'resi': center_res},
+                        {style_name: {'color': shape_color}}
+                    )
+            else:
+                # Show all regions (original behavior)
+                top_regions = top_k_regions[:max_spheres] if max_spheres else top_k_regions
+                self._add_multi_shape_visualization(
+                    view, top_regions, radius, max_spheres,
+                    show_center, center_radius, shape_opacity * 0.6, wireframe
+                )
     
     def _add_probability_visualization(self, view, style, predict_results,
                                   base_color, colormap, show_surface, surface_opacity, threshold,

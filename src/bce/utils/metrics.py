@@ -50,7 +50,11 @@ def calculate_graph_metrics(preds, labels, threshold=0.5):
     
     return metrics
 
-def calculate_node_metrics(preds, labels, find_threshold=False, include_curves=False, threshold_metric='f1'):
+def calculate_node_metrics(preds, labels, find_threshold=False, include_curves=False, threshold_metric='f1', threshold=0.5):
+    if threshold is not None:
+        threshold = threshold
+    else:
+        threshold = 0.5
     """
     Calculate node-level metrics for epitope prediction.
     
@@ -123,7 +127,6 @@ def calculate_node_metrics(preds, labels, find_threshold=False, include_curves=F
             metrics[f'best_{threshold_metric.lower()}'] = best_metric_value
             threshold = best_threshold
         else:
-            threshold = 0.5
             metrics['best_threshold'] = 0.5
         
         # Binary classification metrics using the determined threshold

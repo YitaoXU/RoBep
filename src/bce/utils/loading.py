@@ -18,7 +18,10 @@ from bce.utils.constants import *
 
 # load combined epitopes csv
 def load_epitopes_csv(csv_name: str = "epitopes.csv") -> pd.DataFrame:
-    epitopes_csv = Path(BASE_DIR) / "data" / 'epitopes' / csv_name
+    if csv_name is None:
+        epitopes_csv = Path(BASE_DIR) / "data" / 'epitopes' / 'epitopes.csv'
+    else:
+        epitopes_csv = Path(csv_name)
     if not epitopes_csv.exists():
         raise FileNotFoundError(f"[Error] Epitopes CSV not found at {epitopes_csv}")
     df = pd.read_csv(epitopes_csv)
