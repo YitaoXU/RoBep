@@ -88,7 +88,7 @@ antigen_chain = AntigenChain.from_pdb(
     path='data/pdb/5i9q.pdb', 
     id=pdb_id, 
     chain_id=chain_id,
-    token="your_esm_api_token_here"  # Optional: your ESM API token
+    token="your_esm_api_token_here"  # Your ESM API token used to extract ESM-C embeddings
 )
 
 embeddings, backbone_atoms, rsa, coverage_dict= antigen_chain.data_preparation(radius=19.0)
