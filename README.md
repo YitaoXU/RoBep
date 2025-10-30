@@ -37,7 +37,8 @@ All data used for this work are located in the `data/epitopes/` directory:
 
 ### Complete Dataset
 - **`epitopes.csv`**: Contains all non-redundant antigens with their sequences and merged epitope annotations
-
+- **`virus_nsp.csv`**: Contains 85 non-structural proteins from virus
+- **`cluster.csv`**: Contains representative antigen with corresponding member antigens in each cluster
 ### Training and Testing Subsets
 
 **FASTA Sequences:**
@@ -75,12 +76,13 @@ pip install -e .
 ## Inference
 ### Data Preparation
 ```python
+# Recommend to save the PDB file locally and load it directly 
 from bce.antigen.antigen import AntigenChain
 
 pdb_id = "5i9q"
 chain_id = "A"
 
-antigen_chain = AntigenChain.from_pdb(id=pdb_id, chain_id = chain_id)
+antigen_chain = AntigenChain.from_pdb(path='data/pdb/5i9q.pdb', id=pdb_id, chain_id = chain_id)
 
 embeddings, backbone_atoms, rsa, coverage_dict= antigen_chain.data_preparation(radius=19.0)
 ```
