@@ -116,7 +116,7 @@ The `predict()` function returns a comprehensive dictionary containing the follo
 {
     # Main Results
     'predicted_epitopes': [12, 15, 23, 45, 67, ...],  # List of predicted epitope residue numbers
-    'predictions': {1: 0.02, 2: 0.15, 3: 0.85, ...}, # Dict: {residue_number: probability}
+    'predictions': {1: 0.02, 2: 0.15, 3: 0.85, ...}, # Dict: {residue_number: probability} (if > 0.3525, then predicted as epitope)
     
     # Top-k Region Information
     'top_k_centers': [15, 45, 78, ...],               # Center residues of top-k regions
@@ -132,9 +132,7 @@ The `predict()` function returns a comprehensive dictionary containing the follo
         ...
     ],
     
-    # Summary Statistics  
-    'antigen_rate': 0.72,                             # Average confidence of top-k regions
-    'epitope_rate': 0.15                              # Average probability of all residues
+    'epitope_rate': 0.15                              # Antigenicity (if >0.525, then antigenic)
 }
 ```
 
