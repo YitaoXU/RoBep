@@ -44,7 +44,7 @@ class AntigenChain(ProteinChain):
     Extended ProteinChain class that adds additional functionalities,
     such as computing surface residues based on SASA and maxASA constants.
     """
-    def __post_init__(self, token: Optional[str] = "1mzAo8l1uxaU8UfVcGgV7B"):
+    def __post_init__(self, token: Optional[str] = None):
         super().__post_init__()  # Ensure parent class initialization
         
         # Map residue number to index
@@ -787,7 +787,7 @@ class AntigenChain(ProteinChain):
                 - precisions (np.ndarray): Array of precision values for each center residue. (num_regions,)
                 - recalls (np.ndarray): Array of recall values for each center residue. (num_regions,)
         """
-        embeddings = self.get_embeddings(encoder=encoder)
+        embeddings = self.get_embeddings(encoder=encoder, override=override)
         backbone_atoms = self.get_backbone_atoms()
         rsa = self.get_rsa()
         if radius is None:
@@ -2512,6 +2512,7 @@ class AntigenChain(ProteinChain):
         chain_id: str = "detect",
         id: Optional[str] = None,
         is_predicted: bool = False,
+        token: Optional[str] = None,
     ) -> "AntigenChain":
         """
         Return a AntigenChain object from a pdb file.
@@ -2532,6 +2533,8 @@ class AntigenChain(ProteinChain):
             id (Optional[str], optional): Protein identifier (pdb_id). If not provided and `path`
                 is given, the id will be inferred from the file name.
             is_predicted (bool, optional): If True, reads b factor as the confidence readout.
+            token (Optional[str], optional): ESM API token for embedding generation. If None,
+                uses the default token. Required for ESM-C embeddings.
 
         Returns:
             AntigenChain: The constructed antigen chain.
@@ -2642,7 +2645,8 @@ class AntigenChain(ProteinChain):
         # Ensure that sequence is valid.
         assert all(sequence), "Some residue name was not specified correctly"
 
-        return cls(
+        # Create the AntigenChain object
+        obj = cls(
             id=file_id,
             sequence=sequence,
             chain_id=chain_id,
@@ -2653,3 +2657,9 @@ class AntigenChain(ProteinChain):
             insertion_code=insertion_code,
             confidence=confidence,
         )
+        
+        # Set token if provided (overrides default token)
+        if token is not None:
+            obj.token = token
+            
+        return obj

@@ -76,13 +76,20 @@ pip install -e .
 ## Inference
 ### Data Preparation
 ```python
-# Recommend to save the PDB file locally and load it directly 
+# Recommend to save the PDB file locally and load it directly
+# Please input your own ESM-C api token
 from bce.antigen.antigen import AntigenChain
 
 pdb_id = "5i9q"
 chain_id = "A"
 
-antigen_chain = AntigenChain.from_pdb(path='data/pdb/5i9q.pdb', id=pdb_id, chain_id = chain_id)
+# specify your own ESM API token for embedding generation
+antigen_chain = AntigenChain.from_pdb(
+    path='data/pdb/5i9q.pdb', 
+    id=pdb_id, 
+    chain_id=chain_id,
+    token="your_esm_api_token_here"  # Optional: your ESM API token
+)
 
 embeddings, backbone_atoms, rsa, coverage_dict= antigen_chain.data_preparation(radius=19.0)
 ```
@@ -90,7 +97,7 @@ embeddings, backbone_atoms, rsa, coverage_dict= antigen_chain.data_preparation(r
 ### Epitope Prediction
 You can see our [tutorials](notebooks/example.ipynb) to learn how to use RoBep.
 
-```bash
+```python
 prediction_results = antigen_chain.predict(
     device_id=0,
     radius=18.0,
@@ -100,6 +107,37 @@ prediction_results = antigen_chain.predict(
     use_gpu=False
 )
 ```
+
+#### Understanding the Prediction Results
+
+The `predict()` function returns a comprehensive dictionary containing the following key information:
+
+```python
+{
+    # Main Results
+    'predicted_epitopes': [12, 15, 23, 45, 67, ...],  # List of predicted epitope residue numbers
+    'predictions': {1: 0.02, 2: 0.15, 3: 0.85, ...}, # Dict: {residue_number: probability}
+    
+    # Top-k Region Information
+    'top_k_centers': [15, 45, 78, ...],               # Center residues of top-k regions
+    'top_k_region_residues': [12, 13, 14, 15, ...],   # All residues covered by top-k regions
+    'top_k_regions': [                                # Detailed information for each region
+        {
+            'center_residue': 15,                      # Center residue number
+            'center_idx': 14,                          # Center residue index (0-based)
+            'predicted_value': 0.85,                   # Model confidence score
+            'covered_residues': [12, 13, 14, 15, 16], # Residues in this region
+            'radius': 18.0                             # Radius used
+        },
+        ...
+    ],
+    
+    # Summary Statistics  
+    'antigen_rate': 0.72,                             # Average confidence of top-k regions
+    'epitope_rate': 0.15                              # Average probability of all residues
+}
+```
+
 ## Evaluation
 ```bash
 python -u main.py --mode eval --model_path models/RoBep/20250626_110438/best_mcc_model.bin --radius 18.0 --k 7
