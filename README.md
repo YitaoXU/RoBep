@@ -2,6 +2,8 @@
 ## Website
 RoBep provides a user-friendly web interface accessible through [Hugging Face Spaces](https://huggingface.co/spaces/NielTT/RoBep). This interface allows you to easily predict epitope residues without any local installation.
 
+![RoBep Web Interface](figures/website.png)
+
 ### How to Use the Web Interface
 
 1. **Accessing the Website**
@@ -25,8 +27,6 @@ RoBep provides a user-friendly web interface accessible through [Hugging Face Sp
    - Additional Features:
      * Use "Show Spheres" to visualize the selected spheres used in epitope prediction
      * Interact with the 3D structure using mouse controls (rotate, zoom, pan)
-
-![RoBep Web Interface](figures/website.png)
 
 ## Data Introduction
 
