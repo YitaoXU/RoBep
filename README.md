@@ -144,8 +144,8 @@ python -u main.py --mode eval --model_path models/RoBep/20250626_110438/best_mcc
 
 ## Training
 ```bash
-# Data Preparation (1 hour)
-python data_preparation.py
+# Data Preparation (1 hour; you need to specify your own ESM API token for embedding generation)
+python data_preparation.py --esm_token 'your_esm_api_token_here'
 
 # Training
 python main.py --mode train
