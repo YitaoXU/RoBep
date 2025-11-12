@@ -27,7 +27,7 @@
 !data/
 !data/species.json
 !data/virus_nsp.csv
-!data/pdb/5iq9.pdb
+!data/pdb/5i9q.pdb
 !data/epitopes/
 !data/epitopes/data_splits.json
 !data/epitopes/antigen_metadata.csv

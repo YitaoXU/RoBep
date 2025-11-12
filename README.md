@@ -30,14 +30,14 @@ RoBep provides a user-friendly web interface accessible through [Hugging Face Sp
 
 ## Data Introduction
 
-All data used for this work are located in the `data/epitopes/` directory:
+All data used for this work are located in the `data/epitopes/` directory, except specifically mentioned:
 
 ### Dataset Split Information
 - **`data_splits.json`**: Contains the PDB IDs with chain identifiers for all training and test antigens
 
 ### Complete Dataset
 - **`epitopes.csv`**: Contains all non-redundant antigens with their sequences and merged epitope annotations
-- **`virus_nsp.csv`**: Contains 85 non-structural proteins from virus
+- **`data/virus_nsp.csv`**: Contains 85 non-structural proteins from virus
 - **`cluster.csv`**: Contains representative antigen with corresponding member antigens in each cluster
 ### Training and Testing Subsets
 
@@ -110,7 +110,7 @@ prediction_results = antigen_chain.predict(
 
 #### Understanding the Prediction Results
 
-The `predict()` function returns a comprehensive dictionary containing the following key information:
+The `predict()` function returns a comprehensive dictionary containing the following results and useful information:
 
 ```python
 {
@@ -137,6 +137,7 @@ The `predict()` function returns a comprehensive dictionary containing the follo
 ```
 
 ## Evaluation
+If you want to evaluate our model on your own dataset, please replace the `data_splits.json` and `epitopes.csv` in the `data/epitopes/` directory with the same format. We also recommend to store corresponding PDB files in `data/PDB/`, such as `5i9q.pdb`.
 ```bash
 python -u main.py --mode eval --model_path models/RoBep/20250626_110438/best_mcc_model.bin --radius 18.0 --k 7
 
