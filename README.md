@@ -1,4 +1,4 @@
-# RoBep
+# RoBep: A Region-Oriented Deep Learning Model for B-Cell Epitope Prediction  
 ## Website
 RoBep provides a user-friendly web interface accessible through [Hugging Face Spaces](https://huggingface.co/spaces/NielTT/RoBep). This interface allows you to easily predict epitope residues without any local installation.
 
