@@ -44,14 +44,14 @@ class AntigenChain(ProteinChain):
     Extended ProteinChain class that adds additional functionalities,
     such as computing surface residues based on SASA and maxASA constants.
     """
-    def __post_init__(self, token: Optional[str] = None):
+    def __post_init__(self, token: Optional[str] = None, verbose: bool = True):
         super().__post_init__()  # Ensure parent class initialization
         
         # Map residue number to index
         self.resnum_to_index = {int(rnum): i for i, rnum in enumerate(self.residue_index)}
         
         # Get epitopes as boolean array
-        self.epitopes = self.get_epitopes()  # Automatically get epitopes on initialization
+        self.epitopes = self.get_epitopes(verbose=verbose)  # Automatically get epitopes on initialization
         
         # Set token from parameter or environment variable
         self.token = token
@@ -236,7 +236,7 @@ class AntigenChain(ProteinChain):
                 
         return surface_residue_numbers, surface_residue_indices
     
-    def get_epitopes(self, threshold: float = 0.25, csv_name: str = None) -> np.ndarray:
+    def get_epitopes(self, threshold: float = 0.25, csv_name: str = None, verbose: bool = True) -> np.ndarray:
         """
         Retrieve epitopes for this chain as a boolean array.
         
@@ -253,8 +253,9 @@ class AntigenChain(ProteinChain):
         if f'{self.id}_{self.chain_id}' in epitopes:
             binary_labels = epitopes.get(f'{self.id}_{self.chain_id}', [0] * len(self.sequence)) # default to 0 if not found
         else:
-            print(f"[WARNING] Epitopes not found for {self.id}_{self.chain_id}. Use single epitopes.")
-            binary_labels = self.get_epitopes_single()
+            if verbose:
+                print(f"[WARNING] Epitopes not found for {self.id}_{self.chain_id}. Use single epitopes.")
+            binary_labels = self.get_epitopes_single(verbose=verbose)
             
         # Initialize epitope array with False values
         epitope_array = np.zeros(len(self.sequence), dtype=bool)
@@ -265,7 +266,8 @@ class AntigenChain(ProteinChain):
             if len(binary_labels) == len(self.sequence):
                 epitope_array = np.array(binary_labels, dtype=bool)
             else:
-                print(f"[WARNING] Binary labels length ({len(binary_labels)}) doesn't match "
+                if verbose:
+                    print(f"[WARNING] Binary labels length ({len(binary_labels)}) doesn't match "
                       f"sequence length ({len(self.sequence)}) for {self.id}_{self.chain_id}")
                 return epitope_array
             
@@ -286,7 +288,7 @@ class AntigenChain(ProteinChain):
         
         return epitope_array
 
-    def get_epitopes_single(self) -> np.ndarray:
+    def get_epitopes_single(self, verbose: bool = True) -> np.ndarray:
         """
         Retrieve epitopes for this chain as a boolean array.
         """
@@ -312,7 +314,8 @@ class AntigenChain(ProteinChain):
                     epitope_array[self.resnum_to_index[resnum]] = 1
             return epitope_array
         else:
-            print(f"[WARNING] Single Epitopes not found for {self.id}_{self.chain_id}. Use no epitopes.")
+            if verbose:
+                print(f"[WARNING] Single Epitopes not found for {self.id}_{self.chain_id}. Use no epitopes.")
             epitope_array = np.zeros(len(self.sequence), dtype=int)
         
         return epitope_array
@@ -2513,6 +2516,7 @@ class AntigenChain(ProteinChain):
         id: Optional[str] = None,
         is_predicted: bool = False,
         token: Optional[str] = None,
+        verbose: bool = True,
     ) -> "AntigenChain":
         """
         Return a AntigenChain object from a pdb file.
@@ -2552,8 +2556,8 @@ class AntigenChain(ProteinChain):
                 Path(BASE_DIR) / "data" / "antigen_structs" / f"{id}.pdb",
                 # Path(BASE_DIR) / "data" / "antigen_structs" / f"{id.lower()}_{chain_id}.pdb",
                 # Path(BASE_DIR) / "data" / "antigen_structs" / f"{id.upper()}_{chain_id}.pdb",
-                # Path(BASE_DIR) / "data" / "pdb" / f"{id.lower()}.pdb",
-                # Path(BASE_DIR) / "data" / "pdb" / f"{id.upper()}.pdb",
+                Path(BASE_DIR) / "data" / "pdb" / f"{id.lower()}.pdb",
+                Path(BASE_DIR) / "data" / "pdb" / f"{id.upper()}.pdb",
             ]
             
             # Try each path

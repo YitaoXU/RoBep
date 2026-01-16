@@ -162,3 +162,19 @@ cd src/bce/website
 
 python run_server.py --host 0.0.0.0 --port 8000
 ``` -->
+
+## Cite this work
+If you want to cite this work, please cite:
+```bash
+@article{Xu2026RoBep,
+  author  = {Xu, Yitao and Wei, Guanyun and Zhou, Jingying and Huang, Yuanhua and Yu, Weichuan and Lin, Zhixiang and Liu, Ran and Fan, Xiaodan},
+  title   = {{RoBep}: A Region-Oriented Deep Learning Model for B-Cell Epitope Prediction},
+  journal = {Bioinformatics},
+  year    = {2026},
+  doi     = {10.1093/bioinformatics/btag006}
+}
+```
+
+or
+
+- Yitao Xu, Guanyun Wei, Jingying Zhou, Yuanhua Huang, Weichua Yu, Zhixiang Lin, Ran Liu, Xiaodan Fan, RoBep: A Region-Oriented Deep Learning Model for B-Cell Epitope Prediction, Bioinformatics, 2026;, btag006, https://doi.org/10.1093/bioinformatics/btag006
