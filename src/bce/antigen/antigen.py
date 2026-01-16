@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from scipy.spatial.distance import cdist
 
 import torch
+from torch_geometric.data import Batch
 
 # ESM
 from esm.utils import residue_constants as RC
@@ -804,7 +805,7 @@ class AntigenChain(ProteinChain):
     
     def evaluate(self, model_path: str = None, device_id: int = 1, radius: float = 19.0, k: int = 7, 
                 threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True,
-                find_optimal_threshold: bool = False, include_curves: bool = False):
+                find_optimal_threshold: bool = False, include_curves: bool = False, batch_size: int = 32):
         """
         Evaluate epitopes using RoBep model with spherical regions.
         
@@ -819,6 +820,7 @@ class AntigenChain(ProteinChain):
             use_gpu (bool): Whether to use GPU for prediction
             find_optimal_threshold (bool): Whether to find optimal threshold using F1 score
             include_curves (bool): Whether to include PR and ROC curves in results
+            batch_size (int): Batch size for parallel prediction (default: 32)
             
         Returns:
             dict: Dictionary containing comprehensive evaluation metrics:
@@ -879,69 +881,131 @@ class AntigenChain(ProteinChain):
         # Get epitope indices
         epitope_indices = np.where(self.epitopes)[0].tolist()
         
-        # Phase 1: Predict graph-level values for all regions
+        # Phase 1: Predict graph-level values for all regions using batch processing
+        # Step 1a: Create all graph data first
+        all_graph_data = []
+        metadata_list = []
+        
+        if verbose:
+            print(f"[INFO] Creating graphs for {len(coverage_dict)} regions...")
+        
+        for center_idx, (covered_indices, covered_epitope_indices, precision, recall) in tqdm(
+            coverage_dict.items(), desc="Creating graphs", disable=not verbose):
+            
+            if len(covered_indices) < 2:  # Skip regions with too few residues
+                continue
+            
+            try:
+                # Create graph data for this region
+                graph_data = create_graph_data(
+                    center_idx=center_idx,
+                    covered_indices=covered_indices,
+                    covered_epitope_indices=covered_epitope_indices,
+                    embeddings=embeddings,
+                    backbone_atoms=backbone_atoms,
+                    rsa_values=rsa,
+                    epitope_indices=epitope_indices,
+                    recall=recall,
+                    precision=precision,
+                    pdb_id=self.id,
+                    chain_id=self.chain_id,
+                    verbose=False
+                )
+                
+                if graph_data is None:
+                    continue
+                
+                all_graph_data.append(graph_data)
+                metadata_list.append({
+                    'center_idx': center_idx,
+                    'covered_indices': covered_indices,
+                    'covered_epitope_indices': covered_epitope_indices,
+                    'true_recall': recall,
+                    'precision': precision
+                })
+                
+            except Exception as e:
+                if verbose:
+                    print(f"[WARNING] Error creating graph for region {center_idx}: {str(e)}")
+                continue
+        
+        if not all_graph_data:
+            if verbose:
+                print("[WARNING] No valid graphs created")
+            return {}
+        
+        # Step 1b: Batch predict graph-level values
         region_predictions = []
         
         with torch.no_grad():
-            for center_idx, (covered_indices, covered_epitope_indices, precision, recall) in tqdm(
-                coverage_dict.items(), desc="Predicting region values", disable=not verbose):
-                
-                if len(covered_indices) < 2:  # Skip regions with too few residues
-                    continue
-                
+            num_batches = (len(all_graph_data) + batch_size - 1) // batch_size
+            
+            for i in tqdm(range(0, len(all_graph_data), batch_size), 
+                         desc="Batch predicting regions", total=num_batches, disable=not verbose):
                 try:
-                    # Create graph data for this region
-                    graph_data = create_graph_data(
-                        center_idx=center_idx,
-                        covered_indices=covered_indices,
-                        covered_epitope_indices=covered_epitope_indices,
-                        embeddings=embeddings,
-                        backbone_atoms=backbone_atoms,
-                        rsa_values=rsa,
-                        epitope_indices=epitope_indices,
-                        recall=recall,
-                        precision=precision,
-                        pdb_id=self.id,
-                        chain_id=self.chain_id,
-                        verbose=True  # Enable verbose to see errors
-                    )
+                    batch_graphs = all_graph_data[i:i+batch_size]
+                    batch_metadata = metadata_list[i:i+batch_size]
                     
-                    if graph_data is None:
-                        if verbose:
-                            print(f"[WARNING] Failed to create graph data for region {center_idx}")
-                        continue
+                    # Create batch using PyTorch Geometric's Batch
+                    batch_data = Batch.from_data_list(batch_graphs).to(device)
                     
-                    # Move data to device
-                    graph_data = graph_data.to(device)
+                    # Predict using RoBep model
+                    outputs = model(batch_data)
                     
-                    # Create batch tensor for single graph - this is crucial!
-                    graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
-                    
-                    # Predict using RoBep model (following trainer.py pattern)
-                    outputs = model(graph_data)
-                    
-                    # Get graph-level prediction
+                    # Get graph-level predictions
                     if 'global_pred' in outputs:
-                        graph_pred = torch.sigmoid(outputs['global_pred']).cpu().item()
+                        graph_preds = torch.sigmoid(outputs['global_pred']).cpu().numpy()
                     else:
                         # Fallback: use mean of node predictions as graph prediction
                         node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
-                        graph_pred = float(np.mean(node_preds))
+                        # Use batch tensor to separate predictions by graph
+                        batch_tensor = batch_data.batch.cpu().numpy()
+                        graph_preds = []
+                        for j in range(len(batch_graphs)):
+                            mask = (batch_tensor == j)
+                            graph_preds.append(float(np.mean(node_preds[mask])))
+                        graph_preds = np.array(graph_preds)
                     
-                    region_predictions.append({
-                        'center_idx': center_idx,
-                        'covered_indices': covered_indices,
-                        'covered_epitope_indices': covered_epitope_indices,
-                        'graph_pred': graph_pred,
-                        'true_recall': recall,
-                        'graph_data': graph_data
-                    })
-                    
+                    # Store predictions with metadata
+                    for j, (metadata, graph_pred, graph_data) in enumerate(
+                        zip(batch_metadata, graph_preds, batch_graphs)):
+                        region_predictions.append({
+                            'center_idx': metadata['center_idx'],
+                            'covered_indices': metadata['covered_indices'],
+                            'covered_epitope_indices': metadata['covered_epitope_indices'],
+                            'graph_pred': float(graph_pred),
+                            'true_recall': metadata['true_recall'],
+                            'graph_data': graph_data
+                        })
+                
                 except Exception as e:
                     if verbose:
-                        print(f"[WARNING] Error processing region {center_idx}: {str(e)}")          
+                        print(f"[WARNING] Error in batch prediction: {str(e)}")
                         traceback.print_exc()
-                    continue
+                    # Fall back to sequential processing for this batch
+                    for j, (graph_data, metadata) in enumerate(zip(batch_graphs, batch_metadata)):
+                        try:
+                            graph_data = graph_data.to(device)
+                            graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                            outputs = model(graph_data)
+                            if 'global_pred' in outputs:
+                                graph_pred = torch.sigmoid(outputs['global_pred']).cpu().item()
+                            else:
+                                node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
+                                graph_pred = float(np.mean(node_preds))
+                            
+                            region_predictions.append({
+                                'center_idx': metadata['center_idx'],
+                                'covered_indices': metadata['covered_indices'],
+                                'covered_epitope_indices': metadata['covered_epitope_indices'],
+                                'graph_pred': graph_pred,
+                                'true_recall': metadata['true_recall'],
+                                'graph_data': graph_data.cpu()
+                            })
+                        except Exception as e2:
+                            if verbose:
+                                print(f"[WARNING] Error processing region {metadata['center_idx']}: {str(e2)}")
+                            continue
         
         if not region_predictions:
             if verbose:
@@ -959,44 +1023,80 @@ class AntigenChain(ProteinChain):
                       f"predicted_value={region['graph_pred']:.3f}, "
                       f"true_recall={region['true_recall']:.3f}")
         
-        # Phase 3: Predict node-level epitopes for selected regions
+        # Phase 3: Predict node-level epitopes for selected regions using batch processing
         residue_votes = {}  # residue_idx -> [list of binary predictions]
         residue_probs = {}  # residue_idx -> [list of probabilities]
         
         with torch.no_grad():
-            for region in tqdm(top_k_regions, desc="Predicting node values", disable=not verbose):
+            # Use smaller batch size for node predictions (more memory intensive)
+            node_batch_size = max(1, batch_size // 4)
+            num_node_batches = (len(top_k_regions) + node_batch_size - 1) // node_batch_size
+            
+            for i in tqdm(range(0, len(top_k_regions), node_batch_size),
+                         desc="Batch predicting nodes", total=num_node_batches, disable=not verbose):
                 try:
-                    graph_data = region['graph_data']
+                    batch_regions = top_k_regions[i:i+node_batch_size]
+                    batch_graphs = [region['graph_data'] for region in batch_regions]
                     
-                    # Ensure graph data has batch information - this is crucial!
-                    if not hasattr(graph_data, 'batch') or graph_data.batch is None:
-                        graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                    # Create batch
+                    batch_data = Batch.from_data_list(batch_graphs).to(device)
                     
-                    # Predict using RoBep model (following trainer.py pattern)
-                    outputs = model(graph_data)
+                    # Predict using RoBep model
+                    outputs = model(batch_data)
                     
                     # Get node-level predictions
-                    node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
+                    node_preds_batch = torch.sigmoid(outputs['node_preds']).cpu().numpy()
                     
-                    # Store votes and probabilities for each residue
-                    for local_idx, residue_idx in enumerate(region['covered_indices']):
-                        if residue_idx not in residue_votes:
-                            residue_votes[residue_idx] = []
-                            residue_probs[residue_idx] = []
+                    # Split predictions by graph using batch tensor
+                    batch_tensor = batch_data.batch.cpu().numpy()
+                    
+                    node_start = 0
+                    for j, region in enumerate(batch_regions):
+                        num_nodes = region['graph_data'].num_nodes
+                        node_preds = node_preds_batch[node_start:node_start+num_nodes]
+                        node_start += num_nodes
                         
-                        # Store probability and binary vote
-                        prob = float(node_preds[local_idx])
-                        residue_probs[residue_idx].append(prob)
-                        
-                        # Binary vote based on threshold
-                        vote = 1 if prob >= threshold else 0
-                        residue_votes[residue_idx].append(vote)
-                        
+                        # Store votes and probabilities for each residue
+                        for local_idx, residue_idx in enumerate(region['covered_indices']):
+                            if residue_idx not in residue_votes:
+                                residue_votes[residue_idx] = []
+                                residue_probs[residue_idx] = []
+                            
+                            # Store probability and binary vote
+                            prob = float(node_preds[local_idx])
+                            residue_probs[residue_idx].append(prob)
+                            
+                            # Binary vote based on threshold
+                            vote = 1 if prob >= threshold else 0
+                            residue_votes[residue_idx].append(vote)
+                
                 except Exception as e:
                     if verbose:
-                        print(f"[WARNING] Error in node prediction for region {region['center_idx']}: {str(e)}")
+                        print(f"[WARNING] Error in batch node prediction: {str(e)}")
                         traceback.print_exc()
-                    continue
+                    # Fall back to sequential processing for this batch
+                    for region in batch_regions:
+                        try:
+                            graph_data = region['graph_data'].to(device)
+                            if not hasattr(graph_data, 'batch') or graph_data.batch is None:
+                                graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                            
+                            outputs = model(graph_data)
+                            node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
+                            
+                            for local_idx, residue_idx in enumerate(region['covered_indices']):
+                                if residue_idx not in residue_votes:
+                                    residue_votes[residue_idx] = []
+                                    residue_probs[residue_idx] = []
+                                
+                                prob = float(node_preds[local_idx])
+                                residue_probs[residue_idx].append(prob)
+                                vote = 1 if prob >= threshold else 0
+                                residue_votes[residue_idx].append(vote)
+                        except Exception as e2:
+                            if verbose:
+                                print(f"[WARNING] Error in node prediction for region {region['center_idx']}: {str(e2)}")
+                            continue
         
         # Create predictions dictionary for all residues
         all_residue_predictions = {}
@@ -1148,7 +1248,8 @@ class AntigenChain(ProteinChain):
         }
         
     def predict(self, model_path: str = None, device_id: int = 1, radius: float = 19.0, k: int = 7, 
-                threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True):
+                threshold: float = None, verbose: bool = True, encoder: str = "esmc", use_gpu: bool = True,
+                batch_size: int = 32):
         """
         Predict epitopes using RoBep model with spherical regions (for unknown true epitopes).
         
@@ -1160,6 +1261,8 @@ class AntigenChain(ProteinChain):
             threshold (float): Threshold for node-level epitope prediction
             verbose (bool): Whether to print progress information
             encoder (str): Encoder type for embeddings
+            use_gpu (bool): Whether to use GPU for prediction
+            batch_size (int): Batch size for parallel prediction (default: 32)
             
         Returns:
             dict: Dictionary containing:
@@ -1211,67 +1314,124 @@ class AntigenChain(ProteinChain):
                 print("[WARNING] No surface regions found")
             return {}
         
-        # Phase 1: Predict graph-level values for all regions
+        # Phase 1: Predict graph-level values for all regions using batch processing
+        # Step 1a: Create all graph data first
+        all_graph_data = []
+        metadata_list = []
+        
+        if verbose:
+            print(f"[INFO] Creating graphs for {len(coverage_dict)} regions...")
+        
+        for center_idx, (covered_indices, covered_epitope_indices, precision, recall) in tqdm(
+            coverage_dict.items(), desc="Creating graphs", disable=not verbose):
+            
+            if len(covered_indices) < 2:  # Skip regions with too few residues
+                continue
+            
+            try:
+                # Create graph data for this region (without epitope information)
+                graph_data = create_graph_data(
+                    center_idx=center_idx,
+                    covered_indices=covered_indices,
+                    covered_epitope_indices=[],  # No epitope information for prediction
+                    embeddings=embeddings,
+                    backbone_atoms=backbone_atoms,
+                    rsa_values=rsa,
+                    epitope_indices=[],  # No epitope information for prediction
+                    recall=0.0,  # No recall information
+                    precision=0.0,  # No precision information
+                    pdb_id=self.id,
+                    chain_id=self.chain_id,
+                    verbose=False
+                )
+                
+                if graph_data is None:
+                    continue
+                
+                all_graph_data.append(graph_data)
+                metadata_list.append({
+                    'center_idx': center_idx,
+                    'covered_indices': covered_indices
+                })
+                
+            except Exception as e:
+                if verbose:
+                    print(f"[WARNING] Error creating graph for region {center_idx}: {str(e)}")
+                continue
+        
+        if not all_graph_data:
+            if verbose:
+                print("[WARNING] No valid graphs created")
+            return {}
+        
+        # Step 1b: Batch predict graph-level values
         region_predictions = []
         
         with torch.no_grad():
-            for center_idx, (covered_indices, covered_epitope_indices, precision, recall) in tqdm(
-                coverage_dict.items(), desc="Predicting region values", disable=not verbose):
-                
-                if len(covered_indices) < 2:  # Skip regions with too few residues
-                    continue
-                
+            num_batches = (len(all_graph_data) + batch_size - 1) // batch_size
+            
+            for i in tqdm(range(0, len(all_graph_data), batch_size),
+                         desc="Batch predicting regions", total=num_batches, disable=not verbose):
                 try:
-                    # Create graph data for this region (without epitope information)
-                    graph_data = create_graph_data(
-                        center_idx=center_idx,
-                        covered_indices=covered_indices,
-                        covered_epitope_indices=[],  # No epitope information for prediction
-                        embeddings=embeddings,
-                        backbone_atoms=backbone_atoms,
-                        rsa_values=rsa,
-                        epitope_indices=[],  # No epitope information for prediction
-                        recall=0.0,  # No recall information
-                        precision=0.0,  # No precision information
-                        pdb_id=self.id,
-                        chain_id=self.chain_id,
-                        verbose=False
-                    )
+                    batch_graphs = all_graph_data[i:i+batch_size]
+                    batch_metadata = metadata_list[i:i+batch_size]
                     
-                    if graph_data is None:
-                        if verbose:
-                            print(f"[WARNING] Failed to create graph data for region {center_idx}")
-                        continue
-                    
-                    # Move data to device
-                    graph_data = graph_data.to(device)
-                    
-                    # Create batch tensor for single graph
-                    graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                    # Create batch using PyTorch Geometric's Batch
+                    batch_data = Batch.from_data_list(batch_graphs).to(device)
                     
                     # Predict using RoBep model
-                    outputs = model(graph_data)
+                    outputs = model(batch_data)
                     
-                    # Get graph-level prediction
+                    # Get graph-level predictions
                     if 'global_pred' in outputs:
-                        graph_pred = torch.sigmoid(outputs['global_pred']).cpu().item()
+                        graph_preds = torch.sigmoid(outputs['global_pred']).cpu().numpy()
                     else:
                         # Fallback: use mean of node predictions as graph prediction
                         node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
-                        graph_pred = float(np.mean(node_preds))
+                        # Use batch tensor to separate predictions by graph
+                        batch_tensor = batch_data.batch.cpu().numpy()
+                        graph_preds = []
+                        for j in range(len(batch_graphs)):
+                            mask = (batch_tensor == j)
+                            graph_preds.append(float(np.mean(node_preds[mask])))
+                        graph_preds = np.array(graph_preds)
                     
-                    region_predictions.append({
-                        'center_idx': center_idx,
-                        'covered_indices': covered_indices,
-                        'graph_pred': graph_pred,
-                        'graph_data': graph_data
-                    })
-                    
+                    # Store predictions with metadata
+                    for j, (metadata, graph_pred, graph_data) in enumerate(
+                        zip(batch_metadata, graph_preds, batch_graphs)):
+                        region_predictions.append({
+                            'center_idx': metadata['center_idx'],
+                            'covered_indices': metadata['covered_indices'],
+                            'graph_pred': float(graph_pred),
+                            'graph_data': graph_data
+                        })
+                
                 except Exception as e:
                     if verbose:
-                        print(f"[WARNING] Error processing region {center_idx}: {str(e)}")          
+                        print(f"[WARNING] Error in batch prediction: {str(e)}")
                         traceback.print_exc()
-                    continue
+                    # Fall back to sequential processing for this batch
+                    for j, (graph_data, metadata) in enumerate(zip(batch_graphs, batch_metadata)):
+                        try:
+                            graph_data = graph_data.to(device)
+                            graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                            outputs = model(graph_data)
+                            if 'global_pred' in outputs:
+                                graph_pred = torch.sigmoid(outputs['global_pred']).cpu().item()
+                            else:
+                                node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
+                                graph_pred = float(np.mean(node_preds))
+                            
+                            region_predictions.append({
+                                'center_idx': metadata['center_idx'],
+                                'covered_indices': metadata['covered_indices'],
+                                'graph_pred': graph_pred,
+                                'graph_data': graph_data.cpu()
+                            })
+                        except Exception as e2:
+                            if verbose:
+                                print(f"[WARNING] Error processing region {metadata['center_idx']}: {str(e2)}")
+                            continue
         
         if not region_predictions:
             if verbose:
@@ -1288,38 +1448,71 @@ class AntigenChain(ProteinChain):
                 print(f"  Region {i+1}: center={region['center_idx']}, "
                       f"predicted_value={region['graph_pred']:.3f}")
         
-        # Phase 3: Predict node-level epitopes for selected regions
+        # Phase 3: Predict node-level epitopes for selected regions using batch processing
         residue_probs = {}  # residue_idx -> [list of probabilities]
         
         with torch.no_grad():
-            for region in tqdm(top_k_regions, desc="Predicting node values", disable=not verbose):
+            # Use smaller batch size for node predictions (more memory intensive)
+            node_batch_size = max(1, batch_size // 4)
+            num_node_batches = (len(top_k_regions) + node_batch_size - 1) // node_batch_size
+            
+            for i in tqdm(range(0, len(top_k_regions), node_batch_size),
+                         desc="Batch predicting nodes", total=num_node_batches, disable=not verbose):
                 try:
-                    graph_data = region['graph_data']
+                    batch_regions = top_k_regions[i:i+node_batch_size]
+                    batch_graphs = [region['graph_data'] for region in batch_regions]
                     
-                    # Ensure graph data has batch information
-                    if not hasattr(graph_data, 'batch') or graph_data.batch is None:
-                        graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                    # Create batch
+                    batch_data = Batch.from_data_list(batch_graphs).to(device)
                     
                     # Predict using RoBep model
-                    outputs = model(graph_data)
+                    outputs = model(batch_data)
                     
                     # Get node-level predictions
-                    node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
+                    node_preds_batch = torch.sigmoid(outputs['node_preds']).cpu().numpy()
                     
-                    # Store probabilities for each residue
-                    for local_idx, residue_idx in enumerate(region['covered_indices']):
-                        if residue_idx not in residue_probs:
-                            residue_probs[residue_idx] = []
+                    # Split predictions by graph using batch tensor
+                    batch_tensor = batch_data.batch.cpu().numpy()
+                    
+                    node_start = 0
+                    for j, region in enumerate(batch_regions):
+                        num_nodes = region['graph_data'].num_nodes
+                        node_preds = node_preds_batch[node_start:node_start+num_nodes]
+                        node_start += num_nodes
                         
-                        # Store probability
-                        prob = float(node_preds[local_idx])
-                        residue_probs[residue_idx].append(prob)
-                        
+                        # Store probabilities for each residue
+                        for local_idx, residue_idx in enumerate(region['covered_indices']):
+                            if residue_idx not in residue_probs:
+                                residue_probs[residue_idx] = []
+                            
+                            # Store probability
+                            prob = float(node_preds[local_idx])
+                            residue_probs[residue_idx].append(prob)
+                
                 except Exception as e:
                     if verbose:
-                        print(f"[WARNING] Error in node prediction for region {region['center_idx']}: {str(e)}")
+                        print(f"[WARNING] Error in batch node prediction: {str(e)}")
                         traceback.print_exc()
-                    continue
+                    # Fall back to sequential processing for this batch
+                    for region in batch_regions:
+                        try:
+                            graph_data = region['graph_data'].to(device)
+                            if not hasattr(graph_data, 'batch') or graph_data.batch is None:
+                                graph_data.batch = torch.zeros(graph_data.num_nodes, dtype=torch.long, device=device)
+                            
+                            outputs = model(graph_data)
+                            node_preds = torch.sigmoid(outputs['node_preds']).cpu().numpy()
+                            
+                            for local_idx, residue_idx in enumerate(region['covered_indices']):
+                                if residue_idx not in residue_probs:
+                                    residue_probs[residue_idx] = []
+                                
+                                prob = float(node_preds[local_idx])
+                                residue_probs[residue_idx].append(prob)
+                        except Exception as e2:
+                            if verbose:
+                                print(f"[WARNING] Error in node prediction for region {region['center_idx']}: {str(e2)}")
+                            continue
         
         # Create predictions dictionary for all residues
         all_residue_predictions = {}
@@ -1331,6 +1524,13 @@ class AntigenChain(ProteinChain):
             else:
                 # Set probability to 0 for residues not in any top-k region
                 all_residue_predictions[residue_num] = 0.0
+        
+        # Create prediction probability list for benchmarking (following evaluate() pattern)
+        # This list is ordered by sequence position (index-based)
+        prediction_probabilities = []
+        for idx in range(len(self.residue_index)):
+            residue_num = int(self.residue_index[idx])
+            prediction_probabilities.append(all_residue_predictions.get(residue_num, 0.0))
         
         # Apply probability threshold for predicted epitopes
         predicted_epitope_resnums = []
@@ -1363,7 +1563,8 @@ class AntigenChain(ProteinChain):
         
         return {
             'predicted_epitopes': predicted_epitope_resnums,
-            'predictions': all_residue_predictions,
+            'predicted_probabilities': prediction_probabilities,  # List: probabilities ordered by sequence position
+            'predictions': all_residue_predictions,  # Dict: {residue_number: probability}
             'top_k_centers': top_k_centers,
             'top_k_region_residues': top_k_region_residues,
             'top_k_regions': [
@@ -1380,6 +1581,7 @@ class AntigenChain(ProteinChain):
             'epitope_rate': node_mean
         }
     
+    # Visualize the prediction results
     def visualize(self, 
                   mode: str = 'normal',
                   style: str = 'cartoon',

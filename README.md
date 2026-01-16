@@ -110,12 +110,13 @@ prediction_results = antigen_chain.predict(
 
 #### Understanding the Prediction Results
 
-The `predict()` function returns a comprehensive dictionary containing the following results and useful information:
+The `predict()` function returns a comprehensive dictionary containing the following results and useful information, where `prediction_results['predicted_probabilities']` is residue-wise predicted probability for evaluation:
 
 ```python
 {
     # Main Results
     'predicted_epitopes': [12, 15, 23, 45, 67, ...],  # List of predicted epitope residue numbers
+    'predicted_probabilities': [0.02, 0.15, 0.85, ...], # List: probabilities ordered by sequence position
     'predictions': {1: 0.02, 2: 0.15, 3: 0.85, ...}, # Dict: {residue_number: probability} (if > 0.3525, then predicted as epitope)
     
     # Top-k Region Information
@@ -132,7 +133,8 @@ The `predict()` function returns a comprehensive dictionary containing the follo
         ...
     ],
     
-    'epitope_rate': 0.15                              # Antigenicity (if >0.525, then antigenic)
+    'antigen_rate': 0.85,                             # Mean graph-level prediction (antigenicity)
+    'epitope_rate': 0.15                              # Mean node-level prediction (epitope rate)
 }
 ```
 
