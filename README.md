@@ -17,7 +17,7 @@ RoBep provides a user-friendly web interface accessible through [Hugging Face Sp
 
 3. **View Results**
    - After processing (typically several seconds to 1-2 minutes), you'll see the prediction results
-   - An interactive HTML visualization will be available for download. Here is a demo of the resulted HTML file: [5i9q_A_visualization.html](figures/5i9q_A_visualization.html)
+   - An interactive HTML visualization will be available for download. Here is a demo of the resulted HTML file: [visualization.html](figures/5i9q_A_visualization.html)
 
 4. **Visualization Options**
    - Three display modes are available:
