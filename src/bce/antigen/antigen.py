@@ -240,16 +240,36 @@ class AntigenChain(ProteinChain):
     def get_epitopes(self, threshold: float = 0.25, csv_name: str = None, verbose: bool = True) -> np.ndarray:
         """
         Retrieve epitopes for this chain as a boolean array.
-        
+
+        Ground-truth labels are optional. If the epitopes CSV is missing or this
+        antigen is not annotated, a warning is printed and an all-zero label
+        vector is returned so inference on custom PDBs does not require the
+        packaged annotation files.
+
         Args:
             threshold (float): SASA threshold for determining surface residues.
-        
+            csv_name (str): Optional path to an epitopes CSV. Defaults to the
+                packaged dataset at data/epitopes/epitopes.csv.
+            verbose (bool): Whether to print warnings.
+
         Returns:
             np.ndarray: A boolean array of length L (sequence length) where True indicates 
                        epitope positions and False indicates non-epitope positions.
                        Only surface-exposed residues can be True.
         """
-        _, _, epitopes = load_epitopes_csv(csv_name=csv_name)
+        try:
+            _, _, epitopes = load_epitopes_csv(csv_name=csv_name)
+        except FileNotFoundError:
+            if csv_name is None:
+                epitopes_csv = Path(BASE_DIR) / "data" / "epitopes" / "epitopes.csv"
+            else:
+                epitopes_csv = Path(csv_name)
+            if verbose:
+                print(
+                    f"[WARNING] Epitopes CSV not found at {epitopes_csv}; "
+                    "proceeding without ground-truth labels (inference-only)."
+                )
+            return np.zeros(len(self.sequence), dtype=bool)
 
         if f'{self.id}_{self.chain_id}' in epitopes:
             binary_labels = epitopes.get(f'{self.id}_{self.chain_id}', [0] * len(self.sequence)) # default to 0 if not found
@@ -291,10 +311,29 @@ class AntigenChain(ProteinChain):
 
     def get_epitopes_single(self, verbose: bool = True) -> np.ndarray:
         """
-        Retrieve epitopes for this chain as a boolean array.
+        Retrieve epitopes for this chain from the single-source annotation CSV.
+
+        If the CSV is missing or this antigen is not annotated, a warning is
+        printed and an all-zero label vector is returned. This fallback is used
+        when the antigen is absent from epitopes.csv.
+
+        Args:
+            verbose (bool): Whether to print warnings.
+
+        Returns:
+            np.ndarray: Integer array of length L with 1 at annotated epitope residues.
         """
-        _, _, epitopes = load_epitopes_csv_single()
-        
+        try:
+            _, _, epitopes = load_epitopes_csv_single()
+        except FileNotFoundError:
+            epitopes_csv = Path(BASE_DIR) / "data" / "epitopes" / "epitopes_13.csv"
+            if verbose:
+                print(
+                    f"[WARNING] Epitopes CSV not found at {epitopes_csv}; "
+                    "proceeding without ground-truth labels (inference-only)."
+                )
+            return np.zeros(len(self.sequence), dtype=int)
+
         # Try different key formats to find epitopes
         possible_keys = [
             f'{self.id.upper()}_{self.chain_id}',
